@@ -7,6 +7,7 @@ import { AttributeTag } from '../../components/memory/Badges';
 import { MemoryCard } from '../../components/memory/MemoryCard';
 import { ATTRIBUTE_META } from '../../core/constants';
 import { encounterStatus } from '../../core/battle/setup';
+import { PVP_MODES, PVP_MODE_DEFS } from '../../core/online/pvp';
 import { analyzeLoadout, playerPower } from '../../core/player/character';
 import { discoveryState } from '../../core/player/discovery';
 import { getActiveLoadout } from '../../core/player/loadout';
@@ -148,6 +149,31 @@ export function BattleScreen() {
         <p className="mono mute signals__stats">
           WIN {save.battle.wins} · LOSE {save.battle.losses} · RETREAT {save.battle.retreats}
         </p>
+
+        <section className="panel signals__online" aria-label="オンライン対戦（未実装）">
+          <div className="panel__title">
+            <span>ONLINE</span>
+            <small>
+              対人戦 <span className="tag tag--planned">未実装 · PHASE 5</span>
+            </small>
+          </div>
+          <p className="dim">オンライン対戦は PHASE 5 で実装予定です。現在は接続できません。対戦ルールは次のとおりです。</p>
+          <ul className="signals__online-rules">
+            <li>参加するのは探索者（主人公）1 人。完全同期するメイン Memory は 1 つ</li>
+            <li>バトル開始後は Memory の変更不可（開始時の装備で戦う）</li>
+            <li>サブ Memory はメイン Memory の能力体系内での補助（補助スキル）としてのみ機能</li>
+            <li>結果はサーバーで再計算して検証</li>
+          </ul>
+          <ul className="signals__online-modes">
+            {PVP_MODES.map((m) => (
+              <li key={m}>
+                <span className="mono">{m}</span>
+                <span>{PVP_MODE_DEFS[m].ja}</span>
+                <span className="dim">{PVP_MODE_DEFS[m].description}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
       </div>
     </ScreenFrame>
   );

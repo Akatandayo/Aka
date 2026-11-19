@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useNav } from '../../app/nav';
+import { audio } from '../../audio/audio';
 import { ScreenFrame } from '../../components/layout/ScreenFrame';
 import { AttributeTag, CategoryTag, RarityTag } from '../../components/memory/Badges';
 import { MemoryArt } from '../../components/memory/MemoryArt';
 import { ATTRIBUTE_META, RARITY_META } from '../../core/constants';
 import { checkSyncConditions } from '../../core/player/sync';
+import { KIND_LABEL, restorationChangesFor, type RestorationChange } from '../../core/world/restoration';
 import { usePlayer } from '../../state/GameProvider';
 import './SyncScreen.css';
 
@@ -26,6 +28,7 @@ export function SyncScreen({ memoryId }: { memoryId: string }) {
   const [lines, setLines] = useState<string[]>([]);
   const [progress, setProgress] = useState(0);
   const [unmet, setUnmet] = useState<string[]>([]);
+  const [restored, setRestored] = useState<RestorationChange[]>([]);
   const synced = useRef(false);
   const check = checkSyncConditions(save, data, memoryId);
 
@@ -34,7 +37,8 @@ export function SyncScreen({ memoryId }: { memoryId: string }) {
     const reduced = document.documentElement.dataset.fx === 'reduced';
     const step = reduced ? 120 : 520;
     const timers: number[] = [];
-    CONTACT_LINES.forEach((l, i) => timers.push(window.setTimeout(() => setLines((x) => [...x, l]), step * (i + 1))));
+    const contactLines = [...CONTACT_LINES, ...(def?.syncEffects.direction?.lines ?? [])];
+    contactLines.forEach((l, i) => timers.push(window.setTimeout(() => setLines((x) => [...x, l]), step * (i + 1))));
     let p = 0;
     const iv = window.setInterval(() => {
       p = Math.min(100, p + (reduced ? 25 : 4));
@@ -54,11 +58,14 @@ export function SyncScreen({ memoryId }: { memoryId: string }) {
           setLines((x) => [...x, '> SYNCHRONIZING ABILITIES ... 100%']);
           if (!synced.current) {
             synced.current = true;
+            // 世界修復の変化は、同期で状態が変わる前に算出する
+            setRestored(restorationChangesFor(save, data, memoryId));
             dispatch({ type: 'SYNC_MEMORY', memoryId, at: new Date().toISOString() });
+            audio.playSe('sync');
           }
           timers.push(window.setTimeout(() => setPhase('complete'), reduced ? 100 : 700));
         },
-        step * (CONTACT_LINES.length + 1.5),
+        step * (contactLines.length + 1.5),
       ),
     );
     return () => {
@@ -77,7 +84,11 @@ export function SyncScreen({ memoryId }: { memoryId: string }) {
   }
 
   const instance = save.memories.find((m) => m.memoryId === memoryId);
-  const vars = { ['--r-c' as string]: RARITY_META[def.rarity].color, ['--a-c' as string]: ATTRIBUTE_META[def.attribute].color } as CSSProperties;
+  // 同期演出の色は Memory ごとに設定できる（syncEffects.direction.color）
+  const vars = {
+    ['--r-c' as string]: RARITY_META[def.rarity].color,
+    ['--a-c' as string]: def.syncEffects.direction?.color ?? ATTRIBUTE_META[def.attribute].color,
+  } as CSSProperties;
   const notDetected = !alreadyOwned && !pending && phase === 'detected';
 
   return (
@@ -183,14 +194,14 @@ export function SyncScreen({ memoryId }: { memoryId: string }) {
                       <span className="mono">SKILL</span> {data.skillById.get(id)?.name}
                     </li>
                   ))}
-                  {def.passiveSkills.map((id) => (
+                  {def.passive.map((id) => (
                     <li key={id}>
                       <span className="mono">PASSIVE</span> {data.skillById.get(id)?.name}
                     </li>
                   ))}
-                  {def.rewrite && (
+                  {def.syncEffects.rewrite && (
                     <li>
-                      <span className="mono">REWRITE</span> {data.skillById.get(def.rewrite)?.name}
+                      <span className="mono">REWRITE</span> {data.skillById.get(def.syncEffects.rewrite)?.name}
                     </li>
                   )}
                   {(def.fieldAbilities ?? []).map((f) => (
@@ -200,6 +211,29 @@ export function SyncScreen({ memoryId }: { memoryId: string }) {
                   ))}
                 </ul>
               </div>
+              {restored.length > 0 && (
+                <div className="sync__restore">
+                  <p className="section-label">WORLD RESTORATION 世界修復</p>
+                  {restored.map((r) => (
+                    <div key={r.worldId} className="sync__restore-world">
+                      <p className="mono">
+                        {data.worldById.get(r.worldId)?.name} {Math.round(r.before * 100)}% → <strong>{Math.round(r.after * 100)}%</strong>
+                      </p>
+                      <ul>
+                        {r.restored.map((t) => (
+                          <li key={t.target.id}>
+                            <span className="mono">{KIND_LABEL[t.kind].label}</span> {t.target.name}
+                            <span className="dim"> —— {t.target.description}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                  <button type="button" className="btn btn--sm" onClick={() => nav({ name: 'worldDetail', worldId: restored[0].worldId })}>
+                    WORLD を見る
+                  </button>
+                </div>
+              )}
               <p className="sync__registered">Memory一覧に登録しました。</p>
               <div className="sync__actions">
                 {instance && (
@@ -207,7 +241,7 @@ export function SyncScreen({ memoryId }: { memoryId: string }) {
                     記録を見る
                   </button>
                 )}
-                {def.skills.length + def.passiveSkills.length > 0 && (
+                {def.skills.length + def.passive.length > 0 && (
                   <button type="button" className="btn btn--purple" onClick={() => nav({ name: 'memory', tab: 'loadout' })}>
                     装備する
                   </button>

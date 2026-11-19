@@ -120,8 +120,8 @@ export function applyBattleOutcome(save: PlayerSave, data: GameData, outcome: Ba
       const r = addMemoryExp(m, def, enc.rewards.memoryExp);
       if (r.gained > 0) {
         summary.memoryGrowth.push({ instanceId: m.instanceId, memoryId: m.memoryId, before: m.level, after: r.memory.level });
-        const story = def.storyId ? data.storyById.get(def.storyId) : undefined;
-        for (const f of story?.fragments ?? []) {
+        const fragments = def.storyRecords.flatMap((rid) => data.storyById.get(rid)?.fragments ?? []);
+        for (const f of fragments) {
           if (f.unlock.type === 'level' && f.unlock.value > m.level && f.unlock.value <= r.memory.level) {
             summary.unlockedRecords.push({ memoryId: def.id, title: f.title });
           }

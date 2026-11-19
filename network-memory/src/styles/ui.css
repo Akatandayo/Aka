@@ -499,3 +499,18 @@
     filter: none;
   }
 }
+
+/* テキストリンク風のボタン */
+.link {
+  padding: 0;
+  font: inherit;
+  color: var(--c-cyan);
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed currentColor;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: #fff;
+}

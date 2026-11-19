@@ -10,24 +10,44 @@
     "description": "記録の途絶えた街路に、一本ずつ灯りを点して回る男の記憶。彼が灯した街灯の下でだけ、消えかけた記録は輪郭を取り戻す。",
     "quote": "暗いままじゃ、誰も帰り道を思い出せないだろう？",
     "illustration": "gen:lamplighter",
-    "hp": 560,
-    "atk": 62,
-    "def": 58,
-    "spd": 55,
-    "tec": 60,
-    "res": 65,
+    "baseStats": {
+      "hp": 1848,
+      "atk": 174,
+      "def": 162,
+      "spd": 154,
+      "tec": 168,
+      "res": 182
+    },
     "skills": [
       "SK-0001",
       "SK-0002"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0001"
     ],
-    "attackStyle": {
-      "name": "灯竿打ち",
-      "scale": "atk",
-      "power": 1.0,
-      "hits": 1
+    "syncEffects": {
+      "style": {
+        "name": "灯竿打ち",
+        "scale": "atk",
+        "power": 1.0,
+        "hits": 1
+      },
+      "supportSkill": "SK-0002",
+      "passiveBonus": {
+        "res": 0.06,
+        "hp": 0.04
+      },
+      "direction": {
+        "color": "#4dffa6",
+        "lines": [
+          "灯りの温度が、指先から胸の奥へ伝わってくる。",
+          "> RECORD: 夜の街路 / 点した灯りの数 = 未計測"
+        ]
+      },
+      "appearance": {
+        "aura": "#4dffa6",
+        "label": "灯火のコート"
+      }
     },
     "persona": {
       "personality": "無口で面倒見がよい。皮肉っぽい物言いの奥に、消えていくものへの深い執着がある。",
@@ -48,8 +68,11 @@
       "MEM-0004",
       "MEM-0007"
     ],
-    "storyId": "REC-0001",
     "worldId": "WORLD-001",
+    "storyRecords": [
+      "REC-0001"
+    ],
+    "unlockConditions": [],
     "tags": [
       "starter",
       "healer"
@@ -66,24 +89,43 @@
     "description": "NULL CITYの路地裏に棲みつく、データでできた猫。気まぐれに記録の欠片をくわえて持ち去るため、探索者たちの間では小さな泥棒として知られている。",
     "quote": "（……にゃ。くわえていた断片を、あなたの足元に置いた）",
     "illustration": "gen:cat",
-    "hp": 480,
-    "atk": 64,
-    "def": 40,
-    "spd": 92,
-    "tec": 58,
-    "res": 46,
+    "baseStats": {
+      "hp": 1584,
+      "atk": 179,
+      "def": 112,
+      "spd": 258,
+      "tec": 162,
+      "res": 129
+    },
     "skills": [
       "SK-0003",
       "SK-0004"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0002"
     ],
-    "attackStyle": {
-      "name": "引っかき",
-      "scale": "atk",
-      "power": 0.55,
-      "hits": 2
+    "syncEffects": {
+      "style": {
+        "name": "引っかき",
+        "scale": "atk",
+        "power": 0.55,
+        "hits": 2
+      },
+      "supportSkill": "SK-0004",
+      "passiveBonus": {
+        "spd": 0.08
+      },
+      "direction": {
+        "color": "#3ee8ff",
+        "lines": [
+          "足元を、0と1でできた小さな影がすり抜けていく。",
+          "> RECORD: 路地裏 / 拾い集めた欠片 x 1,024"
+        ]
+      },
+      "appearance": {
+        "aura": "#3ee8ff",
+        "label": "ビットの尾"
+      }
     },
     "acquisitionMethod": [
       {
@@ -100,8 +142,11 @@
       "MEM-0001",
       "MEM-0008"
     ],
-    "storyId": "REC-0002",
     "worldId": "WORLD-001",
+    "storyRecords": [
+      "REC-0002"
+    ],
+    "unlockConditions": [],
     "tags": [
       "starter",
       "speed"
@@ -118,24 +163,43 @@
     "description": "ARCHIVEの封印書架を開くために作られた合鍵。錆びついた今も、触れた記録の『鍵穴』を探し続けている。",
     "quote": "——カチリ。どこかで、閉ざされた何かが応えた。",
     "illustration": "gen:key",
-    "hp": 620,
-    "atk": 50,
-    "def": 100,
-    "spd": 38,
-    "tec": 72,
-    "res": 80,
+    "baseStats": {
+      "hp": 2046,
+      "atk": 140,
+      "def": 280,
+      "spd": 106,
+      "tec": 202,
+      "res": 224
+    },
     "skills": [
       "SK-0005",
       "SK-0006"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0003"
     ],
-    "attackStyle": {
-      "name": "施錠打",
-      "scale": "tec",
-      "power": 1.0,
-      "hits": 1
+    "syncEffects": {
+      "style": {
+        "name": "施錠打",
+        "scale": "tec",
+        "power": 1.0,
+        "hits": 1
+      },
+      "supportSkill": "SK-0006",
+      "passiveBonus": {
+        "def": 0.08
+      },
+      "direction": {
+        "color": "#ffd36b",
+        "lines": [
+          "錆びた感触。それでも、何かの鍵穴が確かに応えた。",
+          "> RECORD: 封印書架 / 開錠回数 = 0"
+        ]
+      },
+      "appearance": {
+        "aura": "#ffd36b",
+        "label": "錆鉄のガントレット"
+      }
     },
     "fieldAbilities": [
       {
@@ -159,8 +223,11 @@
       "MEM-0007",
       "MEM-0011"
     ],
-    "storyId": "REC-0003",
     "worldId": "WORLD-002",
+    "storyRecords": [
+      "REC-0003"
+    ],
+    "unlockConditions": [],
     "tags": [
       "starter",
       "tank"
@@ -177,24 +244,43 @@
     "description": "信号が永遠に赤のまま止まった交差点。降り続く雨は、ここで誰かを待ち続けた人々の記録が滲み出したものだと言われている。",
     "quote": "——信号は、まだ変わらない。",
     "illustration": "gen:crossing",
-    "hp": 700,
-    "atk": 55,
-    "def": 70,
-    "spd": 35,
-    "tec": 85,
-    "res": 95,
+    "baseStats": {
+      "hp": 2310,
+      "atk": 154,
+      "def": 196,
+      "spd": 98,
+      "tec": 238,
+      "res": 266
+    },
     "skills": [
       "SK-0007",
       "SK-0008"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0004"
     ],
-    "attackStyle": {
-      "name": "冷たい雨",
-      "scale": "tec",
-      "power": 1.0,
-      "hits": 1
+    "syncEffects": {
+      "style": {
+        "name": "冷たい雨",
+        "scale": "tec",
+        "power": 1.0,
+        "hits": 1
+      },
+      "supportSkill": "SK-0008",
+      "passiveBonus": {
+        "res": 0.08
+      },
+      "direction": {
+        "color": "#8f7bff",
+        "lines": [
+          "雨音が近い。赤信号の光が、視界の端で滲んでいる。",
+          "> RECORD: 第七区画 / 待機時間 = 測定不能"
+        ]
+      },
+      "appearance": {
+        "aura": "#8f7bff",
+        "label": "雨のヴェール"
+      }
     },
     "fieldAbilities": [
       {
@@ -218,8 +304,11 @@
       "MEM-0001",
       "MEM-0012"
     ],
-    "storyId": "REC-0004",
     "worldId": "WORLD-001",
+    "storyRecords": [
+      "REC-0004"
+    ],
+    "unlockConditions": [],
     "tags": [
       "starter",
       "field"
@@ -236,24 +325,44 @@
     "description": "忘れられた記録が花となって咲くLOST GARDEN。その花々を摘ませまいとする、蔦と花弁でできた小さな守り手。",
     "quote": "わすれないで。わすれないで。",
     "illustration": "gen:flower",
-    "hp": 600,
-    "atk": 48,
-    "def": 62,
-    "spd": 60,
-    "tec": 90,
-    "res": 80,
+    "baseStats": {
+      "hp": 1980,
+      "atk": 134,
+      "def": 174,
+      "spd": 168,
+      "tec": 252,
+      "res": 224
+    },
     "skills": [
       "SK-0009",
       "SK-0010"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0005"
     ],
-    "attackStyle": {
-      "name": "蔦の鞭",
-      "scale": "tec",
-      "power": 1.0,
-      "hits": 1
+    "syncEffects": {
+      "style": {
+        "name": "蔦の鞭",
+        "scale": "tec",
+        "power": 1.0,
+        "hits": 1
+      },
+      "supportSkill": "SK-0009",
+      "passiveBonus": {
+        "hp": 0.06,
+        "tec": 0.03
+      },
+      "direction": {
+        "color": "#4dffa6",
+        "lines": [
+          "花の香り。誰かの声が、何度も同じ言葉を繰り返す。",
+          "> RECORD: 北の花壇 / わすれないで"
+        ]
+      },
+      "appearance": {
+        "aura": "#4dffa6",
+        "label": "花弁のマント"
+      }
     },
     "fieldAbilities": [
       {
@@ -277,8 +386,11 @@
       "MEM-0010",
       "MEM-0001"
     ],
-    "storyId": "REC-0005",
     "worldId": "WORLD-003",
+    "storyRecords": [
+      "REC-0005"
+    ],
+    "unlockConditions": [],
     "tags": [
       "starter",
       "healer"
@@ -295,14 +407,35 @@
     "description": "あなたが初めてNetworkに接続した瞬間の記録。誰にでもあるはずの出来事——なのに、あなたの記録だけ、なぜか一部が欠損している。",
     "quote": "> CONNECTION ESTABLISHED. WELCOME, EXPLORER.",
     "illustration": "gen:signal",
-    "hp": 0,
-    "atk": 0,
-    "def": 0,
-    "spd": 0,
-    "tec": 0,
-    "res": 0,
+    "baseStats": {
+      "hp": 0,
+      "atk": 0,
+      "def": 0,
+      "spd": 0,
+      "tec": 0,
+      "res": 0
+    },
     "skills": [],
-    "passiveSkills": [],
+    "passive": [],
+    "syncEffects": {
+      "style": {
+        "name": "ストライク",
+        "scale": "atk",
+        "power": 1.0,
+        "hits": 1
+      },
+      "direction": {
+        "color": "#3ee8ff",
+        "lines": [
+          "ずっと昔に、同じ感覚を知っていた気がする。",
+          "> RECORD: 接続ログ 00:00:00 / 一部欠損"
+        ]
+      },
+      "appearance": {
+        "aura": "#3ee8ff",
+        "label": "接続の光輪"
+      }
+    },
     "fieldAbilities": [
       {
         "id": "FA-0003",
@@ -320,8 +453,11 @@
       "MEM-0011",
       "MEM-0012"
     ],
-    "storyId": "REC-0006",
     "worldId": null,
+    "storyRecords": [
+      "REC-0006"
+    ],
+    "unlockConditions": [],
     "tags": [
       "starter",
       "story"
@@ -338,25 +474,44 @@
     "description": "ARCHIVEで無数の記録を分類・保管してきた司書。大流出の日、彼女の担当書架だけが空になっていた。その理由を、彼女自身も記録していない。",
     "quote": "記録は嘘をつきません。嘘をつくのは、いつも読む側です。",
     "illustration": "gen:librarian",
-    "hp": 640,
-    "atk": 60,
-    "def": 70,
-    "spd": 72,
-    "tec": 110,
-    "res": 78,
+    "baseStats": {
+      "hp": 2112,
+      "atk": 168,
+      "def": 196,
+      "spd": 202,
+      "tec": 308,
+      "res": 218
+    },
     "skills": [
       "SK-0013",
       "SK-0014"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0007"
     ],
-    "rewrite": "RW-0001",
-    "attackStyle": {
-      "name": "頁の刃",
-      "scale": "tec",
-      "power": 1.0,
-      "hits": 1
+    "syncEffects": {
+      "style": {
+        "name": "頁の刃",
+        "scale": "tec",
+        "power": 1.0,
+        "hits": 1
+      },
+      "supportSkill": "SK-0014",
+      "passiveBonus": {
+        "tec": 0.08
+      },
+      "rewrite": "RW-0001",
+      "direction": {
+        "color": "#ffd36b",
+        "lines": [
+          "無数の頁がめくれる音。分類番号が意識の表面を流れていく。",
+          "> RECORD: ARCHIVE 第三書架 / 状態 = 空"
+        ]
+      },
+      "appearance": {
+        "aura": "#ffd36b",
+        "label": "索引のローブ"
+      }
     },
     "persona": {
       "personality": "几帳面で理知的。記録の正確さに強くこだわるが、自分自身の記録の欠落にだけは怯えている。",
@@ -378,8 +533,11 @@
       "MEM-0010",
       "MEM-0011"
     ],
-    "storyId": "REC-0007",
     "worldId": "WORLD-002",
+    "storyRecords": [
+      "REC-0007"
+    ],
+    "unlockConditions": [],
     "tags": [
       "starter",
       "caster"
@@ -396,25 +554,44 @@
     "description": "破損データを嗅ぎつけ、群れで喰らうERROR ZONEの猟犬。本来はNetworkの破損を処理する清掃プログラムだったという説がある。",
     "quote": "GRRR——#&%——RRR",
     "illustration": "gen:hound",
-    "hp": 620,
-    "atk": 118,
-    "def": 55,
-    "spd": 95,
-    "tec": 52,
-    "res": 70,
+    "baseStats": {
+      "hp": 2046,
+      "atk": 330,
+      "def": 154,
+      "spd": 266,
+      "tec": 146,
+      "res": 196
+    },
     "skills": [
       "SK-0015",
       "SK-0016"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0008"
     ],
-    "rewrite": "RW-0002",
-    "attackStyle": {
-      "name": "噛み砕き",
-      "scale": "atk",
-      "power": 1.05,
-      "hits": 1
+    "syncEffects": {
+      "style": {
+        "name": "噛み砕き",
+        "scale": "atk",
+        "power": 1.05,
+        "hits": 1
+      },
+      "supportSkill": "SK-0016",
+      "passiveBonus": {
+        "atk": 0.08
+      },
+      "rewrite": "RW-0002",
+      "direction": {
+        "color": "#ff3b5c",
+        "lines": [
+          "ノイズが牙の形になる。破損を嗅ぎ分ける感覚が研ぎ澄まされる。",
+          "> RECORD: ERROR ZONE / 命令 = 破損を除去せよ"
+        ]
+      },
+      "appearance": {
+        "aura": "#ff3b5c",
+        "label": "猟犬の牙紋"
+      }
     },
     "acquisitionMethod": [
       {
@@ -431,8 +608,11 @@
       "MEM-0002",
       "MEM-0009"
     ],
-    "storyId": "REC-0008",
     "worldId": "WORLD-004",
+    "storyRecords": [
+      "REC-0008"
+    ],
+    "unlockConditions": [],
     "tags": [
       "starter",
       "attacker"
@@ -449,25 +629,45 @@
     "description": "被った者の記録を、ノイズで上書きしてしまう仮面。誰かになりたかった者たちがこれを手に取り、そして誰でもなくなった。",
     "quote": "この顔は、誰のものだったかな。",
     "illustration": "gen:mask",
-    "hp": 580,
-    "atk": 92,
-    "def": 60,
-    "spd": 80,
-    "tec": 98,
-    "res": 60,
+    "baseStats": {
+      "hp": 1914,
+      "atk": 258,
+      "def": 168,
+      "spd": 224,
+      "tec": 274,
+      "res": 168
+    },
     "skills": [
       "SK-0017",
       "SK-0018"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0009"
     ],
-    "rewrite": "RW-0003",
-    "attackStyle": {
-      "name": "ノイズ掌",
-      "scale": "tec",
-      "power": 1.0,
-      "hits": 1
+    "syncEffects": {
+      "style": {
+        "name": "ノイズ掌",
+        "scale": "tec",
+        "power": 1.0,
+        "hits": 1
+      },
+      "supportSkill": "SK-0018",
+      "passiveBonus": {
+        "tec": 0.05,
+        "atk": 0.04
+      },
+      "rewrite": "RW-0003",
+      "direction": {
+        "color": "#ff7ad9",
+        "lines": [
+          "顔の輪郭が、一瞬だけ自分のものではなくなった。",
+          "> RECORD: 署名 = ■■■■ / 上書き回数 = 不明"
+        ]
+      },
+      "appearance": {
+        "aura": "#ff7ad9",
+        "label": "ノイズの仮面"
+      }
     },
     "acquisitionMethod": [
       {
@@ -484,8 +684,11 @@
       "MEM-0008",
       "MEM-0012"
     ],
-    "storyId": "REC-0009",
     "worldId": "WORLD-004",
+    "storyRecords": [
+      "REC-0009"
+    ],
+    "unlockConditions": [],
     "tags": [
       "starter",
       "debuffer"
@@ -502,36 +705,45 @@
     "description": "記録されたものは、いつか必ず忘れられる。その『必ず』そのものが形を得たMemory。触れた記録の色を、静かに抜き取っていく。",
     "quote": "怖がらなくていい。ただ、少し静かになるだけ。",
     "illustration": "gen:void",
-    "hp": 720,
-    "atk": 70,
-    "def": 75,
-    "spd": 85,
-    "tec": 135,
-    "res": 85,
+    "baseStats": {
+      "hp": 2376,
+      "atk": 196,
+      "def": 210,
+      "spd": 238,
+      "tec": 378,
+      "res": 238
+    },
     "skills": [
       "SK-0019",
       "SK-0020"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0010"
     ],
-    "rewrite": "RW-0004",
-    "attackStyle": {
-      "name": "消去",
-      "scale": "tec",
-      "power": 1.0,
-      "hits": 1
-    },
-    "syncCondition": [
-      {
-        "type": "playerLevel",
-        "value": 6
+    "syncEffects": {
+      "style": {
+        "name": "消去",
+        "scale": "tec",
+        "power": 1.0,
+        "hits": 1
       },
-      {
-        "type": "ownedMemory",
-        "memoryId": "MEM-0005"
+      "supportSkill": "SK-0020",
+      "passiveBonus": {
+        "tec": 0.1
+      },
+      "rewrite": "RW-0004",
+      "direction": {
+        "color": "#8f7bff",
+        "lines": [
+          "音が遠のいていく。静かで、ひどく優しい空白。",
+          "> RECORD: 終着点 / 残存色彩 = 0%"
+        ]
+      },
+      "appearance": {
+        "aura": "#8f7bff",
+        "label": "空白の外套"
       }
-    ],
+    },
     "acquisitionMethod": [
       {
         "type": "boss",
@@ -544,8 +756,20 @@
       "MEM-0007",
       "MEM-0012"
     ],
-    "storyId": "REC-0010",
     "worldId": "WORLD-003",
+    "storyRecords": [
+      "REC-0010"
+    ],
+    "unlockConditions": [
+      {
+        "type": "playerLevel",
+        "value": 6
+      },
+      {
+        "type": "ownedMemory",
+        "memoryId": "MEM-0005"
+      }
+    ],
     "tags": [
       "caster"
     ]
@@ -561,33 +785,46 @@
     "description": "ある日、Network各地からMemoryが一斉に流出した。その出来事そのものの記録。だが、この記録には『誰が』『なぜ』が存在しない。",
     "quote": "> ERROR: CAUSE NOT FOUND.",
     "illustration": "gen:outflow",
-    "hp": 820,
-    "atk": 105,
-    "def": 80,
-    "spd": 90,
-    "tec": 140,
-    "res": 105,
+    "baseStats": {
+      "hp": 2706,
+      "atk": 294,
+      "def": 224,
+      "spd": 252,
+      "tec": 392,
+      "res": 294
+    },
     "skills": [
       "SK-0021",
       "SK-0022"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0011"
     ],
-    "rewrite": "RW-0005",
-    "attackStyle": {
-      "name": "奔流",
-      "scale": "atk",
-      "power": 0.5,
-      "hits": 2
-    },
-    "syncCondition": [
-      {
-        "type": "flag",
-        "flag": "story.chapter1.clear",
-        "label": "CHAPTER 1 を読了する（STORYはPHASE 3で実装）"
+    "syncEffects": {
+      "style": {
+        "name": "奔流",
+        "scale": "atk",
+        "power": 0.5,
+        "hits": 2
+      },
+      "supportSkill": "SK-0022",
+      "passiveBonus": {
+        "atk": 0.06,
+        "tec": 0.06
+      },
+      "rewrite": "RW-0005",
+      "direction": {
+        "color": "#ff7ad9",
+        "lines": [
+          "無数の記録が一斉に流れ出していく光景が、視界を埋め尽くす。",
+          "> RECORD: 原因 = NOT FOUND"
+        ]
+      },
+      "appearance": {
+        "aura": "#ff7ad9",
+        "label": "奔流の残光"
       }
-    ],
+    },
     "fieldAbilities": [
       {
         "id": "FA-0004",
@@ -606,8 +843,20 @@
       "MEM-0007",
       "MEM-0012"
     ],
-    "storyId": "REC-0011",
     "worldId": null,
+    "storyRecords": [
+      "REC-0011"
+    ],
+    "unlockConditions": [
+      {
+        "type": "storyCleared",
+        "chapterId": "CH-001"
+      },
+      {
+        "type": "playerLevel",
+        "value": 6
+      }
+    ],
     "tags": [
       "story"
     ]
@@ -623,31 +872,46 @@
     "description": "Networkのどこにも記録が存在しないはずの少女。それなのに、いくつものMemoryの片隅に、彼女の姿だけが白く抜け落ちたまま残っている。",
     "quote": "……あなたは、わたしを覚えてる？",
     "illustration": "gen:blank",
-    "hp": 666,
-    "atk": 77,
-    "def": 77,
-    "spd": 120,
-    "tec": 160,
-    "res": 126,
+    "baseStats": {
+      "hp": 2198,
+      "atk": 216,
+      "def": 216,
+      "spd": 336,
+      "tec": 448,
+      "res": 353
+    },
     "skills": [
       "SK-0023",
       "SK-0024"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0012"
     ],
-    "rewrite": "RW-0006",
-    "attackStyle": {
-      "name": "空白",
-      "scale": "tec",
-      "power": 1.0,
-      "hits": 1
-    },
-    "syncCondition": [
-      {
-        "type": "unknown"
+    "syncEffects": {
+      "style": {
+        "name": "空白",
+        "scale": "tec",
+        "power": 1.0,
+        "hits": 1
+      },
+      "supportSkill": "SK-0024",
+      "passiveBonus": {
+        "spd": 0.08,
+        "res": 0.08
+      },
+      "rewrite": "RW-0006",
+      "direction": {
+        "color": "#8f7bff",
+        "lines": [
+          "白い。何も書かれていない。それなのに、懐かしい。",
+          "> RECORD: ——"
+        ]
+      },
+      "appearance": {
+        "aura": "#8f7bff",
+        "label": "白紙の残像"
       }
-    ],
+    },
     "persona": {
       "personality": "不明。穏やかで、どこか寂しげ。",
       "note": "記録が存在しないため、この人格データは観測結果からの推定にすぎない。"
@@ -665,8 +929,15 @@
       "MEM-0010",
       "MEM-0011"
     ],
-    "storyId": "REC-0012",
     "worldId": "WORLD-005",
+    "storyRecords": [
+      "REC-0012"
+    ],
+    "unlockConditions": [
+      {
+        "type": "unknown"
+      }
+    ],
     "tags": [
       "irregular"
     ]
@@ -682,24 +953,43 @@
     "description": "NULL CITYの夜を巡回し続ける警備ドローン。報告先の管制センターはとうに消えているが、今も律儀に異常を記録し、誰もいない宛先へ送信している。",
     "quote": "> PATROL LOG 00412: 異常なし。異常なし。異常——",
     "illustration": "gen:cube",
-    "hp": 500,
-    "atk": 58,
-    "def": 56,
-    "spd": 78,
-    "tec": 66,
-    "res": 50,
+    "baseStats": {
+      "hp": 1650,
+      "atk": 162,
+      "def": 157,
+      "spd": 218,
+      "tec": 185,
+      "res": 140
+    },
     "skills": [
       "SK-0025",
       "SK-0026"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0013"
     ],
-    "attackStyle": {
-      "name": "照射",
-      "scale": "tec",
-      "power": 0.5,
-      "hits": 2
+    "syncEffects": {
+      "style": {
+        "name": "照射",
+        "scale": "tec",
+        "power": 0.5,
+        "hits": 2
+      },
+      "supportSkill": "SK-0026",
+      "passiveBonus": {
+        "spd": 0.06
+      },
+      "direction": {
+        "color": "#3ee8ff",
+        "lines": [
+          "巡回ルートの地図が頭の中に展開される。報告先は応答しない。",
+          "> PATROL LOG 00412: 異常なし"
+        ]
+      },
+      "appearance": {
+        "aura": "#3ee8ff",
+        "label": "巡回灯のバイザー"
+      }
     },
     "fieldAbilities": [
       {
@@ -719,8 +1009,11 @@
       "MEM-0001",
       "MEM-0004"
     ],
-    "storyId": "REC-0013",
     "worldId": "WORLD-001",
+    "storyRecords": [
+      "REC-0013"
+    ],
+    "unlockConditions": [],
     "tags": [
       "battle-drop"
     ]
@@ -736,31 +1029,44 @@
     "description": "大流出の衝撃で、すべての項目が少しずつ書き換わってしまった辞書。ARCHIVEでは廃棄が決まったが、読み手によって毎回違う意味を返すため、誰も処分しきれずにいる。",
     "quote": "【探索者】たんさく-しゃ：失くしたものを、失くしたことも知らずに探す者。",
     "illustration": "gen:librarian",
-    "hp": 560,
-    "atk": 50,
-    "def": 60,
-    "spd": 62,
-    "tec": 96,
-    "res": 72,
+    "baseStats": {
+      "hp": 1848,
+      "atk": 140,
+      "def": 168,
+      "spd": 174,
+      "tec": 269,
+      "res": 202
+    },
     "skills": [
       "SK-0027",
       "SK-0028"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0014"
     ],
-    "attackStyle": {
-      "name": "頁めくり",
-      "scale": "tec",
-      "power": 1.0,
-      "hits": 1
-    },
-    "syncCondition": [
-      {
-        "type": "playerLevel",
-        "value": 4
+    "syncEffects": {
+      "style": {
+        "name": "頁めくり",
+        "scale": "tec",
+        "power": 1.0,
+        "hits": 1
+      },
+      "supportSkill": "SK-0028",
+      "passiveBonus": {
+        "tec": 0.06
+      },
+      "direction": {
+        "color": "#ff7ad9",
+        "lines": [
+          "単語の意味が少しずつずれていく。読むたびに、違う答えが返ってくる。",
+          "> RECORD: 改訂履歴 x 8,192"
+        ]
+      },
+      "appearance": {
+        "aura": "#ff7ad9",
+        "label": "誤植の帯"
       }
-    ],
+    },
     "acquisitionMethod": [
       {
         "type": "explore",
@@ -772,8 +1078,16 @@
       "MEM-0007",
       "MEM-0003"
     ],
-    "storyId": "REC-0014",
     "worldId": "WORLD-002",
+    "storyRecords": [
+      "REC-0014"
+    ],
+    "unlockConditions": [
+      {
+        "type": "playerLevel",
+        "value": 4
+      }
+    ],
     "tags": [
       "battle-drop"
     ]
@@ -789,31 +1103,44 @@
     "description": "一度も陽の光を浴びたことのない向日葵。それでも毎朝、存在しない太陽の方角へ花を向ける。LOST GARDENで最も古い花のひとつ。",
     "quote": "（花はゆっくりと、あなたの方へ顔を向けた）",
     "illustration": "gen:flower",
-    "hp": 640,
-    "atk": 66,
-    "def": 66,
-    "spd": 54,
-    "tec": 70,
-    "res": 84,
+    "baseStats": {
+      "hp": 2112,
+      "atk": 185,
+      "def": 185,
+      "spd": 151,
+      "tec": 196,
+      "res": 235
+    },
     "skills": [
       "SK-0029",
       "SK-0030"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0015"
     ],
-    "attackStyle": {
-      "name": "種弾",
-      "scale": "atk",
-      "power": 0.35,
-      "hits": 3
-    },
-    "syncCondition": [
-      {
-        "type": "ownedMemory",
-        "memoryId": "MEM-0005"
+    "syncEffects": {
+      "style": {
+        "name": "種弾",
+        "scale": "atk",
+        "power": 0.35,
+        "hits": 3
+      },
+      "supportSkill": "SK-0029",
+      "passiveBonus": {
+        "hp": 0.08
+      },
+      "direction": {
+        "color": "#4dffa6",
+        "lines": [
+          "存在しない太陽の暖かさを、確かに感じた。",
+          "> RECORD: 北の花壇 / 開花日数 = 不明"
+        ]
+      },
+      "appearance": {
+        "aura": "#4dffa6",
+        "label": "陽だまりの紋"
       }
-    ],
+    },
     "acquisitionMethod": [
       {
         "type": "explore",
@@ -825,8 +1152,16 @@
       "MEM-0005",
       "MEM-0010"
     ],
-    "storyId": "REC-0015",
     "worldId": "WORLD-003",
+    "storyRecords": [
+      "REC-0015"
+    ],
+    "unlockConditions": [
+      {
+        "type": "ownedMemory",
+        "memoryId": "MEM-0005"
+      }
+    ],
     "tags": [
       "battle-drop"
     ]
@@ -842,32 +1177,45 @@
     "description": "ERROR ZONEがまだ『王国』と呼ばれていた頃の王冠。王の記録はとうに破損して消えたが、王冠だけが今も命令を発し続け、猟犬たちを従えている。",
     "quote": "——跪け。いや、跪く者も、もう残っていないのか。",
     "illustration": "gen:key",
-    "hp": 600,
-    "atk": 112,
-    "def": 58,
-    "spd": 84,
-    "tec": 64,
-    "res": 62,
+    "baseStats": {
+      "hp": 1980,
+      "atk": 314,
+      "def": 162,
+      "spd": 235,
+      "tec": 179,
+      "res": 174
+    },
     "skills": [
       "SK-0031",
       "SK-0032"
     ],
-    "passiveSkills": [
+    "passive": [
       "PS-0016"
     ],
-    "rewrite": "RW-0007",
-    "attackStyle": {
-      "name": "王笏",
-      "scale": "atk",
-      "power": 1.05,
-      "hits": 1
-    },
-    "syncCondition": [
-      {
-        "type": "playerLevel",
-        "value": 7
+    "syncEffects": {
+      "style": {
+        "name": "王笏",
+        "scale": "atk",
+        "power": 1.05,
+        "hits": 1
+      },
+      "supportSkill": "SK-0032",
+      "passiveBonus": {
+        "atk": 0.1
+      },
+      "rewrite": "RW-0007",
+      "direction": {
+        "color": "#ff3b5c",
+        "lines": [
+          "跪け、という声が響く。命じる者は、もうどこにもいない。",
+          "> RECORD: 旧王権 / 戴冠者 = ■■"
+        ]
+      },
+      "appearance": {
+        "aura": "#ff3b5c",
+        "label": "崩れた王冠"
       }
-    ],
+    },
     "acquisitionMethod": [
       {
         "type": "explore",
@@ -879,8 +1227,16 @@
       "MEM-0008",
       "MEM-0009"
     ],
-    "storyId": "REC-0016",
     "worldId": "WORLD-004",
+    "storyRecords": [
+      "REC-0016"
+    ],
+    "unlockConditions": [
+      {
+        "type": "playerLevel",
+        "value": 7
+      }
+    ],
     "tags": [
       "battle-drop"
     ]

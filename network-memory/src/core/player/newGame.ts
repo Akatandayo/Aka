@@ -4,6 +4,7 @@ import { DEFAULT_AVATAR, DEFAULT_LOADOUT_CAPACITY_SAVE, DEFAULT_SETTINGS, SAVE_V
 import { applyCurrencyChanges, emptyWallet } from './economy';
 import { acquireMemory } from './memories';
 import { autoLoadout, createDefaultLoadouts } from './loadout';
+import { syncWorldProgress } from '../world/restoration';
 import type { PlayerSave } from '../../types/player';
 
 /** 探索者登録時に受け取る初期 Memory（acquisitionMethod に starter を持つもの） */
@@ -36,8 +37,10 @@ export function createNewSave(rawName: string, data: GameData, at: string = new 
     loadouts,
     activeLoadoutId: loadouts[0].id,
     loadoutCapacity: { ...DEFAULT_LOADOUT_CAPACITY_SAVE },
-    archive: { discoveredMemoryIds: [], readFragmentIds: [], pendingSyncIds: [] },
+    archive: { discoveredMemoryIds: [], readFragmentIds: [], pendingSyncIds: [], readEntryIds: [] },
     battle: { encounters: {}, wins: 0, losses: 0, retreats: 0, records: [] },
+    story: { completedChapters: [], current: null, choices: {} },
+    worlds: {},
     inventory: { ...STARTING_ITEMS },
     progress: { flags: {} },
     settings: { ...DEFAULT_SETTINGS },
@@ -62,6 +65,7 @@ export function createNewSave(rawName: string, data: GameData, at: string = new 
 
   const equip = autoLoadout(save, data, loadouts[0].id);
   if (equip.ok) save = equip.save;
+  save = syncWorldProgress(save, data, at);
 
   return save;
 }

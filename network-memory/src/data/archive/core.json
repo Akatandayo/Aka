@@ -1,0 +1,109 @@
+[
+  {
+    "id": "TERM-NETWORK", "category": "term", "title": "Network", "unlock": [],
+    "sections": [{ "id": "1", "title": "概要", "text": "あらゆる存在が情報として記録される世界。人間、生物、概念、場所、物体、出来事……すべては Memory として保存されている。" }]
+  },
+  {
+    "id": "TERM-MEMORY", "category": "term", "title": "Memory", "unlock": [],
+    "sections": [{ "id": "1", "title": "概要", "text": "Network に記録された存在が、カード状のデータとして具現化したもの。Memory はそれぞれ固有のステータス・スキル・パッシブ能力・属性・戦闘スタイル、そして個別の記録を持つ。" }]
+  },
+  {
+    "id": "TERM-SYNC", "category": "term", "title": "MEMORY SYNC", "subtitle": "メモリー・シンク", "unlock": [],
+    "sections": [
+      { "id": "1", "title": "概要", "text": "Memory に触れ、その記録に宿る存在の性質と能力を自分自身に反映する力。一度同期した Memory はいつでも同期先を変更できるが、戦闘中に変更することはできない。" },
+      { "id": "2", "title": "完全同期", "text": "メインに同期した Memory が、戦闘時の能力・ステータス・姿を決定する。サブ Memory は補助スキルだけを貸してくれる。完全同期できるのは、常にひとつだけだ。" }
+    ]
+  },
+  {
+    "id": "TERM-OUTFLOW", "category": "term", "title": "流出", "unlock": [],
+    "sections": [{ "id": "1", "title": "概要", "text": "Network 各地から Memory が大量に流れ出した異常事態。Memory を失った世界では、情報の欠落や存在の消失、異常現象が起きている。" }]
+  },
+  {
+    "id": "TERM-SIGNAL", "category": "term", "title": "流出反応", "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-001" }],
+    "sections": [{ "id": "1", "title": "概要", "text": "流出した Memory が周囲の記録を歪めて生まれる反応。値を失ったデータの残骸が集まり、近づく者を攻撃する。鎮静化すると、取り込まれていた Memory を検出できることがある。" }]
+  },
+  {
+    "id": "TERM-REWRITE", "category": "term", "title": "REWRITE", "subtitle": "リライト", "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-001" }],
+    "sections": [{ "id": "1", "title": "概要", "text": "Memory の情報を戦闘中に再構築する力。行動するたびに蓄積する REWRITE GAUGE が満ちたとき、メイン Memory 固有の効果を発動できる。" }]
+  },
+  {
+    "id": "TERM-ENERGY", "category": "term", "title": "SYNC ENERGY", "unlock": [],
+    "sections": [{ "id": "1", "title": "概要", "text": "Memory のスキルを使うための共通のエネルギー。自分の手番が来るたびに少しずつ回復し、防御態勢をとると多く回復する。" }]
+  },
+  {
+    "id": "TERM-RESTORE", "category": "term", "title": "世界修復", "unlock": [{ "type": "storyCleared", "chapterId": "CH-001" }],
+    "sections": [{ "id": "1", "title": "概要", "text": "回収した Memory が元の世界へ帰ることで、失われていたものが戻ってくること。人物の記録なら住人が帰り、場所なら建物やエリアが、出来事なら歴史が、物体なら機能が、生物なら生態系が、概念なら世界の特殊な働きが復元される。" }]
+  },
+  {
+    "id": "TERM-AKARUA", "category": "term", "title": "何でも屋「アカルア」", "unlock": [{ "type": "storyCleared", "chapterId": "CH-000" }],
+    "related": { "characterId": "CHR-HARUKA" },
+    "sections": [
+      { "id": "1", "title": "概要", "text": "白石ハルカが店長を務める、NULL CITY の何でも屋。電子独と電子紅葉が所属し、{player} も身を寄せている。雨の街の中で、古い看板の灯りだけがいつも温かい。" },
+      { "id": "2", "title": "お仕事", "text": "探し物から流出反応の鎮静化まで、頼まれれば何でも引き受ける。Memory の回収を始めてから、店の端末はひっきりなしに反応を拾うようになった。", "unlock": [{ "type": "storyCleared", "chapterId": "CH-001" }] }
+    ]
+  },
+  {
+    "id": "CHR-REC-HARUKA", "category": "character", "title": "白石ハルカ", "subtitle": "何でも屋「アカルア」店長", "unlock": [{ "type": "storyCleared", "chapterId": "CH-000" }],
+    "related": { "characterId": "CHR-HARUKA" },
+    "sections": [
+      { "id": "1", "title": "プロフィール", "text": "何でも屋「アカルア」の店長。-No.2【神の娘】-。灰色の髪と紫の瞳を持つ、Network（神格世界）出身の女性。穏やかで、いつも誰かのために温かいものを用意している。" },
+      { "id": "2", "title": "力", "text": "【全知全能】あらゆる知識のひとつを選び、その代わりとして用いることができる。\n【未確認学】この世の森羅万象を生み出し、操ることができる。不可能を可能にする力。" },
+      { "id": "3", "title": "アカルアの店長として", "text": "行き場を失っていた独を拾い、その能力の安定化と改良、働き場所と衣食住を与えた。独と紅葉にとっては、母親のような、優しいお姉さんのような存在。二人の揃いの指輪も、ハルカの手によるものだという。", "unlock": [{ "type": "storyCleared", "chapterId": "CH-001" }] }
+    ]
+  },
+  {
+    "id": "CHR-REC-HITORI", "category": "character", "title": "電子 独", "subtitle": "【原点個体】 / 何でも屋「アカルア」", "unlock": [{ "type": "storyCleared", "chapterId": "CH-000" }],
+    "related": { "characterId": "CHR-HITORI" },
+    "sections": [
+      { "id": "1", "title": "プロフィール", "text": "17歳。《神の失敗作》と呼ばれた少年。いくつもの修羅場を潜り抜けた、歴戦の《敗北者》。口は悪いが、仕事は誰より早い。" },
+      { "id": "2", "title": "力", "text": "【{Glitch}】ゲームのバグを具現化したような力。テレポートや攻撃の無力化など、汎用性の高い圧倒的な力を持つが、自身の身体を犠牲にする諸刃の剣でもある。\n【{upset}】大番狂わせ。自分よりも上の存在にのみ使え、自身と相手を対等な立場に置く。" },
+      { "id": "3", "title": "アカルアでの日々", "text": "転生を経て完成した {Glitch} は、まだ不安定だった。白石ハルカに拾われ、能力の安定化と改良、そして居場所を与えられた。今はハルカのもとで、紅葉と一緒に暮らしている。——良くも悪くも、愛されている。\n「……僕は……まだ終わったつもりじゃ無いぞ……。」", "unlock": [{ "type": "storyCleared", "chapterId": "CH-001" }] }
+    ]
+  },
+  {
+    "id": "CHR-REC-MOMIJI", "category": "character", "title": "電子 紅葉", "subtitle": "【原点個体】 / 何でも屋「アカルア」", "unlock": [{ "type": "storyCleared", "chapterId": "CH-000" }],
+    "related": { "characterId": "CHR-MOMIJI" },
+    "sections": [
+      { "id": "1", "title": "プロフィール", "text": "16歳。いつも独のそばにいる少女。応急手当と観察眼に優れ、アカルアの仕事を支えている。" },
+      { "id": "2", "title": "力", "text": "【{heartache}】ダメージや効果を受けたとき、代わりに自分の心をすり減らすことができる。\n【{CHAOS LOVE}】独に向けられた効果やダメージ、技能を強制的に引き受ける。この力には、いかなる判定も効果も及ばない。" },
+      { "id": "3", "title": "揃いの指輪", "text": "独とお揃いの、ハルカ製のダイヤモンドの指輪。壊れることも、外れることも、消えることもない。刻まれた言葉は——「今までの旅路は無駄なんかじゃない」。", "unlock": [{ "type": "storyCleared", "chapterId": "CH-001" }] }
+    ]
+  },
+  {
+    "id": "EVT-OUTFLOW", "category": "event", "title": "大流出", "subtitle": "Network が記録を失った日", "unlock": [{ "type": "discoveredMemory", "memoryId": "MEM-0011" }],
+    "related": { "memoryIds": ["MEM-0011"] },
+    "sections": [
+      { "id": "1", "title": "概要", "text": "ある日、Network の各地で記録が一斉にカード状に固まり、世界の外へと流れ出した。流出した Memory の総数は、今も集計が終わっていない。" },
+      { "id": "2", "title": "欠けている記録", "text": "大流出の記録には、発生時刻も被害範囲も記されている。欠けているのは「原因」と、最初に流出した Memory の名前だけだ。", "unlock": [{ "type": "storyCleared", "chapterId": "CH-001" }] }
+    ]
+  },
+  {
+    "id": "EVT-FIRSTCONNECT", "category": "event", "title": "最初の接続", "unlock": [{ "type": "ownedMemory", "memoryId": "MEM-0006" }],
+    "related": { "memoryIds": ["MEM-0006"] },
+    "sections": [
+      { "id": "1", "title": "概要", "text": "{player} が初めて Network に接続した瞬間。その記録のタイムスタンプは、大流出が起きた時刻よりも前を指している。" },
+      { "id": "2", "title": "雨の路地で", "text": "目を覚ました {player} を見つけたのは、何でも屋「アカルア」の独と紅葉だった。", "unlock": [{ "type": "storyCleared", "chapterId": "CH-000" }] }
+    ]
+  },
+  {
+    "id": "EVT-RELIGHT", "category": "event", "title": "第七区画の再点灯", "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-002" }],
+    "related": { "worldId": "WORLD-001" },
+    "sections": [{ "id": "1", "title": "概要", "text": "消灯の影を鎮めた夜、NULL CITY 第七区画の街灯がひとつ、またひとつと灯り始めた。雨はまだ、止んでいない。" }]
+  },
+  { "id": "FRAG-001", "category": "fragment", "title": "FRAGMENT LOG #001", "subtitle": "第七区画の流出反応", "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-001" }],
+    "sections": [{ "id": "1", "title": "ログ", "text": "> 残骸の中に、ひとつだけ傷のない記録があった。『雨が止んだら、迎えに行く』。差出人の欄は、雨で滲んで読めない。" }] },
+  { "id": "FRAG-002", "category": "fragment", "title": "FRAGMENT LOG #002", "subtitle": "消えかけの街灯", "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-002" }],
+    "sections": [{ "id": "1", "title": "ログ", "text": "> 消灯の影は、最後に一度だけ街灯を見上げた。忘れられることを、誰よりも怖がっていたのは、影のほうだったのかもしれない。" }] },
+  { "id": "FRAG-003", "category": "fragment", "title": "FRAGMENT LOG #003", "subtitle": "誤植の閲覧室", "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-003" }],
+    "sections": [{ "id": "1", "title": "ログ", "text": "> 頁の端に、几帳面な文字で書き込みがあった。『この棚の分類番号は、誰かが意図して書き換えている』。" }] },
+  { "id": "FRAG-004", "category": "fragment", "title": "FRAGMENT LOG #004", "subtitle": "封印書架の番人", "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-004" }],
+    "sections": [{ "id": "1", "title": "ログ", "text": "> 番人の記録には、最後の命令が残っていた。『この扉を、決して開けさせるな。たとえ、司書であっても』。" }] },
+  { "id": "FRAG-005", "category": "fragment", "title": "FRAGMENT LOG #005", "subtitle": "枯れ蔓の小径", "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-005" }],
+    "sections": [{ "id": "1", "title": "ログ", "text": "> 枯れた蔓の先に、一輪だけ色の残った花があった。花の記録は、誰かの名前を呼び続けていた。" }] },
+  { "id": "FRAG-006", "category": "fragment", "title": "FRAGMENT LOG #006", "subtitle": "色喰い", "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-006" }],
+    "sections": [{ "id": "1", "title": "ログ", "text": "> 色喰いの中から、たくさんの色が溢れ出した。そのどれもが、誰かに覚えていてほしかった色だった。" }] },
+  { "id": "FRAG-007", "category": "fragment", "title": "FRAGMENT LOG #007", "subtitle": "破損体の群れ", "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-007" }],
+    "sections": [{ "id": "1", "title": "ログ", "text": "> 破損体は、ひとつひとつが小さな記録の寄せ集めだった。家族写真、買い物のメモ、言いそびれた『ごめん』。" }] },
+  { "id": "FRAG-008", "category": "fragment", "title": "FRAGMENT LOG #008", "subtitle": "ハウンド・アルファ", "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-008" }],
+    "sections": [{ "id": "1", "title": "ログ", "text": "> 猟犬の長は、倒れる直前に命令を問い直した。『破損を除去せよ。……我々は、まだ、破損ではないか？』" }] }
+]

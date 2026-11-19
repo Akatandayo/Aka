@@ -1160,3 +1160,100 @@
     font-size: 11px;
   }
 }
+
+/* ---------- REWRITE GAUGE ---------- */
+.bt-gauge {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.bt-gauge__label {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--c-warn);
+}
+
+.bt-gauge__track {
+  position: relative;
+  height: 6px;
+  background: rgba(255, 201, 77, 0.12);
+  overflow: hidden;
+}
+
+.bt-gauge__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, rgba(255, 201, 77, 0.5), var(--c-warn));
+  transition: width 0.35s var(--ease-out);
+}
+
+.bt-gauge.is-full .bt-gauge__fill {
+  background: linear-gradient(90deg, #ffc94d, #fff1b8, #ffc94d);
+  background-size: 200% 100%;
+  animation: gauge-shine 1.2s linear infinite;
+  box-shadow: 0 0 10px var(--c-warn);
+}
+
+.bt-gauge__num {
+  font-size: 10px;
+  color: var(--c-warn);
+  min-width: 34px;
+  text-align: right;
+}
+
+@keyframes gauge-shine {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ONLINE（PHASE 5 予定） */
+.signals__online {
+  opacity: 0.85;
+}
+
+.signals__online p {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.signals__online-rules {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.signals__online-modes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.signals__online-modes li {
+  display: grid;
+  grid-template-columns: 5.5em 7em 1fr;
+  gap: 8px;
+  font-size: 13px;
+  align-items: baseline;
+}
+
+.signals__online-modes .mono {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--c-text-mute);
+}
+
+@media (max-width: 520px) {
+  .signals__online-modes li {
+    grid-template-columns: 5.5em 1fr;
+  }
+
+  .signals__online-modes li .dim {
+    grid-column: 1 / -1;
+  }
+}

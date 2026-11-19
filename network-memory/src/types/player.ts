@@ -120,7 +120,7 @@ export type FxLevel = 'full' | 'reduced';
 export interface PlayerSettings {
   fx: FxLevel;
   skipBoot: boolean;
-  /** PHASE 3 で使用（現在は保存のみ） */
+  /** ストーリーの文字送り速度（1〜5） */
   textSpeed: number;
   bgmVolume: number;
   seVolume: number;
@@ -134,6 +134,29 @@ export interface ArchiveState {
   readFragmentIds: string[];
   /** 検出済みで、まだ同期していない Memory（MEMORY SYNC 待ち） */
   pendingSyncIds: string[];
+  /** 閲覧済みの ARCHIVE 記録 ID */
+  readEntryIds: string[];
+}
+
+/** メインストーリーの進行状態（GDD Ver.3 §8） */
+export interface StoryProgress {
+  completedChapters: string[];
+  /** 中断した位置（章 ID と命令の位置）。null なら中断なし */
+  current: { chapterId: string; index: number } | null;
+  /** 選んだ選択肢（"章ID:選択肢ID" → 選んだ値） */
+  choices: Record<string, string>;
+}
+
+/** WORLD の修復状態（GDD Ver.3 §5）。回収済み Memory から算出し、回収時に更新して保存する */
+export interface WorldProgress {
+  restorationRate: number;
+  requiredMemories: string[];
+  recoveredMemories: string[];
+  restoredObjects: string[];
+  restoredNPCs: string[];
+  unlockedAreas: string[];
+  unlockedEvents: string[];
+  updatedAt: string;
 }
 
 export interface ProgressState {
@@ -156,6 +179,9 @@ export interface PlayerSave {
   loadoutCapacity: LoadoutCapacity;
   archive: ArchiveState;
   battle: BattleProgress;
+  story: StoryProgress;
+  /** WORLD ID → 修復状態 */
+  worlds: Record<string, WorldProgress>;
   /** アイテム ID → 所持数 */
   inventory: Record<string, number>;
   progress: ProgressState;

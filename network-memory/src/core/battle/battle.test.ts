@@ -87,15 +87,15 @@ describe('battle engine — turn order & commands', () => {
     expect(step.state.phase).toBe('awaiting_input');
   });
 
-  it('spends SP and applies cooldowns to MEMORY SKILL', () => {
+  it('spends SYNC ENERGY and applies cooldowns to SKILL', () => {
     const { setup } = setupFor(newSave());
     let step = startBattle(dummyEnemies(setup), gameData);
     const sk = skillAvailability(step.state, gameData).find((x) => (x.skill.cooldown ?? 0) >= 1 && x.usable)!;
     expect(sk).toBeDefined();
-    const sp = P(step.state).sp;
+    const energy = P(step.state).energy;
     step = submitCommand(step.state, { type: 'skill', skillId: sk.skill.id, target: 'E1' }, gameData);
     const after = skillAvailability(step.state, gameData).find((x) => x.skill.id === sk.skill.id)!;
-    expect(P(step.state).sp).toBe(Math.min(100, sp - sk.cost + 15));
+    expect(P(step.state).energy).toBe(Math.min(100, energy - sk.cost + 15));
     expect(after.usable).toBe(false);
     expect(after.reason).toMatch(/CT/);
     expect(() => submitCommand(step.state, { type: 'skill', skillId: sk.skill.id }, gameData)).toThrow();
@@ -103,14 +103,14 @@ describe('battle engine — turn order & commands', () => {
     expect(skillAvailability(step.state, gameData).find((x) => x.skill.id === sk.skill.id)!.usable).toBe(true);
   });
 
-  it('DEFEND restores extra SP and sets the defending flag', () => {
+  it('DEFEND restores extra SYNC ENERGY and sets the defending flag', () => {
     const { setup } = setupFor(newSave());
     const step = startBattle(dummyEnemies(setup), gameData);
-    const sp = P(step.state).sp;
+    const energy = P(step.state).energy;
     const next = submitCommand(step.state, { type: 'defend' }, gameData);
     const defendEvent = next.events.find((e) => e.kind === 'action');
     expect(defendEvent?.snapshot.find((u) => u.uid === 'P')?.defending).toBe(true);
-    expect(P(next.state).sp).toBe(Math.min(100, sp + 20 + 15));
+    expect(P(next.state).energy).toBe(Math.min(100, energy + 20 + 15));
   });
 
   it('silence blocks skills, stun skips a turn, corrupt deals damage over time', () => {
@@ -189,17 +189,32 @@ describe('battle engine — affinity, passives, REWRITE', () => {
     expect(step.events.some((e) => e.kind === 'endure')).toBe(true);
   });
 
-  it('REWRITE requires its condition and can be used once', () => {
+  it('REWRITE GAUGE charges through actions and damage, and REWRITE resets it', () => {
     const { setup } = setupFor(newSave());
-    expect(setup.rewrite.skillId).toBe('RW-0001'); // メイン: 記録司書リブラ（3ターン目以降）
+    expect(setup.rewrite.skillId).not.toBeNull();
     let step = startBattle(dummyEnemies(setup), gameData);
-    expect(rewriteAvailability(step.state, gameData).usable).toBe(false);
+    expect(step.state.rewrite.gauge).toBe(0);
+    expect(rewriteAvailability(step.state, gameData)).toMatchObject({ usable: false });
+    expect(rewriteAvailability(step.state, gameData).reason).toMatch(/GAUGE/);
     expect(() => submitCommand(step.state, { type: 'rewrite' }, gameData)).toThrow();
-    while (step.state.round < 3) step = submitCommand(step.state, { type: 'defend' }, gameData);
+    step = submitCommand(step.state, { type: 'attack', target: 'E1' }, gameData);
+    expect(step.state.rewrite.gauge).toBeGreaterThan(0);
+    let guard = 0;
+    while (step.state.rewrite.gauge < 100 && guard++ < 25) step = submitCommand(step.state, { type: 'attack', target: 'E1' }, gameData);
     expect(rewriteAvailability(step.state, gameData).usable).toBe(true);
     step = submitCommand(step.state, { type: 'rewrite' }, gameData);
     expect(step.events[0].kind).toBe('rewrite');
-    expect(rewriteAvailability(step.state, gameData)).toMatchObject({ usable: false, reason: '使用済み' });
+    expect(step.state.rewrite.uses).toBe(1);
+    expect(step.state.rewrite.gauge).toBeLessThan(100);
+    expect(rewriteAvailability(step.state, gameData).usable).toBe(false);
+  });
+
+  it('taking damage charges the REWRITE GAUGE', () => {
+    const { setup } = setupFor(newSave());
+    const s = dummyEnemies(setup, 99999);
+    for (const e of s.enemies) e.stats.atk = 400;
+    const step = startBattle(s, gameData);
+    expect(step.state.rewrite.gauge).toBeGreaterThan(0);
   });
 
   it('REWRITE can shift attribute (属性変化) and unlock a special skill (特殊スキル解放)', () => {
@@ -207,7 +222,7 @@ describe('battle engine — affinity, passives, REWRITE', () => {
     const s = dummyEnemies(setup);
     s.rewrite = { skillId: 'RW-0007', memoryId: 'MEM-0016' };
     let step = startBattle(s, gameData);
-    P(step.state).hp = Math.floor(P(step.state).maxHp * 0.3);
+    step.state.rewrite.gauge = 100;
     step = submitCommand(step.state, { type: 'rewrite' }, gameData);
     expect(P(step.state).attribute).toBe('ORDER');
     expect(P(step.state).empower?.value).toBeCloseTo(0.3);
@@ -217,7 +232,7 @@ describe('battle engine — affinity, passives, REWRITE', () => {
     const s2 = dummyEnemies(setup);
     s2.rewrite = { skillId: 'RW-0003', memoryId: 'MEM-0009' };
     let st = startBattle(s2, gameData);
-    for (const e of st.state.units.filter((u) => u.side === 'enemy')) e.statuses.push({ id: 'glitch', turns: 3 });
+    st.state.rewrite.gauge = 100;
     st = submitCommand(st.state, { type: 'rewrite' }, gameData);
     expect(P(st.state).skills.some((x) => x.skillId === 'SK-0101')).toBe(true);
   });
@@ -281,7 +296,7 @@ describe('battle results, growth and MEMORY SYNC', () => {
   }, 60000);
 });
 
-describe('save migration v1 → v2', () => {
+describe('save migration v1 → v3', () => {
   it('converts PHASE 1 teams into loadouts and grants starter items', () => {
     const v2 = newSave();
     const id = (mid: string) => v2.memories.find((m) => m.memoryId === mid)!.instanceId;
@@ -302,7 +317,9 @@ describe('save migration v1 → v2', () => {
     const r = parseSaveText(JSON.stringify(v1), gameData);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.save.version).toBe(2);
+    expect(r.save.version).toBe(3);
+    expect(r.save.story).toEqual({ completedChapters: [], current: null, choices: {} });
+    expect(r.save.worlds['WORLD-001'].recoveredMemories.length).toBeGreaterThan(0);
     expect(r.save.loadouts[0].slots.main).toEqual([id('MEM-0007')]);
     // MEM-0006 は戦闘能力を持たない記録になったため装備から外れる
     expect(r.save.loadouts[0].slots.sub).toEqual([null, id('MEM-0008'), null]);

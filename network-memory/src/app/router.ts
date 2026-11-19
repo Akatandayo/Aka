@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { ARCHIVE_CATEGORIES, type ArchiveCategory } from '../types/archive';
 import type { MenuScreenId } from './screens';
 
 /**
@@ -13,16 +14,21 @@ export type Route =
   | { name: 'sync'; memoryId: string }
   | { name: 'battle' }
   | { name: 'battleRun'; encounterId: string }
+  | { name: 'story' }
+  | { name: 'storyPlay'; chapterId: string }
+  | { name: 'world' }
+  | { name: 'worldDetail'; worldId: string }
+  | { name: 'archive'; category: ArchiveCategory }
+  | { name: 'archiveEntry'; entryId: string }
   | { name: 'profile' }
   | { name: 'settings' }
   | { name: 'planned'; screen: MenuScreenId };
 
 const PLANNED: Record<string, MenuScreenId> = {
-  story: 'STORY',
-  world: 'WORLD',
-  archive: 'ARCHIVE',
   shop: 'SHOP',
 };
+
+const isArchiveCategory = (v: string | undefined): v is ArchiveCategory => !!v && (ARCHIVE_CATEGORIES as readonly string[]).includes(v);
 
 export function parseHash(hash: string): Route {
   const parts = hash
@@ -30,7 +36,7 @@ export function parseHash(hash: string): Route {
     .split('/')
     .filter(Boolean)
     .map((p) => decodeURIComponent(p));
-  const [head, sub] = parts;
+  const [head, sub, third] = parts;
   switch (head) {
     case undefined:
     case 'lobby':
@@ -44,6 +50,13 @@ export function parseHash(hash: string): Route {
       return sub ? { name: 'sync', memoryId: sub } : { name: 'memory', tab: 'list' };
     case 'battle':
       return sub ? { name: 'battleRun', encounterId: sub } : { name: 'battle' };
+    case 'story':
+      return sub ? { name: 'storyPlay', chapterId: sub } : { name: 'story' };
+    case 'world':
+      return sub ? { name: 'worldDetail', worldId: sub } : { name: 'world' };
+    case 'archive':
+      if (sub === 'entry' && third) return { name: 'archiveEntry', entryId: third };
+      return { name: 'archive', category: isArchiveCategory(sub) ? sub : 'memory' };
     case 'profile':
       return { name: 'profile' };
     case 'settings':
@@ -68,6 +81,18 @@ export function toHash(route: Route): string {
       return '#/battle';
     case 'battleRun':
       return `#/battle/${encodeURIComponent(route.encounterId)}`;
+    case 'story':
+      return '#/story';
+    case 'storyPlay':
+      return `#/story/${encodeURIComponent(route.chapterId)}`;
+    case 'world':
+      return '#/world';
+    case 'worldDetail':
+      return `#/world/${encodeURIComponent(route.worldId)}`;
+    case 'archive':
+      return route.category === 'memory' ? '#/archive' : `#/archive/${route.category}`;
+    case 'archiveEntry':
+      return `#/archive/entry/${encodeURIComponent(route.entryId)}`;
     case 'profile':
       return '#/profile';
     case 'settings':

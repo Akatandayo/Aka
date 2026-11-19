@@ -1,6 +1,7 @@
 import type { GameData } from '../data/gameData';
+import { describeCondition, evaluateCondition } from '../conditions';
+import { syncWorldProgress } from '../world/restoration';
 import { acquireMemory } from './memories';
-import type { SyncCondition } from '../../types/memory';
 import type { PlayerMemory, PlayerSave } from '../../types/player';
 
 /**
@@ -18,26 +19,11 @@ export interface SyncCheck {
   conditions: { text: string; met: boolean }[];
 }
 
-function describe(c: SyncCondition, data: GameData, save: PlayerSave): { text: string; met: boolean } {
-  switch (c.type) {
-    case 'playerLevel':
-      return { text: `探索者 Lv.${c.value} 以上`, met: save.profile.level >= c.value };
-    case 'ownedMemory': {
-      const m = data.memoryById.get(c.memoryId);
-      const known = save.archive.discoveredMemoryIds.includes(c.memoryId) || save.memories.some((x) => x.memoryId === c.memoryId);
-      return { text: `『${m && known ? m.name : '未発見のMemory'}』と同期済み`, met: save.memories.some((x) => x.memoryId === c.memoryId) };
-    }
-    case 'flag':
-      return { text: c.label, met: Boolean(save.progress.flags[c.flag]) };
-    case 'unknown':
-      return { text: 'ERROR: 同期条件を解析できない', met: false };
-  }
-}
-
 export function checkSyncConditions(save: PlayerSave, data: GameData, memoryId: string): SyncCheck {
   const def = data.memoryById.get(memoryId);
   if (!def) return { ok: false, conditions: [{ text: '存在しないMemory', met: false }] };
-  const conditions = (def.syncCondition ?? []).map((c) => describe(c, data, save));
+  const ctx = { save, data };
+  const conditions = def.unlockConditions.map((c) => ({ text: describeCondition(c, ctx), met: evaluateCondition(c, ctx) }));
   return { ok: conditions.every((c) => c.met), conditions };
 }
 
@@ -65,9 +51,7 @@ export function syncMemory(save: PlayerSave, data: GameData, memoryId: string, a
   if (!check.ok) return { ok: false, error: '同期条件を満たしていません', check };
   const r = acquireMemory(save, data, memoryId, 'MEMORY SYNC', at);
   if (!r.ok) return r;
-  return {
-    ok: true,
-    instance: r.instance,
-    save: { ...r.save, archive: { ...r.save.archive, pendingSyncIds: r.save.archive.pendingSyncIds.filter((id) => id !== memoryId) } },
-  };
+  // Memory の回収によって、対応する WORLD の修復状態が更新される（GDD Ver.3 §5）
+  const next = { ...r.save, archive: { ...r.save.archive, pendingSyncIds: r.save.archive.pendingSyncIds.filter((id) => id !== memoryId) } };
+  return { ok: true, instance: r.instance, save: syncWorldProgress(next, data, at) };
 }

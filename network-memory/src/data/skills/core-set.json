@@ -628,11 +628,6 @@
     "kind": "rewrite",
     "attribute": "ORDER",
     "target": "enemy_all",
-    "condition": {
-      "type": "turn_at_least",
-      "value": 3
-    },
-    "conditionText": "3ターン目以降",
     "description": "封じられた書架を開き、敵全体にTEC200%のORDER属性ダメージ。敵のバフをすべて解除する。",
     "effects": [
       {
@@ -658,11 +653,6 @@
     "kind": "rewrite",
     "attribute": "ERROR",
     "target": "enemy_all",
-    "condition": {
-      "type": "self_hp_below",
-      "value": 0.5
-    },
-    "conditionText": "自身のHPが50%以下",
     "description": "敵全体にATK160%のERROR属性ダメージを与え、3ターン『侵食』を付与する。",
     "effects": [
       {
@@ -691,11 +681,6 @@
     "kind": "rewrite",
     "attribute": "CHAOS",
     "target": "enemy_all",
-    "condition": {
-      "type": "enemies_with_status_at_least",
-      "value": 2
-    },
-    "conditionText": "状態異常の敵が2体以上",
     "description": "敵全体にTEC180%のCHAOS属性ダメージ（状態異常1つにつき威力+20%）。さらに戦闘終了まで特殊スキル『ノーフェイス』が解放される。",
     "effects": [
       {
@@ -728,11 +713,6 @@
     "kind": "rewrite",
     "attribute": "VOID",
     "target": "enemy_single",
-    "condition": {
-      "type": "units_down_at_least",
-      "value": 1
-    },
-    "conditionText": "敵が1体以上戦闘不能",
     "description": "敵単体にTEC300%のVOID属性ダメージ。対象のパッシブスキルを戦闘終了まで無効化する。",
     "effects": [
       {
@@ -761,11 +741,6 @@
     "kind": "rewrite",
     "attribute": "CHAOS",
     "target": "all",
-    "condition": {
-      "type": "turn_at_least",
-      "value": 5
-    },
-    "conditionText": "5ターン目以降",
     "description": "敵全体にATK250%のCHAOS属性ダメージ。その後、敵味方全員のバフとデバフを入れ替える。",
     "effects": [
       {
@@ -1062,11 +1037,6 @@
     "kind": "rewrite",
     "attribute": "ORDER",
     "target": "self",
-    "condition": {
-      "type": "self_hp_below",
-      "value": 0.4
-    },
-    "conditionText": "自身のHPが40%以下",
     "description": "自身の記録を『例外』として再定義する。3ターンの間、属性をORDERに変化させ、ATKを30%上昇、与ダメージを30%強化する。",
     "effects": [
       {

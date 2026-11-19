@@ -1,3 +1,5 @@
+import type { Condition } from './condition';
+
 /**
  * Memory マスターデータの型定義。
  *
@@ -57,13 +59,8 @@ export interface AttackStyle {
   hits: number;
 }
 
-/** 同期条件（MEMORY SYNC に必要な条件） */
-export type SyncCondition =
-  | { type: 'playerLevel'; value: number }
-  | { type: 'ownedMemory'; memoryId: string }
-  | { type: 'flag'; flag: string; label: string }
-  /** 条件不明（現時点では同期できない） */
-  | { type: 'unknown' };
+/** 同期条件（Ver.3 では unlockConditions。共通の Condition を使う） */
+export type SyncCondition = Condition;
 
 /** 探索能力（WORLD 探索・イベント解放で使用。PHASE 4） */
 export interface FieldAbility {
@@ -77,6 +74,25 @@ export interface MemoryPersona {
   personality: string;
   /** 人物の記憶・口癖など */
   note?: string;
+}
+
+/**
+ * 同期効果（GDD Ver.3 §2）。
+ * Memory に同期したときに主人公へ反映される性質。メイン装備でのみ完全同期となる。
+ */
+export interface SyncEffects {
+  /** 戦闘スタイル（ATTACK コマンドの通常攻撃） */
+  style: AttackStyle;
+  /** サブ装備時に使える補助スキル（skills のいずれか）。完全同期能力は使えない */
+  supportSkill?: string;
+  /** パッシブ装備時の能力値補正（割合。0.05 = +5%） */
+  passiveBonus?: Partial<Record<StatKey, number>>;
+  /** メイン装備時の REWRITE */
+  rewrite?: string;
+  /** 同期演出（MEMORY SYNC 画面のテーマ色・同期ログ） */
+  direction?: { color?: string; lines?: string[] };
+  /** メイン同期時の外見演出（主人公のオーラ色と名称） */
+  appearance?: { aura: string; label: string };
 }
 
 export interface MemoryDefinition {
@@ -100,34 +116,26 @@ export interface MemoryDefinition {
    */
   illustration: string;
   /**
-   * ステータス補正（Lv1 時）。装備すると主人公のステータスに加算される（スロットごとに倍率あり）。
-   * 戦闘能力を持たない Memory は 0 でよい。
+   * 固有ステータス（Lv1）。メインに同期すると、これが戦闘時の基本ステータスになる。
+   * 戦闘能力を持たない Memory はすべて 0。
    */
-  hp: number;
-  atk: number;
-  def: number;
-  spd: number;
-  tec: number;
-  res: number;
-  /** アクティブスキル ID（MemorySkills 参照）。空なら戦闘スキルを持たない */
+  baseStats: StatBlock;
+  /** 固有スキル（完全同期 = メイン装備時に使用可能） */
   skills: string[];
-  /** パッシブスキル ID（MemorySkills 参照） */
-  passiveSkills: string[];
-  /** メイン装備時の通常攻撃（省略時は ATK/TEC の高い方から自動決定） */
-  attackStyle?: AttackStyle;
-  /** 同期条件（省略時は条件なし） */
-  syncCondition?: SyncCondition[];
-  /** 探索能力 */
+  /** パッシブ能力（メイン・パッシブ装備時に有効） */
+  passive: string[];
+  syncEffects: SyncEffects;
+  /** 探索能力（WORLD 探索で使用） */
   fieldAbilities?: FieldAbility[];
   /** 人物の人格・記憶（HUMAN など） */
   persona?: MemoryPersona;
-  /** REWRITE スキル ID（任意） */
-  rewrite?: string;
   acquisitionMethod: AcquisitionMethod[];
   relatedMemories: string[];
-  /** Memory 固有の記録（MemoryStory）ID */
-  storyId: string | null;
-  /** 出現する WORLD */
-  worldId?: string | null;
+  /** 出現・帰属する WORLD（修復対象の世界） */
+  worldId: string | null;
+  /** 個別記録（ARCHIVE の MEMORY RECORD の ID） */
+  storyRecords: string[];
+  /** 同期条件（MEMORY SYNC に必要な条件。空なら接触するだけで同期できる） */
+  unlockConditions: Condition[];
   tags?: string[];
 }

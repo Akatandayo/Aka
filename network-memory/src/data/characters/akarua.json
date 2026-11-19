@@ -1,0 +1,53 @@
+[
+  {
+    "id": "CHR-HARUKA",
+    "name": "白石ハルカ",
+    "reading": "しらいし はるか",
+    "role": "何でも屋「アカルア」店長 / -No.2【神の娘】-",
+    "age": 32,
+    "origin": "Network（神格世界）",
+    "color": "#b69cff",
+    "hair": "#a8adb8",
+    "eyes": "#9b6bff",
+    "profile": "NULL CITYの何でも屋「アカルア」の店長。行き場を失っていた独を拾い、能力の安定化と改良、働き場所と衣食住を与えた。独と紅葉にとっては、母親のような、優しいお姉さんのような存在。",
+    "abilities": [
+      { "name": "全知全能", "description": "あらゆる知識のひとつを選び、その代わりとして用いることができる。" },
+      { "name": "未確認学", "description": "この世の森羅万象を生み出し、操ることができる。不可能を可能にする。" }
+    ],
+    "expressions": ["normal", "smile", "serious", "worried", "surprised"]
+  },
+  {
+    "id": "CHR-HITORI",
+    "name": "電子 独",
+    "reading": "でんし ひとり",
+    "role": "何でも屋「アカルア」 / 【原点個体】",
+    "age": 17,
+    "origin": "現世（日本）",
+    "color": "#3ee8ff",
+    "hair": "#1d2233",
+    "eyes": "#3ee8ff",
+    "profile": "《神の失敗作》と呼ばれた少年。いくつもの修羅場を潜り抜けた歴戦の《敗北者》。転生を経て完成した能力 {Glitch} はまだ不安定で、白石ハルカのもとで安定化と改良を受けた。今はハルカのもとで、紅葉と一緒に暮らしている。良くも悪くも……愛されている。",
+    "abilities": [
+      { "name": "{Glitch}", "description": "ゲームのバグを具現化したような力。テレポートや攻撃の無力化など汎用性は高いが、自身の身体を犠牲にする諸刃の剣。" },
+      { "name": "{upset}【大番狂わせ】", "description": "自分よりも上の存在にのみ使える。自身と相手を対等な立場に置く。" }
+    ],
+    "expressions": ["normal", "smirk", "serious", "annoyed", "surprised"]
+  },
+  {
+    "id": "CHR-MOMIJI",
+    "name": "電子 紅葉",
+    "reading": "でんし もみじ",
+    "role": "何でも屋「アカルア」 / 【原点個体】",
+    "age": 16,
+    "origin": "現世（日本）",
+    "color": "#ff8a5c",
+    "hair": "#5a2a2a",
+    "eyes": "#ff8a5c",
+    "profile": "独とお揃いの、ハルカ製の指輪を身につけている少女。独に向けられた痛みや効果を、迷わず自分で引き受けてしまう。応急手当と観察眼に優れ、アカルアの仕事を支えている。",
+    "abilities": [
+      { "name": "{heartache}", "description": "ダメージや効果を受けたとき、代わりに自分の心をすり減らすことができる。" },
+      { "name": "{CHAOS LOVE}", "description": "独に向けられた効果やダメージ、技能を、強制的に引き受ける。" }
+    ],
+    "expressions": ["normal", "smile", "worried", "pout", "surprised"]
+  }
+]

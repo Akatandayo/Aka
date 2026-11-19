@@ -53,8 +53,9 @@ export interface BattleUnit {
   stats: StatBlock;
   hp: number;
   maxHp: number;
-  sp: number;
-  maxSp: number;
+  /** SYNC ENERGY */
+  energy: number;
+  maxEnergy: number;
   attack: AttackStyle;
   skills: SkillSlot[];
   passives: PassiveSlot[];
@@ -93,7 +94,8 @@ export interface BattleState {
   units: BattleUnit[];
   /** このラウンドで未行動のユニット（SPD 順） */
   queue: string[];
-  rewrite: { skillId: string | null; memoryId: string | null; used: boolean };
+  /** REWRITE: メイン Memory 固有の効果と、行動で蓄積する REWRITE GAUGE */
+  rewrite: { skillId: string | null; memoryId: string | null; gauge: number; uses: number };
   items: Record<string, number>;
   itemsUsed: Record<string, number>;
   downCount: number;
@@ -106,8 +108,8 @@ export interface UnitSnapshot {
   uid: string;
   hp: number;
   maxHp: number;
-  sp: number;
-  maxSp: number;
+  energy: number;
+  maxEnergy: number;
   alive: boolean;
   defending: boolean;
   attribute: Attribute;
@@ -145,6 +147,8 @@ export interface BattleEvent {
   skillId?: string;
   /** 各イベント直後のユニット状態（UI の段階的な再生用） */
   snapshot: UnitSnapshot[];
+  /** 各イベント直後の REWRITE GAUGE */
+  gauge: number;
 }
 
 export interface StepResult {

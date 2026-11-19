@@ -50,6 +50,21 @@ export const MIGRATIONS: Record<number, Migration> = {
       battle: { encounters: {}, wins: 0, losses: 0, retreats: 0, records: [] },
     };
   },
+  /**
+   * v2 → v3（GDD Ver.3）
+   * - メインストーリーの進行状態、WORLD の修復状態、ARCHIVE の閲覧履歴を追加
+   *   （WORLD の修復状態は sanitize で回収済み Memory から算出される）
+   */
+  2: (raw) => {
+    const archive = isObj(raw.archive) ? raw.archive : {};
+    return {
+      ...raw,
+      version: 3,
+      archive: { ...archive, readEntryIds: [] },
+      story: { completedChapters: [], current: null, choices: {} },
+      worlds: {},
+    };
+  },
 };
 
 export type MigrateResult = { ok: true; data: Raw; from: number } | { ok: false; error: string };

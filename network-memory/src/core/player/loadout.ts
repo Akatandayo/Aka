@@ -40,18 +40,17 @@ export function createDefaultLoadouts(capacity: LoadoutCapacity = DEFAULT_LOADOU
 
 /** そのスロットに装備できる Memory か */
 export function slotEligible(def: MemoryDefinition, slot: LoadoutSlotType): boolean {
-  const rule = SLOT_RULES[slot];
   if (slot === 'main') return def.skills.length > 0;
-  if (rule.grantsSkills) return def.skills.length > 0;
-  if (rule.grantsPassives) return def.passiveSkills.length > 0;
-  return false;
+  if (slot === 'sub') return Boolean(def.syncEffects.supportSkill);
+  return def.passive.length > 0 || Object.keys(def.syncEffects.passiveBonus ?? {}).length > 0;
 }
 
 export function slotIneligibleReason(def: MemoryDefinition, slot: LoadoutSlotType): string | null {
   if (slotEligible(def, slot)) return null;
-  if (def.skills.length === 0 && def.passiveSkills.length === 0) return '戦闘能力を持たない記録です（探索・ストーリー用）';
-  if (slot === 'passive') return 'パッシブ効果を持っていません';
-  return 'スキルを持っていません';
+  if (def.skills.length === 0 && def.passive.length === 0) return '戦闘能力を持たない記録です（探索・ストーリー用）';
+  if (slot === 'sub') return '補助スキルを持っていません';
+  if (slot === 'passive') return 'パッシブ能力を持っていません';
+  return '固有スキルを持っていません';
 }
 
 export function getLoadout(save: PlayerSave, id: string): PlayerLoadout | undefined {
@@ -160,7 +159,7 @@ export function autoLoadout(save: PlayerSave, data: GameData, loadoutId: string)
     used.add(e.def.id);
     return e.instance.instanceId;
   };
-  slots.main = slots.main.map(() => pick('main', (e) => Boolean(e.def.rewrite)));
+  slots.main = slots.main.map(() => pick('main'));
   slots.sub = slots.sub.map(() => pick('sub'));
   slots.passive = slots.passive.map(() => pick('passive'));
   return { ok: true, save: replaceLoadout(save, { ...l, slots }) };

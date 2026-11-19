@@ -7,6 +7,9 @@ import { toggleFavorite } from '../core/player/memories';
 import { createNewSave } from '../core/player/newGame';
 import { syncMemory } from '../core/player/sync';
 import { PLAYER_BIO_MAX, normalizePlayerName } from '../core/save/schema';
+import type { FlagValue } from '../core/story/engine';
+import { completeChapter, saveStoryProgress } from '../core/story/progress';
+import { syncWorldProgress } from '../core/world/restoration';
 import type { LoadoutSlotType, PlayerAvatar, PlayerSave, PlayerSettings } from '../types/player';
 
 /**
@@ -30,6 +33,10 @@ export type GameAction =
   | { type: 'DISCOVER'; memoryIds: string[]; fragmentIds: string[] }
   | { type: 'SYNC_MEMORY'; memoryId: string; at: string }
   | { type: 'COMMIT_BATTLE'; outcome: BattleOutcome; at: string }
+  | { type: 'STORY_PROGRESS'; chapterId: string; index: number; flags: Record<string, FlagValue>; choices: Record<string, string> }
+  | { type: 'STORY_COMPLETE'; chapterId: string; flags: Record<string, FlagValue>; detected: string[]; at: string }
+  | { type: 'STORY_RESET_CURRENT' }
+  | { type: 'ARCHIVE_READ'; entryIds: string[] }
   | { type: 'UPDATE_SETTINGS'; patch: Partial<PlayerSettings> }
   | { type: 'DEV_GRANT_ALL'; at: string }
   | { type: 'DEV_ADD_CURRENCY'; at: string }
@@ -94,10 +101,21 @@ export function gameReducer(save: PlayerSave | null, action: GameAction, data: G
     }
     case 'COMMIT_BATTLE':
       return applyBattleOutcome(save, data, action.outcome, action.at).save;
+    case 'STORY_PROGRESS':
+      return saveStoryProgress(save, action.chapterId, action.index, action.flags, action.choices);
+    case 'STORY_COMPLETE':
+      return completeChapter(save, data, action.chapterId, action.flags, action.detected, action.at).save;
+    case 'STORY_RESET_CURRENT':
+      return { ...save, story: { ...save.story, current: null } };
+    case 'ARCHIVE_READ': {
+      const read = new Set(save.archive.readEntryIds);
+      const add = action.entryIds.filter((id) => !read.has(id));
+      return add.length ? { ...save, archive: { ...save.archive, readEntryIds: [...save.archive.readEntryIds, ...add] } } : save;
+    }
     case 'UPDATE_SETTINGS':
       return { ...save, settings: { ...save.settings, ...action.patch } };
     case 'DEV_GRANT_ALL':
-      return devGrantAllMemories(save, data, action.at).save;
+      return syncWorldProgress(devGrantAllMemories(save, data, action.at).save, data, action.at);
     case 'DEV_ADD_CURRENCY': {
       const r = devAddCurrencies(save, action.at);
       return r.ok ? r.save : save;

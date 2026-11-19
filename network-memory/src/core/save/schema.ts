@@ -5,7 +5,7 @@ import type { LoadoutCapacity, PlayerSettings } from '../../types/player';
  * セーブデータのバージョン。
  * PlayerSave の構造を変更したら値を上げ、migrations.ts に変換処理を追加する。
  */
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 export const SAVE_STORAGE_KEY = 'network-memory:save';
 export const SAVE_BACKUP_PREFIX = 'network-memory:backup:';

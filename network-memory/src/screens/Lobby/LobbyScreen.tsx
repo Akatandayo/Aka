@@ -12,6 +12,9 @@ import { expToNext } from '../../core/memory/stats';
 import { analyzeLoadout, playerPower } from '../../core/player/character';
 import { collectionSummary } from '../../core/player/discovery';
 import { getActiveLoadout } from '../../core/player/loadout';
+import { fillText } from '../../core/story/engine';
+import { chapterStatus, nextChapter } from '../../core/story/progress';
+import { computeWorldState, overallRestoration, worldConnection } from '../../core/world/restoration';
 import { usePlayer } from '../../state/GameProvider';
 import { CURRENCIES, LOADOUT_SLOT_TYPES } from '../../types/player';
 import './LobbyScreen.css';
@@ -27,10 +30,14 @@ export function LobbyScreen() {
   const nextSignal = data.encounters.find((e) => encounterStatus(save, e) === 'available');
   const pendingSync = save.archive.pendingSyncIds.length;
   const rate = summary.total ? Math.round((summary.owned / summary.total) * 100) : 0;
+  const story = nextChapter(save, data);
+  const storyStatus = story ? chapterStatus(save, data, story) : null;
+  const lockedStory = !story ? data.chapters.find((c) => !save.story.completedChapters.includes(c.id)) : undefined;
 
   const logs = [
     { tone: 'alert', text: 'Memoryの流出を継続して観測中。流出規模は測定不能。' },
     { tone: 'info', text: `同期済みの記録 ${summary.owned} / ${summary.total}（${rate}%）` },
+    ...(story ? [{ tone: 'discover', text: `STORY: ${story.label}「${story.title}」${storyStatus === 'in_progress' ? 'の続きが読めます。' : 'が読めます。'}` }] : []),
     ...(pendingSync > 0 ? [{ tone: 'discover', text: `検出済み・未同期のMemoryが ${pendingSync} 件あります（MEMORY › PENDING SYNC）。` }] : []),
     ...(nextSignal ? [{ tone: 'info', text: `新たな流出反応: ${data.worldById.get(nextSignal.worldId)?.name} 「${nextSignal.name}」` }] : []),
     {
@@ -110,6 +117,15 @@ export function LobbyScreen() {
               )}
             </div>
           </div>
+
+          <StoryPrompt
+            label={story ? `${story.label}「${story.title}」` : lockedStory ? `${lockedStory.label}「${lockedStory.title}」` : null}
+            summary={story ? fillText(story.summary, save.profile.name) : null}
+            status={story ? (storyStatus === 'in_progress' ? 'in_progress' : 'available') : lockedStory ? 'locked' : 'done'}
+            onOpen={() => (story ? nav({ name: 'storyPlay', chapterId: story.id }) : nav({ name: 'story' }))}
+          />
+
+          <WorldSummary />
         </section>
 
         <nav className="lobby__menu" aria-label="メインメニュー">
@@ -181,6 +197,50 @@ function ExplorerPanel({ analysis }: { analysis: ReturnType<typeof analyzeLoadou
         </div>
       </div>
     </article>
+  );
+}
+
+function StoryPrompt({ label, summary, status, onOpen }: { label: string | null; summary: string | null; status: 'available' | 'in_progress' | 'locked' | 'done'; onOpen: () => void }) {
+  return (
+    <button type="button" className={`panel lobby__story is-${status}`} onClick={onOpen}>
+      <span className="section-label">{status === 'in_progress' ? 'CONTINUE STORY' : 'NEXT STORY'}</span>
+      {label ? <span className="lobby__story-title">{label}</span> : <span className="lobby__story-title">現在読める章はすべて読み終えました</span>}
+      {summary && <span className="lobby__story-sum dim">{summary}</span>}
+      {status === 'locked' && <span className="lobby__story-sum mute">解放条件を満たすと読めるようになります（STORY で確認）</span>}
+      <span className="lobby__story-go mono">{status === 'in_progress' ? '続きから ▶' : status === 'available' ? '読む ▶' : 'STORY ▶'}</span>
+    </button>
+  );
+}
+
+function WorldSummary() {
+  const nav = useNav();
+  const { save, data } = usePlayer();
+  const overall = overallRestoration(save, data);
+  return (
+    <section className="panel lobby__world" aria-label="世界修復">
+      <div className="panel__title">
+        <span>WORLD RESTORATION</span>
+        <small className="mono">TOTAL {Math.round(overall * 100)}%</small>
+      </div>
+      <ul>
+        {data.worlds.map((w) => {
+          const conn = worldConnection(save, data, w);
+          const r = computeWorldState(save, data, w, '').restorationRate;
+          const color = ATTRIBUTE_META[w.attribute].color;
+          return (
+            <li key={w.id}>
+              <button type="button" className="lobby__world-row" onClick={() => nav({ name: 'worldDetail', worldId: w.id })} style={{ ['--w-c' as string]: color } as CSSProperties}>
+                <span className={`lobby__world-name ${conn.connected ? '' : 'is-offline'}`}>{conn.known ? w.name : '？？？'}</span>
+                <span className="lobby__world-meter">
+                  <span style={{ width: `${Math.round(r * 100)}%` }} />
+                </span>
+                <span className="mono lobby__world-rate">{Math.round(r * 100)}%</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
 

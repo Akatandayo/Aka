@@ -128,6 +128,9 @@ export function dealDamage(
 
   const dmg = Math.max(1, Math.round(base * mult * variance));
   defender.hp = Math.max(0, defender.hp - dmg);
+  // REWRITE GAUGE: 与えたヒット・受けたダメージで蓄積
+  if (attacker.side === 'player') ctx.chargeGauge(BATTLE_RULES.gaugePerHit);
+  if (defender.side === 'player') ctx.chargeGauge(Math.round((dmg / defender.maxHp) * BATTLE_RULES.gaugeOnDamageTaken));
   const affText = aff.kind === 'advantage' ? '【属性有利】' : aff.kind === 'disadvantage' ? '【属性不利】' : '';
   ctx.emit('damage', `${crit ? 'CRITICAL! ' : ''}${affText}${defender.name}に ${dmg} のダメージ`, {
     actor: attacker.uid,
@@ -169,6 +172,7 @@ export function handleLethal(ctx: BattleCtx, u: BattleUnit): void {
   u.defending = false;
   u.statuses = [];
   ctx.state.downCount++;
+  if (u.side === 'enemy') ctx.chargeGauge(BATTLE_RULES.gaugeOnEnemyDown);
   ctx.state.queue = ctx.state.queue.filter((id) => id !== u.uid);
   ctx.emit('down', u.side === 'enemy' ? `${u.name}の記録が崩壊した` : `${u.name}は倒れた……`, { target: u.uid });
   for (const other of ctx.living()) {
@@ -313,11 +317,12 @@ export function applyEffects(ctx: BattleCtx, effects: SkillEffect[], src: Effect
         }
         break;
       }
+      case 'energy_gain':
       case 'sp_gain':
         for (const t of targets) {
-          const before = t.sp;
-          t.sp = Math.min(t.maxSp, t.sp + (e.value ?? 0));
-          ctx.emit('heal', `${t.name}のSPが ${t.sp - before} 回復`, { target: t.uid });
+          const before = t.energy;
+          t.energy = Math.min(t.maxEnergy, t.energy + (e.value ?? 0));
+          ctx.emit('heal', `${t.name}の SYNC ENERGY が ${t.energy - before} 回復`, { target: t.uid });
         }
         break;
       case 'special':

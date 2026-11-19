@@ -192,7 +192,7 @@
         "unlock": {
           "type": "flag",
           "flag": "story.prologue.clear",
-          "label": "PROLOGUEを読了（STORYはPHASE 3で実装）"
+          "label": "STORY「PROLOGUE アカルア」を読了"
         },
         "text": "消された数秒間の復元に、わずかに成功した。そこには、誰かの声が一言だけ残っていた。『——今度は、忘れないで』"
       }
@@ -356,7 +356,7 @@
         "unlock": {
           "type": "flag",
           "flag": "story.chapter1.clear",
-          "label": "CHAPTER 1を読了（STORYはPHASE 3で実装）"
+          "label": "STORY「CHAPTER 1 灯りの消えた街」を読了"
         },
         "text": "最初に流出したMemoryは、名前の欄が空白のまま記録されていた。カテゴリは UNKNOWN。レアリティは——IRREGULAR。"
       }

@@ -4,6 +4,7 @@ import { clampLimitBreak, maxLevel } from '../memory/stats';
 import { MAX_BALANCE, TRANSACTION_HISTORY_LIMIT, emptyWallet } from '../player/economy';
 import { clampCapacity, createDefaultLoadouts, slotEligible } from '../player/loadout';
 import { PLAYER_MAX_LEVEL } from '../constants';
+import { syncWorldProgress } from '../world/restoration';
 import { DEFAULT_AVATAR, DEFAULT_SETTINGS, PLAYER_BIO_MAX, SAVE_VERSION, normalizePlayerName } from './schema';
 import {
   CURRENCIES,
@@ -185,6 +186,7 @@ export function sanitizeSave(raw: unknown, data: GameData, now: string = new Dat
     readFragmentIds: strings(ra.readFragmentIds),
     // 同期待ちは「存在するMemory」かつ「未同期」のもののみ
     pendingSyncIds: strings(ra.pendingSyncIds).filter((id) => data.memoryById.has(id) && !ownedIds.has(id)),
+    readEntryIds: strings(ra.readEntryIds),
   };
   for (const id of archive.pendingSyncIds) if (!discovered.has(id)) archive.discoveredMemoryIds.push(id);
 
@@ -213,6 +215,18 @@ export function sanitizeSave(raw: unknown, data: GameData, now: string = new Dat
       });
     }
   }
+  // ---- story progress
+  const rst = isObj(raw.story) ? raw.story : {};
+  const completedChapters = strings(rst.completedChapters).filter((id) => data.chapterById.has(id));
+  let current: PlayerSave['story']['current'] = null;
+  if (isObj(rst.current) && typeof rst.current.chapterId === 'string' && data.chapterById.has(rst.current.chapterId)) {
+    const ch = data.chapterById.get(rst.current.chapterId)!;
+    current = { chapterId: ch.id, index: Math.min(nonNegInt(rst.current.index, 0, 100000), Math.max(0, ch.script.length - 1)) };
+  }
+  const choices: Record<string, string> = {};
+  if (isObj(rst.choices)) for (const [k, v] of Object.entries(rst.choices)) if (typeof v === 'string') choices[k] = v;
+  const story = { completedChapters, current, choices };
+
   const battle: BattleProgress = {
     encounters,
     wins: nonNegInt(rb.wins),
@@ -247,26 +261,43 @@ export function sanitizeSave(raw: unknown, data: GameData, now: string = new Dat
     devMode: rs.devMode === true,
   };
 
-  return {
-    ok: true,
-    issues,
-    save: {
-      version: SAVE_VERSION,
-      saveId: str(raw.saveId, createId('save')),
-      createdAt: isIsoDate(raw.createdAt) ? raw.createdAt : profile.createdAt,
-      updatedAt: isIsoDate(raw.updatedAt) ? raw.updatedAt : now,
-      profile,
-      wallet,
-      transactions,
-      memories,
-      loadouts,
-      activeLoadoutId,
-      loadoutCapacity,
-      archive,
-      battle,
-      inventory,
-      progress: { flags },
-      settings,
-    },
+  // ---- world progress（保存済みのスナップショットを読み、回収済み Memory から再計算して整合させる）
+  const worlds: PlayerSave['worlds'] = {};
+  if (isObj(raw.worlds)) {
+    for (const [id, v] of Object.entries(raw.worlds)) {
+      if (!isObj(v) || !data.worldById.has(id)) continue;
+      worlds[id] = {
+        restorationRate: typeof v.restorationRate === 'number' ? v.restorationRate : 0,
+        requiredMemories: strings(v.requiredMemories),
+        recoveredMemories: strings(v.recoveredMemories),
+        restoredObjects: strings(v.restoredObjects),
+        restoredNPCs: strings(v.restoredNPCs),
+        unlockedAreas: strings(v.unlockedAreas),
+        unlockedEvents: strings(v.unlockedEvents),
+        updatedAt: isIsoDate(v.updatedAt) ? v.updatedAt : now,
+      };
+    }
+  }
+
+  const save: PlayerSave = {
+    version: SAVE_VERSION,
+    saveId: str(raw.saveId, createId('save')),
+    createdAt: isIsoDate(raw.createdAt) ? raw.createdAt : profile.createdAt,
+    updatedAt: isIsoDate(raw.updatedAt) ? raw.updatedAt : now,
+    profile,
+    wallet,
+    transactions,
+    memories,
+    loadouts,
+    activeLoadoutId,
+    loadoutCapacity,
+    archive,
+    battle,
+    story,
+    worlds,
+    inventory,
+    progress: { flags },
+    settings,
   };
+  return { ok: true, issues, save: syncWorldProgress(save, data, now) };
 }

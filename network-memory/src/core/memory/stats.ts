@@ -7,9 +7,14 @@ import {
 } from '../constants';
 import { STAT_KEYS, type MemoryDefinition, type Rarity, type StatBlock } from '../../types/memory';
 
-/** 基礎ステータス（Lv1・限界突破0） */
+/** 固有ステータス（Lv1・限界突破0） */
 export function baseStats(def: MemoryDefinition): StatBlock {
-  return { hp: def.hp, atk: def.atk, def: def.def, spd: def.spd, tec: def.tec, res: def.res };
+  return { ...def.baseStats };
+}
+
+/** 戦闘能力を持つ Memory か（固有スキル・パッシブのどちらかを持つ） */
+export function isCombatMemory(def: MemoryDefinition): boolean {
+  return def.skills.length > 0 || def.passive.length > 0;
 }
 
 export function clampLimitBreak(limitBreak: number): number {

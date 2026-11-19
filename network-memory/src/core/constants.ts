@@ -100,9 +100,15 @@ export const STAT_BONUS_PER_LIMIT_BREAK = 0.05;
 // =====================================================================
 
 
-/** 主人公の基礎ステータス（Lv1）と 1 レベルごとの成長 */
-export const PLAYER_BASE_STATS = { hp: 300, atk: 30, def: 30, spd: 30, tec: 30, res: 30 } as const;
-export const PLAYER_GROWTH_PER_LEVEL = { hp: 50, atk: 6, def: 6, spd: 4, tec: 6, res: 6 } as const;
+/**
+ * 主人公の共通成長（GDD Ver.3 §2: 主人公の共通成長要素は別管理）。
+ * 戦闘時の基本ステータスはメイン Memory が決め、主人公のレベルは全ステータスへの倍率として効く。
+ */
+export const PLAYER_SYNC_GROWTH_PER_LEVEL = 0.03;
+/** どの Memory とも同期していないときの能力（戦闘にはメイン Memory が必須） */
+export const UNSYNCED_STATS = { hp: 600, atk: 60, def: 60, spd: 60, tec: 60, res: 60 } as const;
+/** パッシブ枠の能力値補正は Memory のレベルで少し伸びる（1 レベルごと +2%） */
+export const PASSIVE_BONUS_GROWTH_PER_LEVEL = 0.02;
 export const PLAYER_MAX_LEVEL = 99;
 
 /** 装備枠の初期数（将来拡張可能。セーブデータの loadoutCapacity が優先される） */
@@ -114,43 +120,24 @@ export interface SlotRule {
   label: string;
   ja: string;
   description: string;
-  /** ステータス補正の適用倍率 */
-  statRate: number;
-  /** アクティブスキル（MEMORY SKILL）を追加するか */
-  grantsSkills: boolean;
-  /** パッシブ効果が有効になるか */
-  grantsPassives: boolean;
-  /** REWRITE・属性・通常攻撃（戦闘スタイル）を決定するか */
-  definesStyle: boolean;
 }
 
+/** 装備枠の役割（GDD Ver.3 §3） */
 export const SLOT_RULES: Record<LoadoutSlotType, SlotRule> = {
   main: {
     label: 'MAIN',
     ja: 'メイン',
-    description: '戦闘スタイルの基本（属性・通常攻撃・REWRITE）を決定し、スキルとパッシブも使用可能。補正100%。',
-    statRate: 1,
-    grantsSkills: true,
-    grantsPassives: true,
-    definesStyle: true,
+    description: '完全同期。戦闘時のステータス・属性・戦闘スタイル・スキル・パッシブ・REWRITE・外見を決定する。',
   },
   sub: {
     label: 'SUB',
     ja: 'サブ',
-    description: '戦闘中に使えるスキル（MEMORY SKILL）を追加する。補正30%。',
-    statRate: 0.3,
-    grantsSkills: true,
-    grantsPassives: false,
-    definesStyle: false,
+    description: 'その Memory の補助スキルを 1 つだけ借りる。完全同期能力やステータスは反映されない。',
   },
   passive: {
     label: 'PASSIVE',
     ja: 'パッシブ',
-    description: 'パッシブ効果と能力値に影響する。補正50%。',
-    statRate: 0.5,
-    grantsSkills: false,
-    grantsPassives: true,
-    definesStyle: false,
+    description: 'その Memory のパッシブ能力と、能力値の補正（数%）が有効になる。',
   },
 };
 
@@ -174,12 +161,24 @@ export const AFFINITY_DISADVANTAGE_RATE = 0.75;
 export const BATTLE_RULES = {
   maxEnemies: 3,
   maxRounds: 30,
-  spMax: 100,
-  spStart: 30,
-  /** 自分の行動開始時に回復する SP */
-  spRegen: 15,
-  /** DEFEND 時に追加で回復する SP */
-  spDefendBonus: 20,
+  /** SYNC ENERGY（Memory スキルの共通消費リソース） */
+  energyMax: 100,
+  energyStart: 30,
+  /** 自分の行動開始時に回復する SYNC ENERGY */
+  energyRegen: 15,
+  /** DEFEND 時に追加で回復する SYNC ENERGY */
+  energyDefendBonus: 20,
+  /** REWRITE GAUGE（行動で蓄積し、最大で REWRITE を発動できる） */
+  gaugeMax: 100,
+  gaugeOnAttack: 9,
+  gaugeOnSkill: 11,
+  gaugeOnDefend: 7,
+  gaugeOnItem: 3,
+  /** 与えたダメージ 1 ヒットごと */
+  gaugePerHit: 3,
+  /** 受けたダメージ（最大HP比）× この値 */
+  gaugeOnDamageTaken: 70,
+  gaugeOnEnemyDown: 10,
   /** DEFEND 中の被ダメージ倍率 */
   defendRate: 0.5,
   /** ダメージ式 dmg = 攻撃値 × 威力 × K / (K + 防御値) */

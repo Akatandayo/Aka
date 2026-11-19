@@ -11,7 +11,8 @@ import type { SkillDefinition } from '../../types/skill';
  *
  * - 主人公 1 人 vs 敵（最大 3 体）のターン制コマンドバトル
  * - 毎ラウンド SPD 順に行動（同速はシード乱数で決定）
- * - コマンド: ATTACK / DEFEND / MEMORY SKILL / ITEM / REWRITE（+ 撤退）
+ * - コマンド: ATTACK / SKILL / DEFEND / ITEM / REWRITE（+ 撤退）
+ * - SYNC ENERGY: スキルの共通消費リソース / REWRITE GAUGE: 行動で蓄積し、最大で REWRITE を発動
  * - UI から完全に独立。startBattle / submitCommand は新しい state とイベント列を返す純粋関数
  * - 同じ setup（シード含む）と同じコマンド列からは常に同じ結果になる（replayBattle）
  */
@@ -30,7 +31,7 @@ export function startBattle(setup: BattleSetup, data: GameData): StepResult {
     activeUid: null,
     units,
     queue: [],
-    rewrite: { skillId: setup.rewrite.skillId, memoryId: setup.rewrite.memoryId, used: false },
+    rewrite: { skillId: setup.rewrite.skillId, memoryId: setup.rewrite.memoryId, gauge: 0, uses: 0 },
     items: { ...setup.items },
     itemsUsed: {},
     downCount: 0,
@@ -114,7 +115,7 @@ export function skillAvailability(state: BattleState, data: GameData): SkillAvai
     let reason: string | null = null;
     if (silenced) reason = '沈黙中';
     else if (slot.cooldown > 0) reason = `CT ${slot.cooldown}`;
-    else if (p.sp < cost) reason = 'SP不足';
+    else if (p.energy < cost) reason = 'SE不足';
     return [{ skill, sourceMemoryId: slot.sourceMemoryId, cooldown: slot.cooldown, cost, usable: reason === null, reason }];
   });
 }
@@ -122,12 +123,16 @@ export function skillAvailability(state: BattleState, data: GameData): SkillAvai
 export function rewriteAvailability(state: BattleState, data: GameData): RewriteAvailability {
   const skill = state.rewrite.skillId ? (data.skillById.get(state.rewrite.skillId) ?? null) : null;
   if (!skill) return { skill: null, usable: false, reason: 'メインMemoryにREWRITEがありません' };
-  if (state.rewrite.used) return { skill, usable: false, reason: '使用済み' };
   const p = playerUnit(state);
   if (p.statuses.some((s) => s.id === 'silence')) return { skill, usable: false, reason: '沈黙中' };
+  if (state.rewrite.gauge < BATTLE_RULES.gaugeMax) return { skill, usable: false, reason: `GAUGE ${Math.floor(state.rewrite.gauge)}%` };
+  // Memory 固有の追加条件（任意）
   const c = skill.condition;
-  let met = false;
+  let met = true;
   switch (c?.type) {
+    case undefined:
+      met = true;
+      break;
     case 'turn_at_least':
       met = state.round >= (c.value ?? 1);
       break;
@@ -232,7 +237,7 @@ function runUntilInput(ctx: BattleCtx): void {
     u.defending = false;
 
     if (u.side === 'player') {
-      u.sp = Math.min(u.maxSp, u.sp + BATTLE_RULES.spRegen);
+      u.energy = Math.min(u.maxEnergy, u.energy + BATTLE_RULES.energyRegen);
     }
     // 停止: この手番をスキップ（停止は消費される）
     const stun = u.statuses.find((x) => x.id === 'stun');
@@ -290,19 +295,22 @@ function executePlayerCommand(ctx: BattleCtx, p: BattleUnit, cmd: BattleCommand)
   const s = ctx.state;
   switch (cmd.type) {
     case 'attack':
+      ctx.chargeGauge(BATTLE_RULES.gaugeOnAttack);
       performAttack(ctx, p, cmd.target);
       tickCooldowns(p);
       return;
     case 'defend':
       p.defending = true;
-      p.sp = Math.min(p.maxSp, p.sp + BATTLE_RULES.spDefendBonus);
-      ctx.emit('action', `${p.name}は防御態勢をとった（SP +${BATTLE_RULES.spDefendBonus}）`, { actor: p.uid });
+      p.energy = Math.min(p.maxEnergy, p.energy + BATTLE_RULES.energyDefendBonus);
+      ctx.chargeGauge(BATTLE_RULES.gaugeOnDefend);
+      ctx.emit('action', `${p.name}は防御態勢をとった（SYNC ENERGY +${BATTLE_RULES.energyDefendBonus}）`, { actor: p.uid });
       tickCooldowns(p);
       return;
     case 'skill': {
       const skill = ctx.skill(cmd.skillId)!;
-      p.sp -= skill.cost ?? 0;
-      performSkill(ctx, p, skill, cmd.target, 'MEMORY SKILL ');
+      p.energy -= skill.cost ?? 0;
+      ctx.chargeGauge(BATTLE_RULES.gaugeOnSkill);
+      performSkill(ctx, p, skill, cmd.target, 'SKILL ');
       tickCooldowns(p, { skillId: skill.id, cooldown: skill.cooldown ?? 0 });
       return;
     }
@@ -310,6 +318,7 @@ function executePlayerCommand(ctx: BattleCtx, p: BattleUnit, cmd: BattleCommand)
       const item = ctx.data.itemById.get(cmd.itemId)!;
       s.items[item.id] = (s.items[item.id] ?? 0) - 1;
       s.itemsUsed[item.id] = (s.itemsUsed[item.id] ?? 0) + 1;
+      ctx.chargeGauge(BATTLE_RULES.gaugeOnItem);
       ctx.emit('action', `${p.name}は${item.name}を使った`, { actor: p.uid });
       applyEffects(ctx, item.effects, { actor: p, target: item.target ?? 'self', primary: cmd.target, attribute: p.attribute, source: `item:${item.id}` });
       tickCooldowns(p);
@@ -317,7 +326,8 @@ function executePlayerCommand(ctx: BattleCtx, p: BattleUnit, cmd: BattleCommand)
     }
     case 'rewrite': {
       const skill = ctx.skill(s.rewrite.skillId!)!;
-      s.rewrite.used = true;
+      s.rewrite.gauge = 0;
+      s.rewrite.uses++;
       ctx.emit('rewrite', `REWRITE —— ${skill.name}`, { actor: p.uid, skillId: skill.id });
       const single = skill.target === 'enemy_single';
       const primary = single ? chooseSingleTarget(ctx, p, cmd.target) : cmd.target;

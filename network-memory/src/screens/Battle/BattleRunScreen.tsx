@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { audio } from '../../audio/audio';
 import { useNav } from '../../app/nav';
 import { EnemyArt } from '../../components/battle/EnemyArt';
 import { ExplorerAvatar } from '../../components/battle/ExplorerAvatar';
@@ -92,6 +93,8 @@ export function BattleRunScreen({ encounterId }: { encounterId: string }) {
       setShown(ev.snapshot);
       setLog((l) => [...l.slice(-30), { ev, n }]);
       if (ev.kind === 'rewrite') setRewriteFx(ev);
+      if (ev.kind === 'rewrite') audio.playSe('rewrite');
+      else if (ev.kind === 'damage') audio.playSe('hit');
       if (ev.kind === 'round') setShownRound(Number(ev.text.match(/\d+/)?.[0] ?? 0));
     }
     const reduced = document.documentElement.dataset.fx === 'reduced';
@@ -195,6 +198,7 @@ export function BattleRunScreen({ encounterId }: { encounterId: string }) {
   }
 
   const skills = skillAvailability(state, data);
+  const mainMemoryId = state.rewrite.memoryId ?? skills[0]?.sourceMemoryId ?? null;
   const items = usableItems(state, data);
   const rw = rewriteAvailability(state, data);
   const livingEnemies = enemies.filter((e) => snap.get(e.uid)?.alive);
@@ -218,6 +222,7 @@ export function BattleRunScreen({ encounterId }: { encounterId: string }) {
   };
 
   const attrColor = ATTRIBUTE_META[ps.attribute].color;
+  const gauge = !idle && current ? current.ev.gauge : state.rewrite.gauge;
 
   return (
     <ScreenFrame code="05" title="BATTLE" subtitle={enc.name} back={{ route: { name: 'battle' }, label: 'SIGNALS' }}>
@@ -286,10 +291,17 @@ export function BattleRunScreen({ encounterId }: { encounterId: string }) {
               {ps.defending && <span className="tag">DEFEND</span>}
             </p>
             <Bar value={ps.hp} max={ps.maxHp} kind="hp" label="HP" />
-            <Bar value={ps.sp} max={ps.maxSp} kind="sp" label="SP" />
+            <Bar value={ps.energy} max={ps.maxEnergy} kind="sp" label="SE" />
+            <div className={`bt-gauge ${gauge >= 100 ? 'is-full' : ''}`} aria-label={`REWRITE GAUGE ${Math.floor(gauge)}%`}>
+              <span className="bt-gauge__label mono">REWRITE</span>
+              <div className="bt-gauge__track">
+                <div className="bt-gauge__fill" style={{ width: `${Math.min(100, gauge)}%` }} />
+              </div>
+              <span className="bt-gauge__num mono">{Math.floor(gauge)}%</span>
+            </div>
             <Effects s={ps} />
             <p className={`bt__rw mono ${rw.usable ? 'is-ready' : ''}`}>
-              REWRITE: {rw.skill ? (state.rewrite.used ? `${rw.skill.name}（使用済み）` : rw.usable ? `${rw.skill.name} — READY` : `${rw.skill.name}（${rw.skill.conditionText}）`) : 'なし'}
+              {rw.skill ? (rw.usable ? `REWRITE READY — ${rw.skill.name}` : `REWRITE: ${rw.skill.name}`) : 'REWRITE: なし'}
             </p>
           </div>
         </div>
@@ -305,7 +317,7 @@ export function BattleRunScreen({ encounterId }: { encounterId: string }) {
           ) : menu === 'skill' ? (
             <div className="bt__submenu">
               <div className="bt__submenu-head">
-                <span className="mono">MEMORY SKILL</span>
+                <span className="mono">SKILL — SYNC ENERGY {ps.energy}</span>
                 <button type="button" className="btn btn--sm btn--ghost" onClick={() => setMenu('main')}>
                   戻る
                 </button>
@@ -322,12 +334,12 @@ export function BattleRunScreen({ encounterId }: { encounterId: string }) {
                   >
                     <span className="bt-skill__name">{s.skill.name}</span>
                     <span className="bt-skill__cost mono">
-                      SP {s.cost}
+                      SE {s.cost}
                       {s.reason && <em> · {s.reason}</em>}
                     </span>
                     <span className="bt-skill__desc">{s.skill.description}</span>
                     <span className="bt-skill__src">
-                      {s.sourceMemoryId ? data.memoryById.get(s.sourceMemoryId)?.name : 'REWRITE解放'} · {TARGET_LABEL[s.skill.target ?? 'enemy_single']}
+                      {s.sourceMemoryId ? `${data.memoryById.get(s.sourceMemoryId)?.name}${s.sourceMemoryId === mainMemoryId ? '（完全同期）' : '（補助）'}` : 'REWRITE解放'} · {TARGET_LABEL[s.skill.target ?? 'enemy_single']}
                     </span>
                   </button>
                 ))}
@@ -361,10 +373,10 @@ export function BattleRunScreen({ encounterId }: { encounterId: string }) {
               </button>
               <button type="button" className="bt-cmd bt-cmd--defend" disabled={!awaiting} onClick={() => submit({ type: 'defend' })}>
                 <span className="mono">DEFEND</span>
-                <small>被ダメ半減・SP回復</small>
+                <small>被ダメ半減・SE回復</small>
               </button>
               <button type="button" className="bt-cmd bt-cmd--skill" disabled={!awaiting} onClick={() => setMenu('skill')}>
-                <span className="mono">MEMORY SKILL</span>
+                <span className="mono">SKILL</span>
                 <small>{skills.filter((s) => s.usable).length} / {skills.length} 使用可</small>
               </button>
               <button type="button" className="bt-cmd bt-cmd--item" disabled={!awaiting} onClick={() => setMenu('item')}>
@@ -436,8 +448,8 @@ function toSnap(u: BattleState['units'][number]): UnitSnapshot {
     uid: u.uid,
     hp: u.hp,
     maxHp: u.maxHp,
-    sp: u.sp,
-    maxSp: u.maxSp,
+    energy: u.energy,
+    maxEnergy: u.maxEnergy,
     alive: u.alive,
     defending: u.defending,
     attribute: u.attribute,

@@ -694,3 +694,45 @@
 .skill--field .skill__kind {
   color: var(--c-warn);
 }
+
+.mdetail__sync::before {
+  background: var(--sync-c);
+  box-shadow: 0 0 12px var(--sync-c);
+}
+
+.mdetail__sync-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+}
+
+.mdetail__sync-list dt {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--sync-c);
+}
+
+.mdetail__sync-list dd {
+  margin: 2px 0 0;
+}
+
+.mdetail__aura {
+  color: var(--sync-c);
+}
+
+.mdetail__sync-lines {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-left: 2px solid var(--sync-c);
+  background: rgba(3, 8, 18, 0.55);
+  font-size: 13px;
+  color: var(--c-text-dim);
+}
+
+.mdetail__sync-lines .mono {
+  font-size: 11px;
+  color: var(--sync-c);
+}

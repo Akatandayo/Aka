@@ -144,7 +144,7 @@ export function LoadoutView() {
         </div>
         <div className="loadout__status-grid">
           <div className="loadout__avatar">
-            <ExplorerAvatar color={save.profile.avatar.color} syncColor={syncColor} animated />
+            <ExplorerAvatar color={save.profile.avatar.color} syncColor={analysis.appearance?.aura ?? syncColor} animated />
             <p className="mono">
               {save.profile.name} · Lv.{save.profile.level}
             </p>
@@ -155,9 +155,9 @@ export function LoadoutView() {
               <thead>
                 <tr>
                   <th />
-                  <th className="mono">BASE</th>
-                  <th className="mono">MEMORY</th>
-                  <th className="mono">TOTAL</th>
+                  <th className="mono">MAIN固有</th>
+                  <th className="mono">成長+補正</th>
+                  <th className="mono">同期後</th>
                 </tr>
               </thead>
               <tbody>
@@ -184,12 +184,19 @@ export function LoadoutView() {
               </dd>
               <dt>REWRITE</dt>
               <dd>{analysis.rewrite ? data.skillById.get(analysis.rewrite.skillId)?.name : <span className="mute">なし（メインMemoryに依存）</span>}</dd>
+              <dt>外見</dt>
+              <dd style={analysis.appearance ? { color: analysis.appearance.aura } : undefined}>{analysis.appearance?.label ?? <span className="mute">未同期</span>}</dd>
+              <dt>成長</dt>
+              <dd>
+                共通成長 +{Math.round(analysis.rates.growth * 100)}%
+                {Object.entries(analysis.rates.passive).map(([k, v]) => ` / ${k.toUpperCase()} +${Math.round((v ?? 0) * 100)}%`).join('')}
+              </dd>
             </dl>
           </div>
         </div>
         <div className="loadout__abilities">
           <div>
-            <p className="section-label">MEMORY SKILL（{analysis.skills.length}）</p>
+            <p className="section-label">SKILL（{analysis.skills.length}）</p>
             {analysis.skills.length ? (
               <ul className="loadout__list">
                 {analysis.skills.map((s) => {
@@ -198,9 +205,12 @@ export function LoadoutView() {
                     <li key={s.skillId}>
                       <strong>{sk?.name}</strong>
                       <span className="mono mute">
-                        SP {sk?.cost ?? 0} · CT {sk?.cooldown ?? 0}
+                        SE {sk?.cost ?? 0} · CT {sk?.cooldown ?? 0}
                       </span>
-                      <small>{data.memoryById.get(s.memoryId)?.name}</small>
+                      <small>
+                        {data.memoryById.get(s.memoryId)?.name}
+                        {analysis.main?.def.id === s.memoryId ? '（完全同期）' : '（補助スキル）'}
+                      </small>
                     </li>
                   );
                 })}

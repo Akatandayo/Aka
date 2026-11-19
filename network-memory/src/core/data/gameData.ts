@@ -4,7 +4,22 @@ import type { MemoryDefinition } from '../../types/memory';
 import type { MemoryStory } from '../../types/record';
 import type { SkillDefinition, SkillEffect, SkillKind } from '../../types/skill';
 import type { WorldDefinition } from '../../types/world';
-import { parseEncounter, parseEnemy, parseItem, parseMemory, parseSkill, parseStory, parseWorld, type DataIssue } from './validate';
+import type { ArchiveEntry } from '../../types/archive';
+import type { Condition } from '../../types/condition';
+import type { CharacterDefinition, StoryChapter } from '../../types/story';
+import {
+  parseArchiveEntry,
+  parseChapter,
+  parseCharacter,
+  parseEncounter,
+  parseEnemy,
+  parseItem,
+  parseMemory,
+  parseSkill,
+  parseStory,
+  parseWorld,
+  type DataIssue,
+} from './validate';
 
 /**
  * ゲームのマスターデータ（読み取り専用リポジトリ）。
@@ -23,6 +38,9 @@ export interface RawGameDataSources {
   items?: unknown[];
   enemies?: unknown[];
   encounters?: unknown[];
+  characters?: unknown[];
+  chapters?: unknown[];
+  archive?: unknown[];
 }
 
 export interface GameData {
@@ -36,6 +54,14 @@ export interface GameData {
   enemyById: ReadonlyMap<string, EnemyDefinition>;
   encounters: EncounterDefinition[];
   encounterById: ReadonlyMap<string, EncounterDefinition>;
+  characters: CharacterDefinition[];
+  characterById: ReadonlyMap<string, CharacterDefinition>;
+  /** ストーリーの章（order 順） */
+  chapters: StoryChapter[];
+  chapterById: ReadonlyMap<string, StoryChapter>;
+  /** ARCHIVE（MEMORY RECORD 以外） */
+  archive: ArchiveEntry[];
+  archiveById: ReadonlyMap<string, ArchiveEntry>;
   issues: DataIssue[];
 }
 
@@ -68,6 +94,9 @@ export function buildGameData(src: RawGameDataSources): GameData {
   const items = parseAll(src.items, parseItem, 'item', issues);
   const enemyMap = parseAll(src.enemies, parseEnemy, 'enemy', issues);
   const encounterMap = parseAll(src.encounters, parseEncounter, 'encounter', issues);
+  const characterMap = parseAll(src.characters, parseCharacter, 'character', issues);
+  const chapterMap = parseAll(src.chapters, parseChapter, 'story', issues);
+  const archiveMap = parseAll(src.archive, parseArchiveEntry, 'archive', issues);
 
   const err = (source: string, message: string) => issues.push({ level: 'error', source, message });
   const warn = (source: string, message: string) => issues.push({ level: 'warning', source, message });
@@ -98,32 +127,33 @@ export function buildGameData(src: RawGameDataSources): GameData {
   const memories: MemoryDefinition[] = [];
   for (const m of memoryMap.values()) {
     const src = `memory:${m.id}`;
+    const skillsOk = checkSkillRefs(src, m.skills, 'active', 'skills');
+    const se = { ...m.syncEffects };
+    if (se.supportSkill && !skillsOk.includes(se.supportSkill)) {
+      err(src, `syncEffects.supportSkill ${se.supportSkill} は skills に含まれている必要があります`);
+      delete se.supportSkill;
+    }
+    if (se.rewrite && !checkSkillRefs(src, [se.rewrite], 'rewrite', 'syncEffects.rewrite').length) delete se.rewrite;
     const fixed: MemoryDefinition = {
       ...m,
-      skills: checkSkillRefs(src, m.skills, 'active', 'skills'),
-      passiveSkills: checkSkillRefs(src, m.passiveSkills, 'passive', 'passiveSkills'),
-      rewrite: m.rewrite && checkSkillRefs(src, [m.rewrite], 'rewrite', 'rewrite').length ? m.rewrite : undefined,
+      skills: skillsOk,
+      passive: checkSkillRefs(src, m.passive, 'passive', 'passive'),
+      syncEffects: se,
       relatedMemories: m.relatedMemories.filter((id) => {
         const ok = memoryMap.has(id) && id !== m.id;
         if (!ok) err(src, `relatedMemories の ${id} が不正です`);
         return ok;
       }),
+      storyRecords: m.storyRecords.filter((rid) => {
+        const story = stories.get(rid);
+        if (!story) err(src, `storyRecords の ${rid} が存在しません`);
+        else if (story.memoryId !== m.id) err(src, `記録 ${rid} の memoryId が一致しません`);
+        return Boolean(story);
+      }),
     };
-    if (fixed.storyId) {
-      const story = stories.get(fixed.storyId);
-      if (!story) {
-        err(src, `storyId ${fixed.storyId} が存在しません`);
-        fixed.storyId = null;
-      } else if (story.memoryId !== m.id) {
-        err(src, `記録 ${story.id} の memoryId が一致しません`);
-      }
-    }
     if (fixed.worldId && !worlds.has(fixed.worldId)) warn(src, `worldId ${fixed.worldId} が存在しません`);
     for (const a of fixed.acquisitionMethod) {
       if (a.worldId && !worlds.has(a.worldId)) warn(src, `acquisitionMethod の worldId ${a.worldId} が存在しません`);
-    }
-    for (const c of fixed.syncCondition ?? []) {
-      if (c.type === 'ownedMemory' && !memoryMap.has(c.memoryId)) err(src, `syncCondition の ${c.memoryId} が存在しません`);
     }
     memories.push(fixed);
   }
@@ -177,7 +207,57 @@ export function buildGameData(src: RawGameDataSources): GameData {
     encounters.push({ ...enc, enemies: enemies.slice(0, 3) });
   }
 
+  // ---- 共通条件式の参照チェック
+  const checkConds = (source: string, conds: Condition[] | undefined) => {
+    for (const c of conds ?? []) {
+      if ((c.type === 'ownedMemory' || c.type === 'discoveredMemory' || c.type === 'memoryLevel') && !memoryById.has(c.memoryId)) err(source, `条件の Memory ${c.memoryId} が存在しません`);
+      if (c.type === 'encounterCleared' && !encounterMap.has(c.encounterId)) err(source, `条件の流出反応 ${c.encounterId} が存在しません`);
+      if (c.type === 'storyCleared' && !chapterMap.has(c.chapterId)) err(source, `条件の章 ${c.chapterId} が存在しません`);
+      if (c.type === 'worldRestoration' && !worlds.has(c.worldId)) err(source, `条件の WORLD ${c.worldId} が存在しません`);
+    }
+  };
+  for (const m of memories) checkConds(`memory:${m.id}`, m.unlockConditions);
+
+  // ---- WORLD の修復対象
+  for (const w of worlds.values()) {
+    const ids = new Set<string>();
+    for (const t of w.restorations) {
+      if (ids.has(t.id)) err(`world:${w.id}`, `修復対象 ID ${t.id} が重複しています`);
+      ids.add(t.id);
+      if (!memoryById.has(t.memoryId)) err(`world:${w.id}`, `修復対象 ${t.id} の Memory ${t.memoryId} が存在しません`);
+    }
+  }
+
+  // ---- ストーリー
+  const chapters = [...chapterMap.values()].sort((a, b) => a.order - b.order);
+  for (const ch of chapters) {
+    const source = `story:${ch.id}`;
+    checkConds(source, ch.unlock);
+    for (const cmd of ch.script) {
+      if ((cmd.t === 'show' || cmd.t === 'hide' || cmd.t === 'say') && !characterMap.has(cmd.char) && cmd.char !== 'PLAYER') err(source, `登場人物 ${cmd.char} が存在しません`);
+      if (cmd.t === 'detect' && !memoryById.has(cmd.memoryId)) err(source, `Memory ${cmd.memoryId} が存在しません`);
+      if (cmd.t === 'if') checkConds(source, cmd.cond);
+    }
+    for (const id of Object.keys(ch.rewards?.items ?? {})) if (!items.has(id)) err(source, `報酬のアイテム ${id} が存在しません`);
+  }
+
+  // ---- ARCHIVE
+  for (const e of archiveMap.values()) {
+    const source = `archive:${e.id}`;
+    checkConds(source, e.unlock);
+    for (const sec of e.sections) checkConds(source, sec.unlock);
+    if (e.related?.characterId && !characterMap.has(e.related.characterId)) err(source, `登場人物 ${e.related.characterId} が存在しません`);
+    if (e.related?.worldId && !worlds.has(e.related.worldId)) err(source, `WORLD ${e.related.worldId} が存在しません`);
+    for (const id of e.related?.memoryIds ?? []) if (!memoryById.has(id)) err(source, `Memory ${id} が存在しません`);
+  }
+
   return {
+    characters: [...characterMap.values()],
+    characterById: characterMap,
+    chapters,
+    chapterById: new Map(chapters.map((c) => [c.id, c])),
+    archive: [...archiveMap.values()],
+    archiveById: archiveMap,
     memories,
     memoryById,
     skillById: skills,
@@ -211,6 +291,9 @@ export function loadBundledSources(): RawGameDataSources {
     items: flattenModules(import.meta.glob('../../data/items.json', { eager: true, import: 'default' })),
     enemies: flattenModules(import.meta.glob('../../data/enemies/*.json', { eager: true, import: 'default' })),
     encounters: flattenModules(import.meta.glob('../../data/encounters/*.json', { eager: true, import: 'default' })),
+    characters: flattenModules(import.meta.glob('../../data/characters/*.json', { eager: true, import: 'default' })),
+    chapters: flattenModules(import.meta.glob('../../data/story/*.json', { eager: true, import: 'default' })),
+    archive: flattenModules(import.meta.glob('../../data/archive/*.json', { eager: true, import: 'default' })),
   };
 }
 

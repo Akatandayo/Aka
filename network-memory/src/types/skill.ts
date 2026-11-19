@@ -60,7 +60,9 @@ export const EFFECT_TYPES = [
   'attribute_shift',
   /** 特殊スキル解放: 戦闘終了までスキル（id）を追加 */
   'grant_skill',
-  /** SP（スキル用リソース）の回復 */
+  /** SYNC ENERGY の回復 */
+  'energy_gain',
+  /** 旧名（energy_gain と同じ） */
   'sp_gain',
   'special',
 ] as const;
@@ -117,11 +119,11 @@ export interface SkillDefinition {
   target?: SkillTarget;
   /** active: 再使用までのターン数 */
   cooldown?: number;
-  /** active: 消費 SP */
+  /** active: 消費 SYNC ENERGY */
   cost?: number;
   /** passive: 発動タイミング */
   trigger?: PassiveTrigger;
-  /** rewrite: 発動条件 */
+  /** rewrite: REWRITE GAUGE 最大に加えて必要な追加条件（任意） */
   condition?: RewriteCondition;
   /** 発動条件の表示テキスト（rewrite 用） */
   conditionText?: string;

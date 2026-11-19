@@ -117,6 +117,12 @@ export class BattleCtx {
     return STATUS_META[id].label;
   }
 
+  /** REWRITE GAUGE を蓄積する（主人公のみ） */
+  chargeGauge(amount: number): void {
+    if (amount <= 0) return;
+    this.state.rewrite.gauge = Math.min(BATTLE_RULES.gaugeMax, this.state.rewrite.gauge + amount);
+  }
+
   // ---------------------------------------------------------------- events
 
   snapshot(): UnitSnapshot[] {
@@ -124,8 +130,8 @@ export class BattleCtx {
       uid: u.uid,
       hp: u.hp,
       maxHp: u.maxHp,
-      sp: u.sp,
-      maxSp: u.maxSp,
+      energy: u.energy,
+      maxEnergy: u.maxEnergy,
       alive: u.alive,
       defending: u.defending,
       attribute: u.attribute,
@@ -136,6 +142,6 @@ export class BattleCtx {
   }
 
   emit(kind: BattleEventKind, text: string, extra: Omit<Partial<BattleEvent>, 'kind' | 'text' | 'snapshot'> = {}): void {
-    this.events.push({ kind, text, ...extra, snapshot: this.snapshot() });
+    this.events.push({ kind, text, ...extra, snapshot: this.snapshot(), gauge: this.state.rewrite.gauge });
   }
 }

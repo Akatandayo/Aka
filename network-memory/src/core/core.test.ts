@@ -44,9 +44,9 @@ describe('stats', () => {
   const def = gameData.memoryById.get('MEM-0007')!;
   it('scales with level and limit break', () => {
     const lv1 = calcStats(def, 1, 0);
-    expect(lv1.tec).toBe(def.tec);
+    expect(lv1.tec).toBe(def.baseStats.tec);
     const lv11 = calcStats(def, 11, 0);
-    expect(lv11.tec).toBe(Math.round(def.tec * 1.5));
+    expect(lv11.tec).toBe(Math.round(def.baseStats.tec * 1.5));
     expect(combatPower(lv11)).toBeGreaterThan(combatPower(lv1));
   });
   it('clamps level to rarity cap', () => {

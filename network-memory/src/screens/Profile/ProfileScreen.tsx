@@ -5,7 +5,7 @@ import { CurrencyAmount } from '../../components/memory/Badges';
 import { useToast } from '../../components/ui/Toast';
 import { ATTRIBUTE_META, CURRENCY_META, RARITY_META } from '../../core/constants';
 import { expToNext } from '../../core/memory/stats';
-import { analyzeLoadout, playerBaseStats } from '../../core/player/character';
+import { analyzeLoadout } from '../../core/player/character';
 import { getActiveLoadout } from '../../core/player/loadout';
 import { buildEntries } from '../../core/memory/query';
 import { collectionSummary } from '../../core/player/discovery';
@@ -61,7 +61,6 @@ export function ProfileScreen() {
 
   const pct = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0);
   const analysis = useMemo(() => analyzeLoadout(save, data, getActiveLoadout(save)), [save, data]);
-  const base = playerBaseStats(save.profile.level);
   const need = expToNext(save.profile.level);
   const clears = Object.keys(save.battle.encounters).length;
 
@@ -153,8 +152,8 @@ export function ProfileScreen() {
         <div className="profile__grid">
           <section className="panel">
             <div className="panel__title">
-              <span>EXPLORER STATUS</span>
-              <small>主人公の基礎能力（装備前）</small>
+              <span>SYNC STATUS</span>
+              <small>共通成長 +{Math.round(analysis.rates.growth * 100)}%（探索者 Lv.{save.profile.level}）</small>
             </div>
             <table className="profile__rarity">
               <tbody>
@@ -163,8 +162,8 @@ export function ProfileScreen() {
                     <th scope="row" className="mono">
                       {k.toUpperCase()}
                     </th>
-                    <td className="mono">{base[k]}</td>
-                    <td className="mono mute">装備込み {analysis.total[k]}</td>
+                    <td className="mono mute">固有 {analysis.base[k]}</td>
+                    <td className="mono">同期後 {analysis.total[k]}</td>
                   </tr>
                 ))}
               </tbody>

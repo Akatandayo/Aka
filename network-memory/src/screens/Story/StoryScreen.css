@@ -1,0 +1,141 @@
+.story-list {
+  display: grid;
+  gap: 16px;
+}
+
+.story-list__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.story-list__head h2 {
+  margin: 2px 0 6px;
+  font-size: 20px;
+}
+
+.story-list__head p {
+  margin: 0;
+  max-width: 60ch;
+  font-size: 14px;
+}
+
+.story-list__progress {
+  display: grid;
+  text-align: right;
+}
+
+.story-list__progress span {
+  font-size: 28px;
+  color: var(--c-cyan);
+}
+
+.story-list__progress small {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--c-text-mute);
+}
+
+.story-list__chapters {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.story-chapter {
+  border-left: 3px solid var(--st-c);
+}
+
+.story-chapter.is-locked {
+  opacity: 0.8;
+}
+
+.story-chapter__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.story-chapter__label {
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  color: var(--st-c);
+}
+
+.story-chapter__title {
+  margin: 4px 0 6px;
+  font-size: 19px;
+}
+
+.story-chapter__summary {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.story-chapter__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.story-chapter__actions:empty {
+  display: none;
+}
+
+.story-cast__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.story-cast__card {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--spk-c) 35%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--spk-c) 10%, transparent), transparent 60%);
+}
+
+.story-cast__art {
+  align-self: end;
+  height: 154px;
+  overflow: hidden;
+}
+
+.story-cast__art .portrait {
+  height: 100%;
+  width: auto;
+}
+
+.story-cast__body h3 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--spk-c);
+}
+
+.story-cast__reading {
+  margin: 0;
+  font-size: 11px;
+}
+
+.story-cast__role {
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.story-cast__profile {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

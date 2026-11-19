@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
+import { audio } from '../../audio/audio';
 import { ScreenFrame } from '../../components/layout/ScreenFrame';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { useToast } from '../../components/ui/Toast';
@@ -7,6 +8,8 @@ import { SAVE_VERSION } from '../../core/save/schema';
 import { usePlayer } from '../../state/GameProvider';
 import type { PlayerSave } from '../../types/player';
 import './SettingsScreen.css';
+
+const TEXT_SPEED_LABEL = ['とても遅い', '遅い', '標準', '速い', 'とても速い'];
 
 type Pending = { kind: 'import'; text: string; preview: PlayerSave; issues: string[] } | { kind: 'reset' } | null;
 
@@ -64,17 +67,51 @@ export function SettingsScreen() {
           </Row>
         </Section>
 
-        <Section title="TEXT & SOUND" ja="テキスト・サウンド" planned="PHASE 3">
-          <p className="notice notice--planned">テキスト速度・BGM・SEは、ストーリーエンジンとサウンドを実装する PHASE 3 で有効になります。現在は変更できません。</p>
-          <Row label="テキスト速度" desc="ストーリーの文字送り速度">
-            <input type="range" min={1} max={5} value={s.textSpeed} disabled aria-label="テキスト速度（未実装）" />
+        <Section title="TEXT & SOUND" ja="テキスト・サウンド">
+          <Row label="テキスト速度" desc={`ストーリーの文字送り速度（${TEXT_SPEED_LABEL[s.textSpeed - 1] ?? ''}）`}>
+            <input
+              type="range"
+              min={1}
+              max={5}
+              step={1}
+              value={s.textSpeed}
+              aria-label="テキスト速度"
+              onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', patch: { textSpeed: Number(e.target.value) } })}
+            />
           </Row>
-          <Row label="BGM 音量">
-            <input type="range" min={0} max={100} value={Math.round(s.bgmVolume * 100)} disabled aria-label="BGM音量（未実装）" />
+          <Row label="BGM 音量" desc={`${Math.round(s.bgmVolume * 100)}%`}>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              value={Math.round(s.bgmVolume * 100)}
+              aria-label="BGM音量"
+              onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', patch: { bgmVolume: Number(e.target.value) / 100 } })}
+            />
           </Row>
-          <Row label="SE 音量">
-            <input type="range" min={0} max={100} value={Math.round(s.seVolume * 100)} disabled aria-label="SE音量（未実装）" />
+          <Row label="SE 音量" desc={`${Math.round(s.seVolume * 100)}%`}>
+            <div className="settings__inline">
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={Math.round(s.seVolume * 100)}
+                aria-label="SE音量"
+                onChange={(e) => dispatch({ type: 'UPDATE_SETTINGS', patch: { seVolume: Number(e.target.value) / 100 } })}
+              />
+              <button
+                type="button"
+                className="btn btn--sm"
+                onClick={() => {
+                  audio.unlock();
+                  audio.playSe('sync');
+                }}
+              >
+                試聴
+              </button>
+            </div>
           </Row>
+          <p className="mute settings__note">BGM・SE は現在、ブラウザ上で合成した仮の音源です（音声素材は未収録）。ストーリーとバトルの演出で再生されます。</p>
         </Section>
 
         <Section title="SAVE DATA" ja="セーブデータ">
@@ -167,7 +204,7 @@ export function SettingsScreen() {
           )}
         </Section>
 
-        <p className="settings__about mono">NETWORK - Memory: ReCollection · v0.2.0 · PHASE 2</p>
+        <p className="settings__about mono">NETWORK - Memory: ReCollection · v0.3.0 · PHASE 3</p>
       </div>
 
       <ConfirmDialog

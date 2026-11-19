@@ -77,7 +77,7 @@ export function MemoryDetailScreen({ instanceId }: { instanceId: string }) {
   const entry = toEntry(instance, def);
   const cap = maxLevel(def.rarity, instance.limitBreak);
   const placements = loadoutMembership(save).get(instance.instanceId) ?? [];
-  const combat = def.skills.length > 0 || def.passiveSkills.length > 0;
+  const combat = def.skills.length > 0 || def.passive.length > 0;
   const vars = {
     ['--rarity-c' as string]: RARITY_META[def.rarity].color,
     ['--attr-c' as string]: ATTRIBUTE_META[def.attribute].color,
@@ -183,10 +183,13 @@ export function MemoryDetailScreen({ instanceId }: { instanceId: string }) {
 }
 
 function RecordTabs({ tab, setTab, save, data, entry }: { tab: DetailTab; setTab: (t: DetailTab) => void; save: PlayerSave; data: GameData; entry: MemoryEntry }) {
-  const story = entry.def.storyId ? data.storyById.get(entry.def.storyId) : undefined;
   const fragments = useMemo(
-    () => (story ? evaluateFragments(story.fragments, { ownedMemoryIds: ownedMemoryIdSet(save), flags: save.progress.flags, instance: entry.instance }) : []),
-    [story, save, entry.instance],
+    () =>
+      evaluateFragments(
+        entry.def.storyRecords.flatMap((rid) => data.storyById.get(rid)?.fragments ?? []),
+        { ownedMemoryIds: ownedMemoryIdSet(save), flags: save.progress.flags, instance: entry.instance },
+      ),
+    [entry.def, data, save, entry.instance],
   );
   const unread = fragments.filter((f) => f.unlocked && !save.archive.readFragmentIds.includes(f.fragment.id)).length;
 
@@ -216,7 +219,7 @@ function RecordTabs({ tab, setTab, save, data, entry }: { tab: DetailTab; setTab
 function StatusTab({ entry }: { entry: MemoryEntry }) {
   const base = baseStats(entry.def);
   const color = ATTRIBUTE_META[entry.def.attribute].color;
-  const combat = entry.def.skills.length > 0 || entry.def.passiveSkills.length > 0;
+  const combat = entry.def.skills.length > 0 || entry.def.passive.length > 0;
   return (
     <div className="mdetail__status">
       <div className="panel">
@@ -230,6 +233,7 @@ function StatusTab({ entry }: { entry: MemoryEntry }) {
           {entry.def.persona.note && <p className="dim mdetail__persona-note">{entry.def.persona.note}</p>}
         </div>
       )}
+      {combat && <SyncEffectsPanel entry={entry} />}
       {!combat && <p className="notice notice--planned">この記録は戦闘能力を持たず、ステータス補正もありません。探索能力やストーリー進行に使われます（SKILLタブ参照）。</p>}
       <div className="mdetail__status-grid">
         <div className="panel">
@@ -253,7 +257,7 @@ function StatusTab({ entry }: { entry: MemoryEntry }) {
             </tbody>
           </table>
           <p className="mdetail__hint">
-            数値はこのMemoryの<strong>ステータス補正</strong>（現在のレベル）。装備すると主人公に加算されます: {(['main', 'sub', 'passive'] as const).map((t) => `${SLOT_RULES[t].ja} ${Math.round(SLOT_RULES[t].statRate * 100)}%`).join(' / ')}。バーは資質を示します。
+            数値はこのMemoryの<strong>固有ステータス</strong>（現在のレベル）。<strong>メインに同期すると、これが戦闘時の基本ステータス</strong>になり、主人公のレベル（共通成長）とパッシブ補正で強化されます。バーは資質を示します。
           </p>
         </div>
         <div className="panel mdetail__hex">
@@ -265,9 +269,48 @@ function StatusTab({ entry }: { entry: MemoryEntry }) {
   );
 }
 
+function SyncEffectsPanel({ entry }: { entry: MemoryEntry }) {
+  const { data } = usePlayer();
+  const se = entry.def.syncEffects;
+  const support = se.supportSkill ? data.skillById.get(se.supportSkill) : undefined;
+  const rewrite = se.rewrite ? data.skillById.get(se.rewrite) : undefined;
+  const bonus = Object.entries(se.passiveBonus ?? {}).map(([k, v]) => `${STAT_META[k as keyof typeof STAT_META].label} +${Math.round((v ?? 0) * 100)}%`);
+  return (
+    <div className="panel mdetail__sync" style={{ ['--sync-c' as string]: se.appearance?.aura ?? se.direction?.color ?? 'var(--c-cyan)' } as CSSProperties}>
+      <p className="section-label">SYNC EFFECTS 同期効果</p>
+      <dl className="mdetail__sync-list">
+        <div>
+          <dt>{SLOT_RULES.main.label}（完全同期）</dt>
+          <dd>
+            戦闘スタイル『{se.style.name}』（{se.style.scale.toUpperCase()} {Math.round(se.style.power * 100)}%{se.style.hits > 1 ? ` ×${se.style.hits}` : ''}）・固有スキル {entry.def.skills.length}・REWRITE {rewrite ? `『${rewrite.name}』` : 'なし'}
+            {se.appearance && <span className="mdetail__aura"> ・外見：{se.appearance.label}</span>}
+          </dd>
+        </div>
+        <div>
+          <dt>{SLOT_RULES.sub.label}（補助）</dt>
+          <dd>{support ? `補助スキル『${support.name}』のみ使用可能` : 'サブ装備不可'}</dd>
+        </div>
+        <div>
+          <dt>{SLOT_RULES.passive.label}</dt>
+          <dd>{bonus.length ? `能力値補正 ${bonus.join(' / ')}・パッシブ能力` : 'パッシブ能力'}</dd>
+        </div>
+      </dl>
+      {se.direction?.lines && (
+        <div className="mdetail__sync-lines">
+          {se.direction.lines.map((l) => (
+            <p key={l} className={l.startsWith('>') ? 'mono' : ''}>
+              {l}
+            </p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------- SKILL
 
-function SkillCard({ skill, level }: { skill: SkillDefinition; level?: number }) {
+function SkillCard({ skill, level, support = false }: { skill: SkillDefinition; level?: number; support?: boolean }) {
   const attr = skill.attribute ? ATTRIBUTE_META[skill.attribute] : null;
   const statuses = [...new Set(skill.effects.map((e) => e.status).filter((s): s is NonNullable<typeof s> => Boolean(s)))];
   return (
@@ -280,7 +323,8 @@ function SkillCard({ skill, level }: { skill: SkillDefinition; level?: number })
       <div className="skill__meta">
         {skill.attribute && <AttributeTag attribute={skill.attribute} />}
         {skill.target && <span className="tag">{TARGET_LABEL[skill.target]}</span>}
-        {skill.kind === 'active' && <span className="tag">SP {skill.cost ?? 0}</span>}
+        {skill.kind === 'active' && <span className="tag" title="SYNC ENERGY の消費量">EN {skill.cost ?? 0}</span>}
+        {support && <span className="tag tag--solid" style={{ ['--tag-c' as string]: 'var(--c-purple)' } as CSSProperties} title="サブ枠に装備すると、この補助スキルだけが使える">SUPPORT</span>}
         {skill.kind === 'active' && <span className="tag">CT {skill.cooldown ?? 0}</span>}
         {skill.kind === 'passive' && skill.trigger && <span className="tag">{TRIGGER_LABEL[skill.trigger]}</span>}
       </div>
@@ -300,14 +344,14 @@ function SkillCard({ skill, level }: { skill: SkillDefinition; level?: number })
 
 function SkillTab({ entry, data }: { entry: MemoryEntry; data: GameData }) {
   const actives = entry.def.skills.map((id) => data.skillById.get(id)).filter((s): s is SkillDefinition => Boolean(s));
-  const passives = entry.def.passiveSkills.map((id) => data.skillById.get(id)).filter((s): s is SkillDefinition => Boolean(s));
-  const rewrite = entry.def.rewrite ? data.skillById.get(entry.def.rewrite) : undefined;
+  const passives = entry.def.passive.map((id) => data.skillById.get(id)).filter((s): s is SkillDefinition => Boolean(s));
+  const rewrite = entry.def.syncEffects.rewrite ? data.skillById.get(entry.def.syncEffects.rewrite) : undefined;
   return (
     <div className="mdetail__skills">
       {actives.length + passives.length === 0 ? (
         <p className="notice notice--planned">この記録は戦闘スキルを持たない。</p>
       ) : (
-        <p className="notice">メイン・サブ枠に装備するとアクティブスキル（MEMORY SKILL）、メイン・パッシブ枠に装備するとパッシブ効果が戦闘で使えます。REWRITEはメイン装備時のみ。</p>
+        <p className="notice">メインに完全同期すると、固有スキル・パッシブ・REWRITE のすべてが使えます。サブ枠では補助スキル（SUPPORT）1 つだけ、パッシブ枠ではパッシブ能力と能力補正が加わります。</p>
       )}
       {(entry.def.fieldAbilities?.length ?? 0) > 0 && (
         <>
@@ -329,7 +373,7 @@ function SkillTab({ entry, data }: { entry: MemoryEntry; data: GameData }) {
       {actives.length > 0 && <p className="section-label">ACTIVE SKILL</p>}
       <div className="skill-grid">
         {actives.map((s) => (
-          <SkillCard key={s.id} skill={s} level={entry.instance.skillLevels[s.id] ?? 1} />
+          <SkillCard key={s.id} skill={s} level={entry.instance.skillLevels[s.id] ?? 1} support={entry.def.syncEffects.supportSkill === s.id} />
         ))}
       </div>
       {passives.length > 0 && <p className="section-label">PASSIVE SKILL</p>}
@@ -348,7 +392,10 @@ function SkillTab({ entry, data }: { entry: MemoryEntry; data: GameData }) {
           </h4>
           <dl className="rewrite__cond">
             <dt>発動条件</dt>
-            <dd>{rewrite.conditionText}</dd>
+            <dd>
+              REWRITE GAUGE が最大
+              {rewrite.conditionText && ` / ${rewrite.conditionText}`}
+            </dd>
           </dl>
           <p className="skill__desc">{rewrite.description}</p>
           {rewrite.direction?.cutin && (
@@ -415,7 +462,7 @@ function RecordTab({ entry, save, data, fragments }: { entry: MemoryEntry; save:
         ))}
       </ol>
       <p className="mdetail__hint">記録はMemoryの入手・育成・ストーリー進行によって解放されます。記録の中には、まだ見ぬMemoryの手がかりが含まれていることもあります。</p>
-      {entry.def.storyId && <p className="mdetail__hint mono">STORY-ID: {entry.def.storyId}</p>}
+      {entry.def.storyRecords.length > 0 && <p className="mdetail__hint mono">RECORD: {entry.def.storyRecords.join(', ')}</p>}
     </div>
   );
 }

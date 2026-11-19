@@ -323,3 +323,35 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.sync__restore {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--a-c) 45%, transparent);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--a-c) 12%, transparent), transparent 70%);
+}
+
+.sync__restore-world p {
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.sync__restore-world strong {
+  color: var(--a-c);
+}
+
+.sync__restore-world ul {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.sync__restore-world .mono {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--a-c);
+}

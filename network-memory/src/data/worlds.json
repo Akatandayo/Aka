@@ -5,7 +5,52 @@
     "subtitle": "値を失った街",
     "description": "記録の途絶えた区画から順に灯りが消えていく、夜と雨の都市。大流出の影響を最初に受けた世界のひとつ。",
     "attribute": "DATA",
-    "unlock": { "type": "initial" }
+    "unlock": {
+      "type": "initial"
+    },
+    "restorations": [
+      {
+        "id": "R001-LUX",
+        "memoryId": "MEM-0001",
+        "name": "点灯夫ルクスの帰還",
+        "description": "夜の街路に灯竿を担いだ男が戻り、消えていた街灯がひとつずつ灯り始めた。",
+        "lostDescription": "灯りの消えた通りに、誰かの足音だけが残っている。"
+      },
+      {
+        "id": "R001-CAT",
+        "memoryId": "MEM-0002",
+        "name": "路地裏の猫たち",
+        "description": "0と1でできた猫たちが路地裏に戻り、散らばった記録の欠片を拾い集めている。",
+        "lostDescription": "路地裏は静まり返り、記録の欠片が雨に流されている。"
+      },
+      {
+        "id": "R001-CROSS",
+        "memoryId": "MEM-0004",
+        "name": "第七区画・雨の交差点",
+        "description": "地図から消えていた第七区画が復元され、交差点へ続く道が通れるようになった。",
+        "lostDescription": "地図の一角が、雨の向こうに滲んで読めない。"
+      },
+      {
+        "id": "R001-PATROL",
+        "memoryId": "MEM-0013",
+        "name": "夜間巡回ネットワーク",
+        "description": "巡回ドローンの航路が復旧し、街の案内と見回りの機能が戻った。",
+        "lostDescription": "巡回灯の消えた空に、応答のない信号だけが飛んでいる。"
+      },
+      {
+        "id": "R001-GATE",
+        "memoryId": "MEM-0006",
+        "name": "最初の接続ゲート",
+        "description": "探索者が初めて接続した記録が戻り、認証ゲートの由来が読めるようになった。"
+      },
+      {
+        "id": "R001-UMBRELLA",
+        "memoryId": "MEM-0012",
+        "name": "白い傘の待ち人",
+        "description": "交差点の向こうで、誰かが傘を閉じた。",
+        "lostDescription": "交差点の向こう側に、白い何かが立っている気がする。"
+      }
+    ]
   },
   {
     "id": "WORLD-002",
@@ -13,7 +58,40 @@
     "subtitle": "全記録保管庫",
     "description": "Networkのあらゆる記録を分類・保管する巨大な書庫。封印書架の奥には、司書でさえ閲覧を許されない記録が眠る。",
     "attribute": "ORDER",
-    "unlock": { "type": "worldClear", "worldId": "WORLD-001" }
+    "unlock": {
+      "type": "worldClear",
+      "worldId": "WORLD-001"
+    },
+    "restorations": [
+      {
+        "id": "R002-LIBRA",
+        "memoryId": "MEM-0007",
+        "name": "第三司書リブラの帰還",
+        "description": "空だった第三書架に司書が戻り、記録の分類と貸し出しが再開された。",
+        "lostDescription": "第三書架の前に、主のいない椅子がある。"
+      },
+      {
+        "id": "R002-SEAL",
+        "memoryId": "MEM-0003",
+        "name": "封印書架の鍵機構",
+        "description": "封印書架の鍵が機能を取り戻し、許可された記録を閲覧できるようになった。",
+        "lostDescription": "封印書架の鍵穴は錆に埋もれている。"
+      },
+      {
+        "id": "R002-LEXICON",
+        "memoryId": "MEM-0014",
+        "name": "閲覧室の辞書",
+        "description": "言葉の意味を引ける辞書が閲覧室に戻った（ただし、たまに意味がずれる）。",
+        "lostDescription": "閲覧室の頁が、読むたびに書き換わっていく。"
+      },
+      {
+        "id": "R002-OUTFLOW",
+        "memoryId": "MEM-0011",
+        "name": "大流出の公式記録",
+        "description": "「あの日」の出来事が記録として戻り、ARCHIVEで閲覧できるようになった。",
+        "lostDescription": "年表のある一日だけが、空白になっている。"
+      }
+    ]
   },
   {
     "id": "WORLD-003",
@@ -21,7 +99,33 @@
     "subtitle": "忘れられた記録の庭",
     "description": "忘れられた記録が花となって咲く庭園。最深部では、花々が色を失って散り始めている。",
     "attribute": "LIFE",
-    "unlock": { "type": "worldClear", "worldId": "WORLD-002" }
+    "unlock": {
+      "type": "worldClear",
+      "worldId": "WORLD-002"
+    },
+    "restorations": [
+      {
+        "id": "R003-WARDEN",
+        "memoryId": "MEM-0005",
+        "name": "花の番人たち",
+        "description": "庭守たちが戻り、忘れられた記録の花が摘まれずに咲き続けている。",
+        "lostDescription": "花壇の世話をする者がいない。"
+      },
+      {
+        "id": "R003-SUNFLOWER",
+        "memoryId": "MEM-0015",
+        "name": "北の花壇",
+        "description": "陽の当たらない花壇に向日葵が戻り、庭の北側に生気が満ちた。",
+        "lostDescription": "北の花壇は枯れ蔓に覆われている。"
+      },
+      {
+        "id": "R003-OBLIVION",
+        "memoryId": "MEM-0010",
+        "name": "忘却の均衡",
+        "description": "「忘れる」という庭の働きが安定し、花が色を失って散ることがなくなった。",
+        "lostDescription": "庭の奥で、花の色が静かに抜け落ちていく。"
+      }
+    ]
   },
   {
     "id": "WORLD-004",
@@ -29,7 +133,33 @@
     "subtitle": "破損領域",
     "description": "破損したデータが堆積し、地形そのものが歪んだ危険地帯。破損を喰らう猟犬の群れが徘徊している。",
     "attribute": "ERROR",
-    "unlock": { "type": "worldClear", "worldId": "WORLD-003" }
+    "unlock": {
+      "type": "worldClear",
+      "worldId": "WORLD-003"
+    },
+    "restorations": [
+      {
+        "id": "R004-HOUND",
+        "memoryId": "MEM-0008",
+        "name": "清掃猟犬の群れ",
+        "description": "破損を除去する猟犬たちが群れを取り戻し、破損領域の拡大が止まった。",
+        "lostDescription": "破損データが、どこまでも堆積している。"
+      },
+      {
+        "id": "R004-MASK",
+        "memoryId": "MEM-0009",
+        "name": "仮面の研究室",
+        "description": "ある研究者の工房の記録が戻り、仮面の由来が少しだけ読めるようになった。",
+        "lostDescription": "署名の消えた研究室の扉が、半開きのままになっている。"
+      },
+      {
+        "id": "R004-CROWN",
+        "memoryId": "MEM-0016",
+        "name": "旧王権の命令系統",
+        "description": "王冠の命令系統が復元され、猟犬たちが無秩序に暴れることがなくなった。",
+        "lostDescription": "誰のものでもない命令が、破損領域に響き続けている。"
+      }
+    ]
   },
   {
     "id": "WORLD-005",
@@ -37,6 +167,26 @@
     "subtitle": "観測不能領域",
     "description": "Networkの地図に存在しない領域。そこに何があるのか、誰も記録していない。",
     "attribute": "VOID",
-    "unlock": { "type": "flag", "flag": "world.unknown.signal", "label": "未知のシグナルを受信する" }
+    "unlock": {
+      "type": "flag",
+      "flag": "world.unknown.signal",
+      "label": "未知のシグナルを受信する"
+    },
+    "restorations": [
+      {
+        "id": "R005-BLANK",
+        "memoryId": "MEM-0012",
+        "name": "観測不能領域の輪郭",
+        "description": "地図に存在しなかった領域に、うっすらと輪郭が浮かび上がった。",
+        "lostDescription": "——観測できない。"
+      },
+      {
+        "id": "R005-ORIGIN",
+        "memoryId": "MEM-0011",
+        "name": "最初の流出点",
+        "description": "大流出の始まりの地点が、この領域のどこかにあると分かった。",
+        "lostDescription": "——観測できない。"
+      }
+    ]
   }
 ]

@@ -52,6 +52,6 @@ export function chooseAutoCommand(state: BattleState, data: GameData): BattleCom
       best = { type: 'skill', skillId: s.skill.id, target };
     }
   }
-  if (best.type === 'attack' && p.sp < 25 && hpRate < 0.5) return { type: 'defend' };
+  if (best.type === 'attack' && p.energy < 25 && hpRate < 0.5) return { type: 'defend' };
   return best;
 }

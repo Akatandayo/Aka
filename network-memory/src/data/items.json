@@ -53,15 +53,15 @@
   },
   {
     "id": "ITEM-0004",
-    "name": "SPチャージャー",
-    "description": "SPを50回復する。",
+    "name": "シンクチャージャー",
+    "description": "SYNC ENERGY を50回復する。",
     "kind": "consumable",
     "battle": true,
     "target": "self",
     "maxStack": 99,
     "effects": [
       {
-        "type": "sp_gain",
+        "type": "energy_gain",
         "value": 50
       }
     ]
