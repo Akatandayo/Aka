@@ -1,9 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import '@fontsource/chakra-petch/400.css';
-import '@fontsource/chakra-petch/600.css';
-import '@fontsource/chakra-petch/700.css';
-import '@fontsource/jetbrains-mono/400.css';
+// 英数字のみ同梱フォントを使う（日本語は端末のフォント）。latin サブセットに絞って容量を抑える
+import '@fontsource/chakra-petch/latin-400.css';
+import '@fontsource/chakra-petch/latin-600.css';
+import '@fontsource/chakra-petch/latin-700.css';
+import '@fontsource/jetbrains-mono/latin-400.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/ui.css';

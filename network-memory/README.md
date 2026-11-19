@@ -9,7 +9,15 @@
 > 現在 **PHASE 2（Memory SYNC・戦闘）** まで実装済み。正式な基本設計は GDD Ver.2。
 > 各フェーズの状況は [docs/ROADMAP.md](docs/ROADMAP.md)、設計は [docs/DESIGN.md](docs/DESIGN.md) を参照。
 
-## 起動方法
+## すぐに遊ぶ（HTML ファイル 1 つ）
+
+[`release/NETWORK-Memory-ReCollection.html`](release/NETWORK-Memory-ReCollection.html) をダウンロードして、ブラウザで開くだけで遊べます。
+インストール・サーバー・ネット接続は不要です（フォント・画像もすべて 1 ファイルに埋め込み済み）。
+進行状況はそのブラウザに自動保存されます。
+
+この HTML は `npm run build:html` で作り直せます。
+
+## 起動方法（開発）
 
 ```bash
 cd network-memory
@@ -21,6 +29,7 @@ npm run dev          # http://localhost:5173 で起動（同一LANのスマホ�
 | --- | --- |
 | `npm run dev` | 開発サーバー |
 | `npm run build` | 型チェック + 本番ビルド（`dist/`。サブパス配置にも対応） |
+| `npm run build:html` | すべてを埋め込んだ単一 HTML（`release/NETWORK-Memory-ReCollection.html`）を作成 |
 | `npm run preview` | ビルド結果の確認 |
 | `npm test` | ゲームロジック・Battle Engine・マスターデータのテスト（バランス検証を含む） |
 | `npm run validate:data` | マスターデータ（JSON）の検証のみ |
