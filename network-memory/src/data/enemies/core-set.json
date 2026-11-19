@@ -1,0 +1,363 @@
+[
+  {
+    "id": "EN-0001",
+    "name": "ヌルビット",
+    "nameEn": "NULLBIT",
+    "attribute": "VOID",
+    "level": 1,
+    "boss": false,
+    "description": "値を失ったデータの残骸。周囲の記録を齧り取って、自分の空白を埋めようとする。",
+    "hp": 494,
+    "atk": 250,
+    "def": 120,
+    "spd": 180,
+    "tec": 200,
+    "res": 120,
+    "attack": {
+      "name": "齧る",
+      "scale": "atk",
+      "power": 1.0,
+      "hits": 1
+    },
+    "skills": [
+      "ES-0001"
+    ],
+    "passiveSkills": [],
+    "ai": [
+      {
+        "action": "attack",
+        "weight": 3
+      },
+      {
+        "action": "ES-0001",
+        "weight": 2
+      }
+    ]
+  },
+  {
+    "id": "EN-0002",
+    "name": "断線ドローン",
+    "nameEn": "SEVERED DRONE",
+    "attribute": "DATA",
+    "level": 3,
+    "boss": false,
+    "description": "管制との接続を失い、目に入るものすべてを『不審物』として攻撃する警備ドローン。",
+    "hp": 543,
+    "atk": 232,
+    "def": 139,
+    "spd": 253,
+    "tec": 304,
+    "res": 139,
+    "attack": {
+      "name": "体当たり",
+      "scale": "atk",
+      "power": 1.0,
+      "hits": 1
+    },
+    "skills": [
+      "ES-0003"
+    ],
+    "passiveSkills": [],
+    "ai": [
+      {
+        "action": "attack",
+        "weight": 2
+      },
+      {
+        "action": "ES-0003",
+        "weight": 3
+      }
+    ]
+  },
+  {
+    "id": "EN-0003",
+    "name": "消灯の影",
+    "nameEn": "LIGHTS-OUT SHADE",
+    "attribute": "VOID",
+    "level": 2,
+    "boss": true,
+    "description": "灯りの消えた区画に溜まった『忘れられた』という感情の塊。近づく光を呑み込む。",
+    "hp": 1242,
+    "atk": 404,
+    "def": 173,
+    "spd": 184,
+    "tec": 475,
+    "res": 173,
+    "attack": {
+      "name": "闇の腕",
+      "scale": "tec",
+      "power": 1.0,
+      "hits": 1
+    },
+    "skills": [
+      "ES-0002",
+      "ES-0004"
+    ],
+    "passiveSkills": [],
+    "ai": [
+      {
+        "action": "attack",
+        "weight": 2
+      },
+      {
+        "action": "ES-0002",
+        "weight": 2
+      },
+      {
+        "action": "ES-0004",
+        "weight": 2,
+        "when": {
+          "type": "turn_at_least",
+          "value": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "EN-0004",
+    "name": "誤植の頁",
+    "nameEn": "MISPRINTED PAGE",
+    "attribute": "ORDER",
+    "level": 3,
+    "boss": false,
+    "description": "書架から剥がれ落ちた頁。書かれた内容を読んだ者に、間違った意味を押し付ける。",
+    "hp": 603,
+    "atk": 246,
+    "def": 139,
+    "spd": 220,
+    "tec": 290,
+    "res": 181,
+    "attack": {
+      "name": "紙の刃",
+      "scale": "atk",
+      "power": 1.0,
+      "hits": 1
+    },
+    "skills": [
+      "ES-0005"
+    ],
+    "passiveSkills": [],
+    "ai": [
+      {
+        "action": "attack",
+        "weight": 2
+      },
+      {
+        "action": "ES-0005",
+        "weight": 3
+      }
+    ]
+  },
+  {
+    "id": "EN-0005",
+    "name": "封印書架の番人",
+    "nameEn": "SEAL WARDEN",
+    "attribute": "ORDER",
+    "level": 4,
+    "boss": true,
+    "description": "封印書架を守るために作られた自律防衛記録。主を失った今も、扉に近づく者を排除し続ける。",
+    "hp": 1640,
+    "atk": 546,
+    "def": 258,
+    "spd": 211,
+    "tec": 436,
+    "res": 198,
+    "attack": {
+      "name": "鉄扉の拳",
+      "scale": "atk",
+      "power": 1.0,
+      "hits": 1
+    },
+    "skills": [
+      "ES-0006",
+      "ES-0007"
+    ],
+    "passiveSkills": [],
+    "ai": [
+      {
+        "action": "attack",
+        "weight": 3
+      },
+      {
+        "action": "ES-0006",
+        "weight": 3
+      },
+      {
+        "action": "ES-0007",
+        "weight": 3,
+        "when": {
+          "type": "hp_below",
+          "value": 0.6
+        }
+      }
+    ]
+  },
+  {
+    "id": "EN-0006",
+    "name": "枯れ蔓",
+    "nameEn": "WITHERED VINE",
+    "attribute": "LIFE",
+    "level": 5,
+    "boss": false,
+    "description": "記録の養分を失って枯れかけた蔓。最後の力で、生きた記録に絡みつこうとする。",
+    "hp": 755,
+    "atk": 330,
+    "def": 158,
+    "spd": 251,
+    "tec": 314,
+    "res": 158,
+    "attack": {
+      "name": "蔓打ち",
+      "scale": "atk",
+      "power": 1.0,
+      "hits": 1
+    },
+    "skills": [
+      "ES-0008",
+      "ES-0009"
+    ],
+    "passiveSkills": [],
+    "ai": [
+      {
+        "action": "attack",
+        "weight": 2
+      },
+      {
+        "action": "ES-0008",
+        "weight": 2
+      },
+      {
+        "action": "ES-0009",
+        "weight": 2
+      }
+    ]
+  },
+  {
+    "id": "EN-0007",
+    "name": "色喰い",
+    "nameEn": "COLOR EATER",
+    "attribute": "VOID",
+    "level": 6,
+    "boss": true,
+    "description": "忘却の目覚めに引き寄せられ、庭の花の色を喰らい続ける記録の空洞。喰った色の分だけ大きくなる。",
+    "hp": 1449,
+    "atk": 493,
+    "def": 224,
+    "spd": 280,
+    "tec": 616,
+    "res": 224,
+    "attack": {
+      "name": "空洞の爪",
+      "scale": "tec",
+      "power": 1.0,
+      "hits": 1
+    },
+    "skills": [
+      "ES-0010",
+      "ES-0011"
+    ],
+    "passiveSkills": [],
+    "ai": [
+      {
+        "action": "attack",
+        "weight": 2
+      },
+      {
+        "action": "ES-0010",
+        "weight": 3
+      },
+      {
+        "action": "ES-0011",
+        "weight": 2,
+        "when": {
+          "type": "turn_at_least",
+          "value": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "EN-0008",
+    "name": "破損体",
+    "nameEn": "CORRUPTED MASS",
+    "attribute": "ERROR",
+    "level": 7,
+    "boss": false,
+    "description": "壊れたデータが寄り集まって動き出したもの。触れた記録を同じように壊していく。",
+    "hp": 770,
+    "atk": 370,
+    "def": 195,
+    "spd": 281,
+    "tec": 370,
+    "res": 178,
+    "attack": {
+      "name": "崩落",
+      "scale": "atk",
+      "power": 1.0,
+      "hits": 1
+    },
+    "skills": [
+      "ES-0012"
+    ],
+    "passiveSkills": [],
+    "ai": [
+      {
+        "action": "attack",
+        "weight": 3
+      },
+      {
+        "action": "ES-0012",
+        "weight": 2
+      }
+    ]
+  },
+  {
+    "id": "EN-0009",
+    "name": "ハウンド・アルファ",
+    "nameEn": "HOUND ALPHA",
+    "attribute": "ERROR",
+    "level": 8,
+    "boss": true,
+    "description": "グリッチハウンドの群れを率いる個体。崩れた王冠の命令に、最後まで従い続けている。",
+    "hp": 1794,
+    "atk": 652,
+    "def": 250,
+    "spd": 343,
+    "tec": 618,
+    "res": 250,
+    "attack": {
+      "name": "噛み裂き",
+      "scale": "atk",
+      "power": 1.0,
+      "hits": 1
+    },
+    "skills": [
+      "ES-0013",
+      "ES-0014",
+      "ES-0015"
+    ],
+    "passiveSkills": [],
+    "ai": [
+      {
+        "action": "attack",
+        "weight": 2
+      },
+      {
+        "action": "ES-0013",
+        "weight": 3
+      },
+      {
+        "action": "ES-0014",
+        "weight": 1
+      },
+      {
+        "action": "ES-0015",
+        "weight": 3,
+        "when": {
+          "type": "hp_below",
+          "value": 0.5
+        }
+      }
+    ]
+  }
+]

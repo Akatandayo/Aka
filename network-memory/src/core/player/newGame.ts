@@ -1,9 +1,9 @@
 import { createExplorerCode, createId } from '../id';
 import type { GameData } from '../data/gameData';
-import { DEFAULT_SETTINGS, SAVE_VERSION, STARTING_WALLET, normalizePlayerName } from '../save/schema';
+import { DEFAULT_AVATAR, DEFAULT_LOADOUT_CAPACITY_SAVE, DEFAULT_SETTINGS, SAVE_VERSION, STARTING_ITEMS, STARTING_WALLET, normalizePlayerName } from '../save/schema';
 import { applyCurrencyChanges, emptyWallet } from './economy';
 import { acquireMemory } from './memories';
-import { autoFormation, createDefaultTeams } from './teams';
+import { autoLoadout, createDefaultLoadouts } from './loadout';
 import type { PlayerSave } from '../../types/player';
 
 /** 探索者登録時に受け取る初期 Memory（acquisitionMethod に starter を持つもの） */
@@ -13,7 +13,7 @@ export function starterMemoryIds(data: GameData): string[] {
 
 export function createNewSave(rawName: string, data: GameData, at: string = new Date().toISOString()): PlayerSave {
   const name = normalizePlayerName(rawName) || 'EXPLORER';
-  const teams = createDefaultTeams();
+  const loadouts = createDefaultLoadouts(DEFAULT_LOADOUT_CAPACITY_SAVE);
   let save: PlayerSave = {
     version: SAVE_VERSION,
     saveId: createId('save'),
@@ -25,16 +25,20 @@ export function createNewSave(rawName: string, data: GameData, at: string = new 
       title: '新米探索者',
       level: 1,
       exp: 0,
+      avatar: { ...DEFAULT_AVATAR },
+      bio: '',
       createdAt: at,
       lastLoginAt: at,
     },
     wallet: emptyWallet(),
     transactions: [],
     memories: [],
-    teams,
-    activeTeamId: teams[0].id,
-    archive: { discoveredMemoryIds: [], readFragmentIds: [] },
-    inventory: {},
+    loadouts,
+    activeLoadoutId: loadouts[0].id,
+    loadoutCapacity: { ...DEFAULT_LOADOUT_CAPACITY_SAVE },
+    archive: { discoveredMemoryIds: [], readFragmentIds: [], pendingSyncIds: [] },
+    battle: { encounters: {}, wins: 0, losses: 0, retreats: 0, records: [] },
+    inventory: { ...STARTING_ITEMS },
     progress: { flags: {} },
     settings: { ...DEFAULT_SETTINGS },
   };
@@ -56,8 +60,8 @@ export function createNewSave(rawName: string, data: GameData, at: string = new 
   );
   if (money.ok) save = money.save;
 
-  const team = autoFormation(save, data, teams[0].id);
-  if (team.ok) save = team.save;
+  const equip = autoLoadout(save, data, loadouts[0].id);
+  if (equip.ok) save = equip.save;
 
   return save;
 }

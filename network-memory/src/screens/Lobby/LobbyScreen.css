@@ -350,11 +350,6 @@
   color: var(--c-text-dim);
 }
 
-.menu-tile__status {
-  grid-area: status;
-  justify-self: start;
-  margin-top: 6px;
-}
 
 @media (max-width: 380px) {
   .menu-tile {
@@ -405,4 +400,102 @@
 
 .lobby__log-line.is-mute .mono {
   color: var(--c-text-mute);
+}
+
+/* ---------- Ver.2: 探索者パネル・装備 ---------- */
+.lobby__partner-art--avatar {
+  background: linear-gradient(160deg, var(--attr-c), color-mix(in srgb, var(--attr-c) 15%, #000));
+}
+
+.lobby__exp {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  font-size: 11px;
+  color: var(--c-text-dim);
+}
+
+.lobby__sync {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.lobby__sync .mono {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--attr-c);
+}
+
+.lobby__sync-name {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--c-text);
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--attr-c) 60%, transparent);
+  text-underline-offset: 3px;
+}
+
+.lobby__loadout {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.lobby__lo-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.lobby__lo-slot > .mono {
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: var(--c-text-mute);
+}
+
+.lobby__lo-slot--main > .mono {
+  color: var(--c-cyan);
+}
+
+.lobby__lo-slot--passive > .mono {
+  color: #c7a8ff;
+}
+
+.lobby__lo-slot .mcard__meta {
+  display: none;
+}
+
+.lobby__team-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lobby__team-actions .btn {
+  flex: 1 1 auto;
+  min-height: var(--touch);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .lobby__loadout {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.menu-tile__status {
+  grid-area: status;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
 }

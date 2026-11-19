@@ -36,7 +36,7 @@ export function combatPower(s: StatBlock): number {
   return Math.round(s.hp * 0.2 + s.atk * 1.0 + s.def * 0.8 + s.spd * 0.9 + s.tec * 1.0 + s.res * 0.8);
 }
 
-/** 次のレベルまでに必要な経験値（PHASE 2 の育成で使用） */
+/** 次のレベルまでに必要な経験値（主人公・Memory 共通の曲線: 50 × Lv^1.5） */
 export function expToNext(level: number): number {
-  return Math.round(100 * Math.pow(Math.max(1, level), 1.5));
+  return Math.round(50 * Math.pow(Math.max(1, level), 1.5));
 }

@@ -5,8 +5,14 @@ import {
   RARITIES,
   STAT_KEYS,
   type AcquisitionMethod,
+  type AttackStyle,
+  type FieldAbility,
   type MemoryDefinition,
+  type SyncCondition,
 } from '../../types/memory';
+import type { EncounterDefinition, EncounterReward, EnemyAiRule, EnemyDefinition } from '../../types/enemy';
+import type { ItemDefinition } from '../../types/item';
+import { CURRENCIES } from '../../types/player';
 import type { MemoryRecordFragment, MemoryStory, RecordUnlock } from '../../types/record';
 import {
   EFFECT_TYPES,
@@ -44,7 +50,7 @@ const optStr = (v: unknown): string | undefined => (isStr(v) ? v : undefined);
 const strArray = (v: unknown): string[] | null =>
   Array.isArray(v) && v.every((x) => isStr(x)) ? (v as string[]) : null;
 
-class Collector {
+export class Collector {
   issues: DataIssue[] = [];
   constructor(private readonly source: string) {}
   error(message: string) {
@@ -56,6 +62,46 @@ class Collector {
 }
 
 // ---------------------------------------------------------------- Memory
+
+export function parseAttackStyle(v: unknown, c: Collector): AttackStyle | undefined {
+  if (!isObj(v) || !isStr(v.name) || (v.scale !== 'atk' && v.scale !== 'tec') || !isNum(v.power) || !isNum(v.hits) || v.hits < 1) {
+    c.error(`attackStyle が不正です: ${JSON.stringify(v)}`);
+    return undefined;
+  }
+  return { name: v.name, scale: v.scale, power: v.power, hits: Math.floor(v.hits) };
+}
+
+function parseSyncConditions(v: unknown, c: Collector): SyncCondition[] | undefined {
+  if (!Array.isArray(v)) {
+    c.error('syncCondition は配列である必要があります');
+    return undefined;
+  }
+  const out: SyncCondition[] = [];
+  for (const x of v) {
+    if (!isObj(x)) {
+      c.error('syncCondition の要素が不正です');
+      continue;
+    }
+    if (x.type === 'playerLevel' && isNum(x.value)) out.push({ type: 'playerLevel', value: x.value });
+    else if (x.type === 'ownedMemory' && isStr(x.memoryId)) out.push({ type: 'ownedMemory', memoryId: x.memoryId });
+    else if (x.type === 'flag' && isStr(x.flag) && isStr(x.label)) out.push({ type: 'flag', flag: x.flag, label: x.label });
+    else if (x.type === 'unknown') out.push({ type: 'unknown' });
+    else c.error(`syncCondition が不正です: ${JSON.stringify(x)}`);
+  }
+  return out;
+}
+
+function parseFieldAbilities(v: unknown, c: Collector): FieldAbility[] | undefined {
+  if (!Array.isArray(v)) {
+    c.error('fieldAbilities は配列である必要があります');
+    return undefined;
+  }
+  return v.flatMap((x) => {
+    if (isObj(x) && isStr(x.id) && isStr(x.name) && isStr(x.description)) return [{ id: x.id, name: x.name, description: x.description }];
+    c.error(`fieldAbilities の要素が不正です: ${JSON.stringify(x)}`);
+    return [];
+  });
+}
 
 function parseAcquisition(v: unknown, c: Collector): AcquisitionMethod[] {
   if (!Array.isArray(v)) {
@@ -102,6 +148,14 @@ export function parseMemory(raw: unknown, issues: DataIssue[]): MemoryDefinition
   if (!related) c.error('relatedMemories は文字列配列である必要があります');
   if (r.storyId !== null && r.storyId !== undefined && !isStr(r.storyId)) c.error('storyId が不正です');
   const acquisitionMethod = parseAcquisition(r.acquisitionMethod, c);
+  const attackStyle = r.attackStyle === undefined ? undefined : parseAttackStyle(r.attackStyle, c);
+  const syncCondition = r.syncCondition === undefined ? undefined : parseSyncConditions(r.syncCondition, c);
+  const fieldAbilities = r.fieldAbilities === undefined ? undefined : parseFieldAbilities(r.fieldAbilities, c);
+  let persona: MemoryDefinition['persona'];
+  if (r.persona !== undefined) {
+    if (!isObj(r.persona) || !isStr(r.persona.personality)) c.error('persona.personality がありません');
+    else persona = { personality: r.persona.personality, ...(isStr(r.persona.note) ? { note: r.persona.note } : {}) };
+  }
 
   if (c.issues.some((i) => i.level === 'error')) return finish(null);
 
@@ -125,6 +179,10 @@ export function parseMemory(raw: unknown, issues: DataIssue[]): MemoryDefinition
     skills: skills!,
     passiveSkills: passiveSkills!,
     rewrite: optStr(r.rewrite),
+    ...(attackStyle ? { attackStyle } : {}),
+    ...(syncCondition ? { syncCondition } : {}),
+    ...(fieldAbilities ? { fieldAbilities } : {}),
+    ...(persona ? { persona } : {}),
     acquisitionMethod,
     relatedMemories: related!,
     storyId: isStr(r.storyId) ? r.storyId : null,
@@ -136,7 +194,7 @@ export function parseMemory(raw: unknown, issues: DataIssue[]): MemoryDefinition
 
 // ---------------------------------------------------------------- Skill
 
-function parseEffect(v: unknown, c: Collector): SkillEffect | null {
+export function parseEffect(v: unknown, c: Collector): SkillEffect | null {
   if (!isObj(v) || !isOneOf(EFFECT_TYPES, v.type)) {
     c.error(`effect が不正です: ${JSON.stringify(v)}`);
     return null;
@@ -158,6 +216,10 @@ function parseEffect(v: unknown, c: Collector): SkillEffect | null {
     if (!isOneOf(STATUS_IDS, v.status)) c.error(`effect.status が不正です: ${String(v.status)}`);
     else e.status = v.status;
   }
+  if (v.attribute !== undefined) {
+    if (!isOneOf(ATTRIBUTES, v.attribute)) c.error(`effect.attribute が不正です: ${String(v.attribute)}`);
+    else e.attribute = v.attribute;
+  }
   for (const k of ['power', 'hits', 'value', 'chance', 'turns'] as const) {
     if (v[k] !== undefined) {
       if (!isNum(v[k])) c.error(`effect.${k} は数値である必要があります`);
@@ -174,8 +236,10 @@ function parseEffect(v: unknown, c: Collector): SkillEffect | null {
     c.error(`${e.type} 効果には stat と value が必要です`);
   }
   if (e.type === 'status' && !e.status) c.error('status 効果には status が必要です');
-  if (e.type === 'special') {
-    if (!isStr(v.id)) c.error('special 効果には id が必要です');
+  if ((e.type === 'heal_percent' || e.type === 'empower' || e.type === 'sp_gain') && e.value === undefined) c.error(`${e.type} 効果には value が必要です`);
+  if (e.type === 'attribute_shift' && (!e.attribute || e.turns === undefined)) c.error('attribute_shift 効果には attribute と turns が必要です');
+  if (e.type === 'special' || e.type === 'grant_skill') {
+    if (!isStr(v.id)) c.error(`${e.type} 効果には id が必要です`);
     else e.id = v.id;
   }
   return e;
@@ -201,6 +265,8 @@ export function parseSkill(raw: unknown, issues: DataIssue[]): SkillDefinition |
   if (r.target !== undefined && !isOneOf(SKILL_TARGETS, r.target)) c.error('target が不正です');
   if (r.trigger !== undefined && !isOneOf(PASSIVE_TRIGGERS, r.trigger)) c.error('trigger が不正です');
   if (r.kind === 'passive' && r.trigger === undefined) c.error('passive スキルには trigger が必要です');
+  if (r.cost !== undefined && (!isNum(r.cost) || r.cost < 0)) c.error('cost は0以上の数値である必要があります');
+  if (r.cooldown !== undefined && (!isNum(r.cooldown) || r.cooldown < 0)) c.error('cooldown は0以上の数値である必要があります');
   let condition: SkillDefinition['condition'];
   if (r.kind === 'rewrite') {
     if (!isObj(r.condition) || !isOneOf(REWRITE_CONDITIONS, r.condition.type)) {
@@ -238,6 +304,7 @@ export function parseSkill(raw: unknown, issues: DataIssue[]): SkillDefinition |
     description: r.description as string,
     target: r.target as SkillDefinition['target'],
     cooldown: isNum(r.cooldown) ? r.cooldown : undefined,
+    cost: isNum(r.cost) ? r.cost : undefined,
     trigger: r.trigger as SkillDefinition['trigger'],
     condition,
     conditionText: optStr(r.conditionText),
@@ -343,4 +410,183 @@ export function parseWorld(raw: unknown, issues: DataIssue[]): WorldDefinition |
     attribute: raw.attribute,
     unlock,
   };
+}
+
+// ---------------------------------------------------------------- Item
+
+export function parseItem(raw: unknown, issues: DataIssue[]): ItemDefinition | null {
+  const id = isObj(raw) && isStr(raw.id) ? raw.id : '(id不明)';
+  const c = new Collector(`item:${id}`);
+  const finish = <T>(v: T) => {
+    issues.push(...c.issues);
+    return v;
+  };
+  if (!isObj(raw) || !isStr(raw.id) || !isStr(raw.name) || !isStr(raw.description)) {
+    c.error('id / name / description が必要です');
+    return finish(null);
+  }
+  if (raw.kind !== 'consumable' && raw.kind !== 'material' && raw.kind !== 'key') c.error('kind が不正です');
+  if (raw.target !== undefined && !isOneOf(SKILL_TARGETS, raw.target)) c.error('target が不正です');
+  const effects = Array.isArray(raw.effects) ? raw.effects.map((e) => parseEffect(e, c)).filter((e): e is SkillEffect => e !== null) : [];
+  if (raw.battle === true && effects.length === 0) c.error('戦闘用アイテムには effects が必要です');
+  if (c.issues.some((i) => i.level === 'error')) return finish(null);
+  return finish({
+    id: raw.id,
+    name: raw.name,
+    description: raw.description,
+    kind: raw.kind as ItemDefinition['kind'],
+    battle: raw.battle === true,
+    target: raw.target as ItemDefinition['target'],
+    effects,
+    maxStack: isNum(raw.maxStack) && raw.maxStack > 0 ? Math.floor(raw.maxStack) : 99,
+  });
+}
+
+// ---------------------------------------------------------------- Enemy
+
+export function parseEnemy(raw: unknown, issues: DataIssue[]): EnemyDefinition | null {
+  const id = isObj(raw) && isStr(raw.id) ? raw.id : '(id不明)';
+  const c = new Collector(`enemy:${id}`);
+  const finish = <T>(v: T) => {
+    issues.push(...c.issues);
+    return v;
+  };
+  if (!isObj(raw) || !isStr(raw.id) || !isStr(raw.name) || !isStr(raw.description)) {
+    c.error('id / name / description が必要です');
+    return finish(null);
+  }
+  const r = raw;
+  if (!isOneOf(ATTRIBUTES, r.attribute)) c.error('attribute が不正です');
+  if (!isNum(r.level) || r.level < 1) c.error('level が不正です');
+  for (const k of STAT_KEYS) if (!isNum(r[k]) || (r[k] as number) < 0) c.error(`${k} は0以上の数値である必要があります`);
+  if (!isNum(r.hp) || r.hp < 1) c.error('hp は1以上である必要があります');
+  const attack = parseAttackStyle(r.attack, c);
+  const skills = strArray(r.skills ?? []);
+  const passiveSkills = strArray(r.passiveSkills ?? []);
+  if (!skills || !passiveSkills) c.error('skills / passiveSkills は文字列配列である必要があります');
+  const ai: EnemyAiRule[] = [];
+  if (!Array.isArray(r.ai) || r.ai.length === 0) c.error('ai は1つ以上必要です');
+  else {
+    for (const a of r.ai) {
+      if (!isObj(a) || !isStr(a.action) || !isNum(a.weight) || a.weight <= 0) {
+        c.error(`ai の要素が不正です: ${JSON.stringify(a)}`);
+        continue;
+      }
+      let when: EnemyAiRule['when'];
+      if (a.when !== undefined) {
+        const w = a.when;
+        if (isObj(w) && (w.type === 'hp_below' || w.type === 'hp_above' || w.type === 'turn_at_least') && isNum(w.value)) when = { type: w.type, value: w.value };
+        else c.error(`ai.when が不正です: ${JSON.stringify(w)}`);
+      }
+      if (a.action !== 'attack' && skills && !skills.includes(a.action)) c.error(`ai の ${a.action} は skills に含まれていません`);
+      ai.push({ action: a.action, weight: a.weight, ...(when ? { when } : {}) });
+    }
+  }
+  if (c.issues.some((i) => i.level === 'error')) return finish(null);
+  return finish({
+    id: r.id as string,
+    name: r.name as string,
+    nameEn: optStr(r.nameEn),
+    description: r.description as string,
+    attribute: r.attribute as EnemyDefinition['attribute'],
+    level: r.level as number,
+    illustration: optStr(r.illustration),
+    boss: r.boss === true,
+    hp: r.hp as number,
+    atk: r.atk as number,
+    def: r.def as number,
+    spd: r.spd as number,
+    tec: r.tec as number,
+    res: r.res as number,
+    attack: attack!,
+    skills: skills!,
+    passiveSkills: passiveSkills!,
+    ai,
+  });
+}
+
+// ---------------------------------------------------------------- Encounter
+
+function parseCurrencies(v: unknown, c: Collector, field: string): Partial<Record<(typeof CURRENCIES)[number], number>> | undefined {
+  if (v === undefined) return undefined;
+  if (!isObj(v)) {
+    c.error(`${field} が不正です`);
+    return undefined;
+  }
+  const out: Partial<Record<(typeof CURRENCIES)[number], number>> = {};
+  for (const [k, n] of Object.entries(v)) {
+    if (!isOneOf(CURRENCIES, k) || !isNum(n) || n <= 0 || !Number.isInteger(n)) c.error(`${field}.${k} が不正です`);
+    else out[k] = n;
+  }
+  return out;
+}
+
+function parseItemMap(v: unknown, c: Collector, field: string): Record<string, number> | undefined {
+  if (v === undefined) return undefined;
+  if (!isObj(v)) {
+    c.error(`${field} が不正です`);
+    return undefined;
+  }
+  const out: Record<string, number> = {};
+  for (const [k, n] of Object.entries(v)) {
+    if (!isNum(n) || n <= 0 || !Number.isInteger(n)) c.error(`${field}.${k} が不正です`);
+    else out[k] = n;
+  }
+  return out;
+}
+
+export function parseEncounter(raw: unknown, issues: DataIssue[]): EncounterDefinition | null {
+  const id = isObj(raw) && isStr(raw.id) ? raw.id : '(id不明)';
+  const c = new Collector(`encounter:${id}`);
+  const finish = <T>(v: T) => {
+    issues.push(...c.issues);
+    return v;
+  };
+  if (!isObj(raw) || !isStr(raw.id) || !isStr(raw.name) || !isStr(raw.worldId) || !isStr(raw.description)) {
+    c.error('id / name / worldId / description が必要です');
+    return finish(null);
+  }
+  const r = raw;
+  const enemies = strArray(r.enemies);
+  if (!enemies || enemies.length === 0) c.error('enemies は1体以上必要です');
+  if (!isNum(r.recommendedLevel) || r.recommendedLevel < 1) c.error('recommendedLevel が不正です');
+  let unlock: EncounterDefinition['unlock'] = { type: 'initial' };
+  if (isObj(r.unlock) && r.unlock.type === 'encounterClear' && isStr(r.unlock.encounterId)) unlock = { type: 'encounterClear', encounterId: r.unlock.encounterId };
+  else if (!isObj(r.unlock) || r.unlock.type !== 'initial') c.error('unlock が不正です');
+  let rewards: EncounterReward = { exp: 0, memoryExp: 0 };
+  if (!isObj(r.rewards) || !isNum(r.rewards.exp) || !isNum(r.rewards.memoryExp)) c.error('rewards.exp / rewards.memoryExp が必要です');
+  else {
+    rewards = {
+      exp: r.rewards.exp,
+      memoryExp: r.rewards.memoryExp,
+      currencies: parseCurrencies(r.rewards.currencies, c, 'rewards.currencies'),
+      items: parseItemMap(r.rewards.items, c, 'rewards.items'),
+    };
+  }
+  let firstClear: EncounterDefinition['firstClear'];
+  if (r.firstClear !== undefined) {
+    if (!isObj(r.firstClear)) c.error('firstClear が不正です');
+    else {
+      const mems = r.firstClear.memories === undefined ? undefined : strArray(r.firstClear.memories);
+      if (mems === null) c.error('firstClear.memories が不正です');
+      firstClear = {
+        ...(mems ? { memories: mems } : {}),
+        currencies: parseCurrencies(r.firstClear.currencies, c, 'firstClear.currencies'),
+        items: parseItemMap(r.firstClear.items, c, 'firstClear.items'),
+      };
+    }
+  }
+  if (c.issues.some((i) => i.level === 'error')) return finish(null);
+  return finish({
+    id: r.id as string,
+    worldId: r.worldId as string,
+    name: r.name as string,
+    description: r.description as string,
+    recommendedLevel: r.recommendedLevel as number,
+    boss: r.boss === true,
+    enemies: enemies!,
+    unlock,
+    rewards,
+    firstClear,
+  });
 }

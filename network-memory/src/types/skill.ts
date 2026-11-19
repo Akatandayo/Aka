@@ -1,10 +1,10 @@
 import type { Attribute, StatKey } from './memory';
 
 /**
- * MemorySkills の型定義。
+ * MemorySkills の型定義（Memory スキル・敵スキル・アイテム効果で共通）。
  *
- * PHASE 1 では表示のみ。効果（effects）の解釈は PHASE 2 の Battle Engine が担う。
- * ここで定義した構造は Battle Engine の入力仕様となるため、拡張は「追加」で行うこと。
+ * 効果（effects）の解釈は core/battle の Battle Engine が担う。
+ * この構造は Battle Engine の入力仕様のため、拡張は「追加」で行うこと。
  */
 
 export const SKILL_KINDS = ['active', 'passive', 'rewrite'] as const;
@@ -54,6 +54,14 @@ export const EFFECT_TYPES = [
   'cleanse',
   'dispel',
   'immune',
+  /** スキル強化: 与ダメージ倍率を一定ターン上昇 */
+  'empower',
+  /** 属性変化: 一定ターン、対象の属性を変更 */
+  'attribute_shift',
+  /** 特殊スキル解放: 戦闘終了までスキル（id）を追加 */
+  'grant_skill',
+  /** SP（スキル用リソース）の回復 */
+  'sp_gain',
   'special',
 ] as const;
 export type EffectType = (typeof EFFECT_TYPES)[number];
@@ -74,11 +82,13 @@ export interface SkillEffect {
   value?: number;
   /** status: 状態異常 ID */
   status?: StatusId;
+  /** attribute_shift: 変化後の属性 */
+  attribute?: Attribute;
   /** status 等: 発動確率（0〜1） */
   chance?: number;
   /** 継続ターン */
   turns?: number;
-  /** special: Battle Engine 側で実装する固有処理 ID */
+  /** special: Battle Engine 側で実装する固有処理 ID / grant_skill: 追加するスキル ID */
   id?: string;
 }
 
@@ -105,8 +115,10 @@ export interface SkillDefinition {
   attribute?: Attribute;
   description: string;
   target?: SkillTarget;
-  /** active/rewrite: 再使用までのターン数 */
+  /** active: 再使用までのターン数 */
   cooldown?: number;
+  /** active: 消費 SP */
+  cost?: number;
   /** passive: 発動タイミング */
   trigger?: PassiveTrigger;
   /** rewrite: 発動条件 */

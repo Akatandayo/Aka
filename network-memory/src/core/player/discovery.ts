@@ -32,6 +32,7 @@ export function discover(save: PlayerSave, data: GameData, memoryIds: string[], 
     save: {
       ...save,
       archive: {
+        ...save.archive,
         discoveredMemoryIds: [...save.archive.discoveredMemoryIds, ...newlyDiscovered],
         readFragmentIds: [...save.archive.readFragmentIds, ...newFragments],
       },

@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import { Background } from '../components/layout/Background';
 import { useToast } from '../components/ui/Toast';
+import { BattleRunScreen } from '../screens/Battle/BattleRunScreen';
+import { BattleScreen } from '../screens/Battle/BattleScreen';
 import { LobbyScreen } from '../screens/Lobby/LobbyScreen';
 import { MemoryDetailScreen } from '../screens/Memory/MemoryDetailScreen';
 import { MemoryScreen } from '../screens/Memory/MemoryScreen';
 import { PlannedScreen } from '../screens/Planned/PlannedScreen';
 import { ProfileScreen } from '../screens/Profile/ProfileScreen';
 import { SettingsScreen } from '../screens/Settings/SettingsScreen';
+import { SyncScreen } from '../screens/Sync/SyncScreen';
 import { TitleScreen } from '../screens/Title/TitleScreen';
 import { useGame } from '../state/GameProvider';
 import { NavContext } from './nav';
@@ -20,6 +23,12 @@ function renderRoute(route: Route) {
       return <MemoryScreen tab={route.tab} />;
     case 'memoryDetail':
       return <MemoryDetailScreen instanceId={route.instanceId} />;
+    case 'sync':
+      return <SyncScreen key={route.memoryId} memoryId={route.memoryId} />;
+    case 'battle':
+      return <BattleScreen />;
+    case 'battleRun':
+      return <BattleRunScreen key={route.encounterId} encounterId={route.encounterId} />;
     case 'profile':
       return <ProfileScreen />;
     case 'settings':

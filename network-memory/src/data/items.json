@@ -1,0 +1,69 @@
+[
+  {
+    "id": "ITEM-0001",
+    "name": "修復パッチ",
+    "description": "破損した記録を応急修復する。HPを最大HPの30%回復する。",
+    "kind": "consumable",
+    "battle": true,
+    "target": "self",
+    "maxStack": 99,
+    "effects": [
+      {
+        "type": "heal_percent",
+        "value": 0.3
+      }
+    ]
+  },
+  {
+    "id": "ITEM-0002",
+    "name": "デバッグキット",
+    "description": "状態異常をすべて解除する。",
+    "kind": "consumable",
+    "battle": true,
+    "target": "self",
+    "maxStack": 99,
+    "effects": [
+      {
+        "type": "cleanse"
+      }
+    ]
+  },
+  {
+    "id": "ITEM-0003",
+    "name": "オーバークロック",
+    "description": "3ターンの間、ATKとTECを20%上昇させる。",
+    "kind": "consumable",
+    "battle": true,
+    "target": "self",
+    "maxStack": 99,
+    "effects": [
+      {
+        "type": "buff",
+        "stat": "atk",
+        "value": 0.2,
+        "turns": 3
+      },
+      {
+        "type": "buff",
+        "stat": "tec",
+        "value": 0.2,
+        "turns": 3
+      }
+    ]
+  },
+  {
+    "id": "ITEM-0004",
+    "name": "SPチャージャー",
+    "description": "SPを50回復する。",
+    "kind": "consumable",
+    "battle": true,
+    "target": "self",
+    "maxStack": 99,
+    "effects": [
+      {
+        "type": "sp_gain",
+        "value": 50
+      }
+    ]
+  }
+]

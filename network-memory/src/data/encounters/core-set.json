@@ -1,0 +1,284 @@
+[
+  {
+    "id": "ENC-001",
+    "worldId": "WORLD-001",
+    "name": "第七区画の流出反応",
+    "description": "雨の止まない交差点の近くで、弱い流出反応が検出された。値を失ったデータの残骸が集まっている。",
+    "recommendedLevel": 1,
+    "boss": false,
+    "enemies": [
+      "EN-0001",
+      "EN-0001"
+    ],
+    "unlock": {
+      "type": "initial"
+    },
+    "rewards": {
+      "exp": 60,
+      "memoryExp": 50,
+      "currencies": {
+        "DATA": 100
+      },
+      "items": {
+        "ITEM-0001": 1
+      }
+    },
+    "firstClear": {
+      "memories": [
+        "MEM-0013"
+      ],
+      "items": {
+        "ITEM-0001": 2
+      }
+    }
+  },
+  {
+    "id": "ENC-002",
+    "worldId": "WORLD-001",
+    "name": "消えかけの街灯",
+    "description": "灯りが次々と消えていく区画。闇の中心に、強い反応がひとつ。",
+    "recommendedLevel": 2,
+    "boss": true,
+    "enemies": [
+      "EN-0003",
+      "EN-0001"
+    ],
+    "unlock": {
+      "type": "encounterClear",
+      "encounterId": "ENC-001"
+    },
+    "rewards": {
+      "exp": 120,
+      "memoryExp": 70,
+      "currencies": {
+        "DATA": 180
+      },
+      "items": {
+        "ITEM-0004": 1
+      }
+    },
+    "firstClear": {
+      "currencies": {
+        "DATA": 300,
+        "FRAGMENT": 30
+      },
+      "items": {
+        "ITEM-0003": 1
+      }
+    }
+  },
+  {
+    "id": "ENC-003",
+    "worldId": "WORLD-002",
+    "name": "誤植の閲覧室",
+    "description": "ARCHIVEの閲覧室で、頁が勝手に書き換わる異常が発生している。",
+    "recommendedLevel": 3,
+    "boss": false,
+    "enemies": [
+      "EN-0004",
+      "EN-0004",
+      "EN-0002"
+    ],
+    "unlock": {
+      "type": "encounterClear",
+      "encounterId": "ENC-002"
+    },
+    "rewards": {
+      "exp": 200,
+      "memoryExp": 90,
+      "currencies": {
+        "DATA": 240
+      },
+      "items": {
+        "ITEM-0001": 1
+      }
+    },
+    "firstClear": {
+      "memories": [
+        "MEM-0014"
+      ],
+      "items": {
+        "ITEM-0002": 1
+      }
+    }
+  },
+  {
+    "id": "ENC-004",
+    "worldId": "WORLD-002",
+    "name": "封印書架の番人",
+    "description": "封印書架へ続く回廊。番人が、まだ扉を守っている。",
+    "recommendedLevel": 4,
+    "boss": true,
+    "enemies": [
+      "EN-0005",
+      "EN-0004"
+    ],
+    "unlock": {
+      "type": "encounterClear",
+      "encounterId": "ENC-003"
+    },
+    "rewards": {
+      "exp": 300,
+      "memoryExp": 110,
+      "currencies": {
+        "DATA": 360
+      },
+      "items": {
+        "ITEM-0001": 1,
+        "ITEM-0004": 1
+      }
+    },
+    "firstClear": {
+      "currencies": {
+        "DATA": 500,
+        "FRAGMENT": 50,
+        "CORE": 3
+      },
+      "items": {
+        "ITEM-0004": 2
+      }
+    }
+  },
+  {
+    "id": "ENC-005",
+    "worldId": "WORLD-003",
+    "name": "枯れ蔓の小径",
+    "description": "LOST GARDENの北側。枯れかけた蔓が、生きた記録を探して蠢いている。",
+    "recommendedLevel": 5,
+    "boss": false,
+    "enemies": [
+      "EN-0006",
+      "EN-0006",
+      "EN-0001"
+    ],
+    "unlock": {
+      "type": "encounterClear",
+      "encounterId": "ENC-004"
+    },
+    "rewards": {
+      "exp": 420,
+      "memoryExp": 130,
+      "currencies": {
+        "DATA": 420
+      },
+      "items": {
+        "ITEM-0001": 1,
+        "ITEM-0002": 1
+      }
+    },
+    "firstClear": {
+      "memories": [
+        "MEM-0015"
+      ],
+      "items": {
+        "ITEM-0001": 3
+      }
+    }
+  },
+  {
+    "id": "ENC-006",
+    "worldId": "WORLD-003",
+    "name": "色喰い",
+    "description": "庭の最深部。花の色を喰らう空洞の向こうに、静かな気配がある。",
+    "recommendedLevel": 6,
+    "boss": true,
+    "enemies": [
+      "EN-0007",
+      "EN-0006"
+    ],
+    "unlock": {
+      "type": "encounterClear",
+      "encounterId": "ENC-005"
+    },
+    "rewards": {
+      "exp": 560,
+      "memoryExp": 160,
+      "currencies": {
+        "DATA": 600
+      },
+      "items": {
+        "ITEM-0001": 2
+      }
+    },
+    "firstClear": {
+      "memories": [
+        "MEM-0010"
+      ],
+      "currencies": {
+        "FRAGMENT": 80,
+        "CORE": 5
+      }
+    }
+  },
+  {
+    "id": "ENC-007",
+    "worldId": "WORLD-004",
+    "name": "破損体の群れ",
+    "description": "ERROR ZONEの外縁部。破損データが寄り集まり、群れを成している。",
+    "recommendedLevel": 7,
+    "boss": false,
+    "enemies": [
+      "EN-0008",
+      "EN-0008",
+      "EN-0008"
+    ],
+    "unlock": {
+      "type": "encounterClear",
+      "encounterId": "ENC-006"
+    },
+    "rewards": {
+      "exp": 720,
+      "memoryExp": 190,
+      "currencies": {
+        "DATA": 700
+      },
+      "items": {
+        "ITEM-0001": 2
+      }
+    },
+    "firstClear": {
+      "memories": [
+        "MEM-0016"
+      ],
+      "items": {
+        "ITEM-0002": 2
+      }
+    }
+  },
+  {
+    "id": "ENC-008",
+    "worldId": "WORLD-004",
+    "name": "ハウンド・アルファ",
+    "description": "破損領域の深部。王冠の命令に従う猟犬の長が待ち構えている。",
+    "recommendedLevel": 8,
+    "boss": true,
+    "enemies": [
+      "EN-0009",
+      "EN-0008"
+    ],
+    "unlock": {
+      "type": "encounterClear",
+      "encounterId": "ENC-007"
+    },
+    "rewards": {
+      "exp": 900,
+      "memoryExp": 240,
+      "currencies": {
+        "DATA": 1000
+      },
+      "items": {
+        "ITEM-0001": 2,
+        "ITEM-0003": 1
+      }
+    },
+    "firstClear": {
+      "currencies": {
+        "FRAGMENT": 150,
+        "CORE": 10
+      },
+      "items": {
+        "ITEM-0003": 2
+      }
+    }
+  }
+]

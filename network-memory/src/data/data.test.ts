@@ -11,13 +11,36 @@ describe('bundled master data', () => {
     expect(gameData.issues).toEqual([]);
   });
 
-  it('contains at least 10 memories with skills and records', () => {
+  it('contains at least 10 memories, every one with a record', () => {
     expect(gameData.memories.length).toBeGreaterThanOrEqual(10);
+    for (const m of gameData.memories) expect(m.storyId, m.id).not.toBeNull();
+  });
+
+  it('allows non-combat memories but keeps enough combat ones (GDD Ver.2 §5)', () => {
+    const combat = gameData.memories.filter((m) => m.skills.length > 0);
+    const nonCombat = gameData.memories.filter((m) => m.skills.length === 0 && m.passiveSkills.length === 0);
+    expect(combat.length).toBeGreaterThanOrEqual(10);
+    expect(nonCombat.length).toBeGreaterThanOrEqual(1);
+    for (const m of nonCombat) expect(m.fieldAbilities?.length ?? 0, m.id).toBeGreaterThan(0);
+  });
+
+  it('active skills define SP cost', () => {
     for (const m of gameData.memories) {
-      expect(m.skills.length, m.id).toBeGreaterThan(0);
-      expect(m.passiveSkills.length, m.id).toBeGreaterThan(0);
-      expect(m.storyId, m.id).not.toBeNull();
+      for (const id of m.skills) expect(gameData.skillById.get(id)?.cost, id).toBeGreaterThanOrEqual(0);
     }
+  });
+
+  it('has a linear chain of encounters whose drops exist', () => {
+    expect(gameData.encounters.length).toBeGreaterThanOrEqual(8);
+    const ids = new Set<string>();
+    for (const e of gameData.encounters) {
+      if (e.unlock.type === 'encounterClear') expect(ids.has(e.unlock.encounterId), e.id).toBe(true);
+      ids.add(e.id);
+      expect(e.enemies.length).toBeGreaterThan(0);
+      expect(e.enemies.length).toBeLessThanOrEqual(3);
+    }
+    const drops = gameData.encounters.flatMap((e) => e.firstClear?.memories ?? []);
+    expect(drops.length).toBeGreaterThanOrEqual(4);
   });
 
   it('covers every category and rarity', () => {

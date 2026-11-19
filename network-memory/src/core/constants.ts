@@ -1,5 +1,5 @@
 import type { Attribute, MemoryCategory, Rarity, StatKey } from '../types/memory';
-import type { Currency } from '../types/player';
+import type { Currency, LoadoutCapacity, LoadoutSlotType } from '../types/player';
 import type { SkillTarget, StatusId } from '../types/skill';
 
 /**
@@ -94,3 +94,112 @@ export const LEVEL_CAP_PER_LIMIT_BREAK = 10;
 export const STAT_GROWTH_PER_LEVEL = 0.05;
 /** 限界突破 1 段階ごとのステータス補正 */
 export const STAT_BONUS_PER_LIMIT_BREAK = 0.05;
+
+// =====================================================================
+// GDD Ver.2: 主人公・Memory装備・戦闘
+// =====================================================================
+
+
+/** 主人公の基礎ステータス（Lv1）と 1 レベルごとの成長 */
+export const PLAYER_BASE_STATS = { hp: 300, atk: 30, def: 30, spd: 30, tec: 30, res: 30 } as const;
+export const PLAYER_GROWTH_PER_LEVEL = { hp: 50, atk: 6, def: 6, spd: 4, tec: 6, res: 6 } as const;
+export const PLAYER_MAX_LEVEL = 99;
+
+/** 装備枠の初期数（将来拡張可能。セーブデータの loadoutCapacity が優先される） */
+export const DEFAULT_LOADOUT_CAPACITY: LoadoutCapacity = { main: 1, sub: 3, passive: 2 };
+/** 装備枠の上限（拡張時の安全上限） */
+export const MAX_LOADOUT_CAPACITY: LoadoutCapacity = { main: 1, sub: 6, passive: 4 };
+
+export interface SlotRule {
+  label: string;
+  ja: string;
+  description: string;
+  /** ステータス補正の適用倍率 */
+  statRate: number;
+  /** アクティブスキル（MEMORY SKILL）を追加するか */
+  grantsSkills: boolean;
+  /** パッシブ効果が有効になるか */
+  grantsPassives: boolean;
+  /** REWRITE・属性・通常攻撃（戦闘スタイル）を決定するか */
+  definesStyle: boolean;
+}
+
+export const SLOT_RULES: Record<LoadoutSlotType, SlotRule> = {
+  main: {
+    label: 'MAIN',
+    ja: 'メイン',
+    description: '戦闘スタイルの基本（属性・通常攻撃・REWRITE）を決定し、スキルとパッシブも使用可能。補正100%。',
+    statRate: 1,
+    grantsSkills: true,
+    grantsPassives: true,
+    definesStyle: true,
+  },
+  sub: {
+    label: 'SUB',
+    ja: 'サブ',
+    description: '戦闘中に使えるスキル（MEMORY SKILL）を追加する。補正30%。',
+    statRate: 0.3,
+    grantsSkills: true,
+    grantsPassives: false,
+    definesStyle: false,
+  },
+  passive: {
+    label: 'PASSIVE',
+    ja: 'パッシブ',
+    description: 'パッシブ効果と能力値に影響する。補正50%。',
+    statRate: 0.5,
+    grantsSkills: false,
+    grantsPassives: true,
+    definesStyle: false,
+  },
+};
+
+/**
+ * 属性相性。ADVANTAGE[攻撃側] = 有利を取れる防御側の属性。
+ *   DATA → VOID → LIFE → ERROR → DATA（4すくみ）
+ *   ORDER ⇄ CHAOS（互いに有利）
+ */
+export const ATTRIBUTE_ADVANTAGE: Record<Attribute, Attribute[]> = {
+  DATA: ['VOID'],
+  VOID: ['LIFE'],
+  LIFE: ['ERROR'],
+  ERROR: ['DATA'],
+  ORDER: ['CHAOS'],
+  CHAOS: ['ORDER'],
+};
+export const AFFINITY_ADVANTAGE_RATE = 1.5;
+export const AFFINITY_DISADVANTAGE_RATE = 0.75;
+
+/** 戦闘のリソース・ルール */
+export const BATTLE_RULES = {
+  maxEnemies: 3,
+  maxRounds: 30,
+  spMax: 100,
+  spStart: 30,
+  /** 自分の行動開始時に回復する SP */
+  spRegen: 15,
+  /** DEFEND 時に追加で回復する SP */
+  spDefendBonus: 20,
+  /** DEFEND 中の被ダメージ倍率 */
+  defendRate: 0.5,
+  /** ダメージ式 dmg = 攻撃値 × 威力 × K / (K + 防御値) */
+  defenseK: 300,
+  critRate: 0.05,
+  critMultiplier: 1.5,
+  variance: 0.08,
+  /** 侵食の継続ダメージ（最大HP比） */
+  corruptRate: 0.06,
+  /** ステータス倍率の下限・上限 */
+  modifierFloor: 0.25,
+  modifierCeil: 3,
+} as const;
+
+/** 重複して入手した Memory を FRAGMENT に変換するときの量 */
+export const DUPLICATE_FRAGMENTS: Record<Rarity, number> = {
+  COMMON: 10,
+  UNCOMMON: 20,
+  RARE: 40,
+  EPIC: 80,
+  LEGEND: 160,
+  IRREGULAR: 300,
+};

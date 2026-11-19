@@ -7,7 +7,7 @@ import { discover, discoveryState } from './player/discovery';
 import { applyCurrencyChanges } from './player/economy';
 import { acquireMemory } from './player/memories';
 import { createNewSave, starterMemoryIds } from './player/newGame';
-import { assignToSlot, autoFormation, getActiveTeam } from './player/teams';
+import { autoLoadout, equipMemory, getActiveLoadout, loadoutInstanceIds } from './player/loadout';
 import { sanitizeSave } from './save/sanitize';
 import { SAVE_STORAGE_KEY } from './save/schema';
 import { SaveManager, createMemoryStore, parseSaveText } from './save/storage';
@@ -25,7 +25,11 @@ describe('new game', () => {
     expect(s.wallet.DATA).toBe(1000);
     expect(s.wallet.CREDIT).toBe(300);
     expect(s.transactions).toHaveLength(2);
-    expect(getActiveTeam(s).slots.every((x) => x !== null)).toBe(true);
+    const l = getActiveLoadout(s);
+    expect(l.slots.main[0]).not.toBeNull();
+    expect(l.slots.sub.every((x) => x !== null)).toBe(true);
+    expect(l.slots.passive.every((x) => x !== null)).toBe(true);
+    expect(s.inventory['ITEM-0001']).toBe(3);
     // 非スターターは未所持
     expect(discoveryState(s, 'MEM-0012')).toBe('undiscovered');
     expect(discoveryState(s, 'MEM-0001')).toBe('owned');
@@ -76,44 +80,51 @@ describe('economy', () => {
   });
 });
 
-describe('teams', () => {
-  it('swaps when assigning a member already in the team', () => {
+describe('loadout (GDD Ver.2 §6)', () => {
+  const inst = (s: ReturnType<typeof fresh>, memoryId: string) => s.memories.find((m) => m.memoryId === memoryId)!.instanceId;
+
+  it('rejects memories that cannot fill a slot', () => {
     const s = fresh();
-    const team = getActiveTeam(s);
-    const [a, b] = team.slots as string[];
-    const r = assignToSlot(s, team.id, 1, a);
-    expect(r.ok).toBe(true);
-    if (r.ok) expect(getActiveTeam(r.save).slots.slice(0, 2)).toEqual([b, a]);
+    // MEM-0006 は戦闘能力を持たない記録
+    const r = equipMemory(s, gameData, 'LOADOUT-2', 'main', 0, inst(s, 'MEM-0006'));
+    expect(r.ok).toBe(false);
+    expect(equipMemory(s, gameData, 'LOADOUT-2', 'sub', 9, null).ok).toBe(false);
+    expect(equipMemory(s, gameData, 'LOADOUT-2', 'main', 0, 'nope').ok).toBe(false);
   });
 
-  it('prevents the same memory twice in one team', () => {
+  it('moves a memory between slots and keeps memoryId unique', () => {
     let s = fresh();
+    const lux = inst(s, 'MEM-0001');
+    let r = equipMemory(s, gameData, 'LOADOUT-2', 'main', 0, lux);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    r = equipMemory(r.save, gameData, 'LOADOUT-2', 'sub', 1, lux);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    s = r.save;
+    const l = s.loadouts[1];
+    expect(l.slots.main[0]).toBeNull();
+    expect(l.slots.sub[1]).toBe(lux);
+
     const dup = acquireMemory(s, gameData, 'MEM-0001', 'test', AT);
-    expect(dup.ok).toBe(true);
-    if (!dup.ok) return;
-    s = dup.save;
-    const original = s.memories.find((m) => m.memoryId === 'MEM-0001' && m.instanceId !== dup.instance.instanceId)!;
-    const team = s.teams[1];
-    let r = assignToSlot(s, team.id, 0, original.instanceId);
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-    r = assignToSlot(r.save, team.id, 2, dup.instance.instanceId);
-    expect(r.ok).toBe(true);
-    if (r.ok) expect(r.save.teams[1].slots).toEqual([null, null, dup.instance.instanceId]);
+    if (!dup.ok) throw new Error();
+    const r2 = equipMemory(dup.save, gameData, 'LOADOUT-2', 'passive', 0, dup.instance.instanceId);
+    expect(r2.ok).toBe(true);
+    if (r2.ok) {
+      const ids = loadoutInstanceIds(r2.save.loadouts[1]);
+      expect(ids).toEqual([dup.instance.instanceId]);
+    }
   });
 
-  it('auto formation picks the strongest distinct memories', () => {
-    const s = fresh();
-    const r = autoFormation(s, gameData, 'TEAM-2');
+  it('auto loadout fills every slot with distinct memories', () => {
+    const r = autoLoadout(fresh(), gameData, 'LOADOUT-3');
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    const ids = r.save.teams[1].slots.map((id) => r.save.memories.find((m) => m.instanceId === id)!.memoryId);
-    expect(new Set(ids).size).toBe(3);
-  });
-
-  it('rejects unknown instances', () => {
-    expect(assignToSlot(fresh(), 'TEAM-1', 0, 'nope').ok).toBe(false);
-    expect(assignToSlot(fresh(), 'TEAM-1', 5, null).ok).toBe(false);
+    const ids = loadoutInstanceIds(r.save.loadouts[2]);
+    expect(ids).toHaveLength(6);
+    const memIds = ids.map((id) => r.save.memories.find((m) => m.instanceId === id)!.memoryId);
+    expect(new Set(memIds).size).toBe(6);
+    expect(memIds).not.toContain('MEM-0006');
   });
 });
 
@@ -166,7 +177,7 @@ describe('save / load', () => {
     if (loaded.status === 'loaded') {
       expect(loaded.issues).toEqual([]);
       expect(loaded.save.memories).toEqual(s.memories);
-      expect(loaded.save.teams).toEqual(s.teams);
+      expect(loaded.save.loadouts).toEqual(s.loadouts);
       expect(loaded.save.wallet).toEqual(s.wallet);
     }
   });
@@ -189,7 +200,7 @@ describe('save / load', () => {
     tampered.wallet.DATA = -50;
     tampered.wallet.CORE = 'lots';
     tampered.memories[0].level = 99999;
-    tampered.teams[0].slots = [s.memories[0].instanceId, s.memories[0].instanceId, 'ghost'];
+    tampered.loadouts[0].slots = { main: [s.memories[0].instanceId], sub: [s.memories[0].instanceId, 'ghost', null], passive: [null, null] };
     const r = sanitizeSave(tampered, gameData);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -197,7 +208,7 @@ describe('save / load', () => {
     expect(r.save.wallet.CORE).toBe(0);
     const def = gameData.memoryById.get(s.memories[0].memoryId)!;
     expect(r.save.memories[0].level).toBe(maxLevel(def.rarity, 0));
-    expect(r.save.teams[0].slots).toEqual([s.memories[0].instanceId, null, null]);
+    expect(r.save.loadouts[0].slots).toEqual({ main: [s.memories[0].instanceId], sub: [null, null, null], passive: [null, null] });
     expect(r.issues.length).toBeGreaterThan(0);
   });
 

@@ -195,6 +195,10 @@
   animation-delay: 1.05s;
 }
 
+.title__story p:nth-child(5) {
+  animation-delay: 1.4s;
+}
+
 .title__story .is-alert {
   color: #ff8da1;
 }

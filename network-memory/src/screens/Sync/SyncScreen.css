@@ -1,0 +1,325 @@
+.sync {
+  display: grid;
+  gap: 20px;
+  max-width: 900px;
+  margin: 8px auto 0;
+}
+
+@media (min-width: 760px) {
+  .sync {
+    grid-template-columns: 320px 1fr;
+    align-items: center;
+    gap: 36px;
+    min-height: 60vh;
+  }
+}
+
+.sync__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 24px 0;
+}
+
+.sync__rings {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.sync__rings span {
+  position: absolute;
+  width: 70%;
+  aspect-ratio: 1;
+  border: 1px solid var(--a-c);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.sync--detected .sync__rings span,
+.sync--contact .sync__rings span {
+  animation: sync-ring 2.6s ease-out infinite;
+}
+
+.sync--contact .sync__rings span {
+  animation-duration: 1.1s;
+  border-color: #c7a8ff;
+}
+
+.sync__rings span:nth-child(2) {
+  animation-delay: 0.8s;
+}
+
+.sync__rings span:nth-child(3) {
+  animation-delay: 1.6s;
+}
+
+@keyframes sync-ring {
+  from {
+    transform: scale(0.6);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.sync__card {
+  position: relative;
+  width: min(62vw, 260px);
+  padding: 4px;
+  background: linear-gradient(160deg, var(--r-c), color-mix(in srgb, var(--r-c) 18%, #000));
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  transition: box-shadow 0.6s;
+}
+
+.sync--detected .sync__card {
+  animation: sync-pulse 2.2s ease-in-out infinite;
+  background: linear-gradient(160deg, #46557a, #141d33);
+}
+
+.sync--contact .sync__card {
+  animation: sync-shake 0.18s steps(2) infinite;
+  background: linear-gradient(160deg, #c7a8ff, #2a1748);
+}
+
+.sync--failed .sync__card {
+  background: linear-gradient(160deg, var(--c-error), #2a0a12);
+  filter: saturate(0.6);
+}
+
+.sync--complete .sync__card {
+  box-shadow: 0 0 60px color-mix(in srgb, var(--r-c) 60%, transparent);
+  animation: sync-reveal 0.9s var(--ease-out) both;
+}
+
+.sync__scan {
+  position: absolute;
+  inset: 4px;
+  background: linear-gradient(180deg, transparent 0%, rgba(199, 168, 255, 0.6) 48%, rgba(255, 255, 255, 0.9) 50%, rgba(199, 168, 255, 0.6) 52%, transparent 100%);
+  background-size: 100% 40%;
+  background-repeat: no-repeat;
+  animation: sync-scan 0.9s linear infinite;
+  mix-blend-mode: screen;
+}
+
+.sync__flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  animation: sync-flash 0.9s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes sync-pulse {
+  0%,
+  100% {
+    filter: brightness(0.9);
+  }
+  50% {
+    filter: brightness(1.4);
+  }
+}
+
+@keyframes sync-shake {
+  0% {
+    transform: translate(-1px, 0);
+  }
+  100% {
+    transform: translate(1px, 1px);
+  }
+}
+
+@keyframes sync-scan {
+  from {
+    background-position: 0 -60%;
+  }
+  to {
+    background-position: 0 160%;
+  }
+}
+
+@keyframes sync-flash {
+  from {
+    opacity: 0.95;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes sync-reveal {
+  from {
+    transform: scale(0.92) rotateY(70deg);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.sync__info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sync__kicker {
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  color: #c7a8ff;
+}
+
+.sync--failed .sync__kicker {
+  color: var(--c-error);
+}
+
+.sync__kicker.is-ok {
+  color: var(--c-success);
+}
+
+.sync__title {
+  font-family: var(--f-body);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.sync__title--name {
+  font-size: clamp(26px, 6vw, 36px);
+  animation: reveal 0.6s var(--ease-out) both;
+}
+
+.sync__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sync__text {
+  font-size: 14px;
+}
+
+.sync__conds ul,
+.sync__gained ul,
+.sync__unmet {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.sync__conds li {
+  color: var(--c-text-dim);
+}
+
+.sync__conds li.is-met {
+  color: var(--c-success);
+}
+
+.sync__unmet li {
+  padding: 8px 12px;
+  border-left: 2px solid var(--c-error);
+  background: var(--c-error-soft);
+}
+
+.sync__gained li .mono {
+  display: inline-block;
+  min-width: 72px;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--a-c);
+}
+
+.sync__gained li {
+  animation: reveal 0.5s var(--ease-out) both;
+}
+
+.sync__gained li:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.sync__gained li:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.sync__gained li:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.sync__cta {
+  align-self: flex-start;
+  min-width: 240px;
+  min-height: 52px;
+}
+
+.sync__progress {
+  position: relative;
+  height: 22px;
+  border: 1px solid #c7a8ff;
+  background: rgba(10, 6, 24, 0.7);
+}
+
+.sync__progress-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, rgba(155, 107, 255, 0.4), #c7a8ff);
+  box-shadow: 0 0 16px #9b6bff;
+  transition: width 0.1s linear;
+}
+
+.sync--failed .sync__progress {
+  border-color: var(--c-error);
+}
+
+.sync--failed .sync__progress-fill {
+  background: linear-gradient(90deg, rgba(255, 59, 92, 0.3), var(--c-error));
+  box-shadow: none;
+}
+
+.sync__progress .mono {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+}
+
+.sync__log {
+  min-height: 110px;
+  font-size: 12px;
+  line-height: 1.9;
+  color: #c7a8ff;
+}
+
+.sync__log p {
+  animation: reveal 0.25s ease-out both;
+}
+
+.sync__log .is-alert {
+  color: var(--c-error);
+}
+
+.sync__quote {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 2px solid var(--a-c);
+  background: rgba(3, 8, 18, 0.55);
+  font-size: 14px;
+}
+
+.sync__registered {
+  font-size: 13px;
+  color: var(--c-success);
+}
+
+.sync__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

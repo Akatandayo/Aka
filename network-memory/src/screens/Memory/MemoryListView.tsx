@@ -4,7 +4,8 @@ import { MemoryCard } from '../../components/memory/MemoryCard';
 import { ATTRIBUTE_META, CATEGORY_META, RARITY_META } from '../../core/constants';
 import { DEFAULT_QUERY, SORT_KEYS, SORT_LABEL, activeFilterCount, applyQuery, buildEntries, type MemoryQuery, type SortKey } from '../../core/memory/query';
 import { collectionSummary } from '../../core/player/discovery';
-import { teamMembership } from '../../core/player/teams';
+import { loadoutMembership, placementLabel } from '../../core/player/loadout';
+import { checkSyncConditions } from '../../core/player/sync';
 import { usePlayer } from '../../state/GameProvider';
 import { ATTRIBUTES, MEMORY_CATEGORIES, RARITIES } from '../../types/memory';
 import { useMemoryQuery } from './memoryQueryState';
@@ -23,7 +24,8 @@ export function MemoryListView() {
 
   const entries = useMemo(() => buildEntries(save, data), [save, data]);
   const visible = useMemo(() => applyQuery(entries, query), [entries, query]);
-  const membership = useMemo(() => teamMembership(save), [save]);
+  const membership = useMemo(() => loadoutMembership(save), [save]);
+  const pending = save.archive.pendingSyncIds.map((id) => data.memoryById.get(id)).filter((d): d is NonNullable<typeof d> => Boolean(d));
   const summary = useMemo(() => collectionSummary(save, data), [save, data]);
   const filterCount = activeFilterCount(query);
 
@@ -103,6 +105,36 @@ export function MemoryListView() {
         </div>
       )}
 
+      {pending.length > 0 && (
+        <section className="panel mlist__pending" aria-label="同期待ちのMemory">
+          <div className="panel__title" style={{ color: '#c7a8ff', marginBottom: 0 }}>
+            <span>PENDING SYNC</span>
+            <small>検出済み・未同期のMemory {pending.length}件</small>
+          </div>
+          <div className="mlist__pending-grid">
+            {pending.map((def) => {
+              const check = checkSyncConditions(save, data, def.id);
+              return (
+                <div key={def.id} className="mlist__pending-item">
+                  <MemoryCard def={def} mask="silhouette" size="sm" onClick={() => nav({ name: 'sync', memoryId: def.id })} ariaLabel={`${def.name} に接触する`} />
+                  <button type="button" className={`btn btn--sm ${check.ok ? 'btn--purple' : 'btn--ghost'}`} onClick={() => nav({ name: 'sync', memoryId: def.id })}>
+                    {check.ok ? 'SYNC' : '条件未達'}
+                  </button>
+                  {!check.ok && (
+                    <p className="mlist__pending-cond">
+                      {check.conditions
+                        .filter((c) => !c.met)
+                        .map((c) => c.text)
+                        .join(' / ')}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <p className="mlist__count mono">
         <span>
           SHOWING <strong>{visible.length}</strong> / {entries.length}
@@ -122,13 +154,13 @@ export function MemoryListView() {
       ) : (
         <div className="mlist__grid">
           {visible.map((e, i) => {
-            const teams = membership.get(e.instance.instanceId);
+            const places = membership.get(e.instance.instanceId)?.filter((p) => p.loadoutId === save.activeLoadoutId);
             return (
               <div key={e.instance.instanceId} className="mlist__item" style={{ animationDelay: `${Math.min(i, 20) * 0.03}s` }}>
                 <MemoryCard
                   def={e.def}
                   entry={e}
-                  badge={teams ? teams.map((t) => `T${t.replace('TEAM-', '')}`).join(' ') : undefined}
+                  badge={places?.length ? places.map(placementLabel).join(' ').replace(/^L\d+ /, '') : undefined}
                   onClick={() => nav({ name: 'memoryDetail', instanceId: e.instance.instanceId })}
                   ariaLabel={`${e.def.name} Lv.${e.instance.level}`}
                 />

@@ -1,9 +1,13 @@
-# NETWORK - Memory: Re:Collection
+# NETWORK - Memory: ReCollection
 
 あらゆる存在が「記録（Memory）」として刻まれる世界 **Network** を舞台にした、
-Memory 収集型のストーリー RPG（ブラウザ / スマートフォン・PC 対応）。
+ストーリー重視型・Memory 収集 RPG（ブラウザ / スマートフォン・PC 対応）。
 
-> 現在 **PHASE 1（基礎システム）** まで実装済み。各フェーズの状況は [docs/ROADMAP.md](docs/ROADMAP.md) を参照。
+主人公はオリジナルの探索者。Memory に触れることで、その記録に宿る能力を自分自身に **同期（MEMORY SYNC）** し、
+装備した Memory の力で戦い、流出した記録を回収していく。
+
+> 現在 **PHASE 2（Memory SYNC・戦闘）** まで実装済み。正式な基本設計は GDD Ver.2。
+> 各フェーズの状況は [docs/ROADMAP.md](docs/ROADMAP.md)、設計は [docs/DESIGN.md](docs/DESIGN.md) を参照。
 
 ## 起動方法
 
@@ -18,64 +22,82 @@ npm run dev          # http://localhost:5173 で起動（同一LANのスマホ�
 | `npm run dev` | 開発サーバー |
 | `npm run build` | 型チェック + 本番ビルド（`dist/`。サブパス配置にも対応） |
 | `npm run preview` | ビルド結果の確認 |
-| `npm test` | ゲームロジックとマスターデータのテスト |
+| `npm test` | ゲームロジック・Battle Engine・マスターデータのテスト（バランス検証を含む） |
 | `npm run validate:data` | マスターデータ（JSON）の検証のみ |
 | `npm run typecheck` | TypeScript の型チェック |
 
 オンライン機能（Supabase）は未接続でも、すべてのローカル機能が動作します。
 進行状況はブラウザの localStorage に自動保存され、SETTINGS から JSON で書き出し/読み込みできます。
+PHASE 1 のセーブデータは自動的に新形式（v2）へ変換されます。
+
+## 遊び方（PHASE 2）
+
+1. **MEMORY › LOADOUT** で Memory を装備する（メイン 1 / サブ 3 / パッシブ 2）
+2. **BATTLE** で流出反応に接続し、ATTACK / DEFEND / MEMORY SKILL / ITEM / REWRITE で戦う
+3. 初回クリアで Memory の反応を検出 → **MEMORY SYNC** で接触・同期すると新しい能力が使えるようになる
+4. 装備して戦った Memory は同期が深まってレベルが上がり、記録（ストーリー断片）が解放されていく
 
 ## 技術構成
 
-- React 19 + TypeScript + Vite
-- CSS（デザイントークン方式、外部 UI ライブラリなし）
-- Vitest（ロジック・データ検証）
-- Supabase（PostgreSQL / Auth / Realtime / Edge Functions）… PHASE 5 で接続。スキーマは `supabase/migrations/` に設計済み
+- React 19 + TypeScript + Vite / CSS（デザイントークン方式、外部 UI ライブラリなし）
+- Vitest（ロジック・Battle Engine・データ検証・キャンペーンのバランスシミュレーション）
+- Supabase（PostgreSQL / Auth / Realtime / Edge Functions）… PHASE 5 で接続。スキーマは `supabase/migrations/` に設計・検証済み
 
 ## ディレクトリ構成
 
 ```
 network-memory/
 ├── docs/                 設計書・ロードマップ
-├── supabase/migrations/  DB スキーマ（PHASE 5 用・検証済み）
-├── public/               静的ファイル（favicon、将来の画像・音声）
+├── supabase/migrations/  DB スキーマ（PHASE 5 用・ローカル PostgreSQL で検証済み）
 └── src/
     ├── app/              ルーティング・画面登録・エラーバウンダリ
-    ├── types/            データ型定義（Memory / Skill / Record / World / Player）
+    ├── types/            データ型（Memory / Skill / Record / World / Enemy / Item / Player）
     ├── core/             UI から独立したゲームロジック（純粋関数・テスト対象）
+    │   ├── battle/       Battle Engine（決定的・リプレイ可能）・戦闘準備・結果反映・オート戦闘
     │   ├── data/         マスターデータの読み込み・検証
     │   ├── memory/       ステータス計算・検索/ソート・記録の解放判定
-    │   ├── player/       新規開始・入手・編成・通貨・発見
+    │   ├── player/       主人公・装備・MEMORY SYNC・成長・通貨・発見
     │   └── save/         セーブの保存/読込・マイグレーション・修復
     ├── data/             マスターデータ（JSON）
     ├── state/            React 状態管理（GameProvider / reducer）
-    ├── components/       共通 UI（カード・イラスト・ダイアログ等）
+    ├── components/       共通 UI（カード・イラスト・主人公・敵・ダイアログ等）
     ├── screens/          画面（1画面 = 1ディレクトリ）
     └── styles/           デザイントークン・共通スタイル
 ```
 
-## Memory の追加方法
+## データの追加方法
 
-コードの変更は不要です。
+コードの変更は不要です。JSON を追加して `npm run validate:data` で検証します。
 
-1. `src/data/memories/` に JSON を追加（既存ファイルへの追記、または新規ファイル。1ファイルに配列でも単体でも可）
-2. スキルを `src/data/skills/`、記録（ストーリー断片）を `src/data/records/` に追加
-3. `npm run validate:data` で検証（ID 重複・存在しない参照・不正な値を検出）
+| 追加するもの | 置き場所 |
+| --- | --- |
+| Memory | `src/data/memories/*.json` |
+| スキル（Memory・敵・REWRITE） | `src/data/skills/*.json` |
+| Memory 固有の記録（ストーリー断片） | `src/data/records/*.json` |
+| 敵 | `src/data/enemies/*.json` |
+| 流出反応（エンカウント） | `src/data/encounters/*.json` |
+| アイテム | `src/data/items.json` |
+| WORLD | `src/data/worlds.json` |
 
 ```jsonc
+// Memory の例
 {
-  "id": "MEM-0013",
+  "id": "MEM-0017",
   "name": "名前",
   "category": "HUMAN",          // HUMAN / CREATURE / CONCEPT / OBJECT / LOCATION / EVENT / UNKNOWN
   "rarity": "RARE",             // COMMON / UNCOMMON / RARE / EPIC / LEGEND / IRREGULAR
   "attribute": "DATA",          // DATA / VOID / ERROR / LIFE / CHAOS / ORDER
   "description": "説明",
-  "illustration": "gen:human",  // 画像パス（例 "assets/memories/MEM-0013.webp"）または手続き生成モチーフ
-  "hp": 600, "atk": 70, "def": 60, "spd": 70, "tec": 70, "res": 60,
-  "skills": ["SK-xxxx"], "passiveSkills": ["PS-xxxx"], "rewrite": "RW-xxxx",
+  "illustration": "gen:human",  // 画像パス（例 "assets/memories/MEM-0017.webp"）または手続き生成モチーフ
+  "hp": 600, "atk": 70, "def": 60, "spd": 70, "tec": 70, "res": 60,   // 装備時のステータス補正（Lv1）
+  "skills": ["SK-xxxx"], "passiveSkills": ["PS-xxxx"], "rewrite": "RW-xxxx",   // 戦闘能力が無い記録は空配列でよい
+  "attackStyle": { "name": "斬撃", "scale": "atk", "power": 1.0, "hits": 1 },
+  "syncCondition": [{ "type": "playerLevel", "value": 5 }],
+  "fieldAbilities": [{ "id": "FA-xxxx", "name": "探索能力", "description": "…" }],
+  "persona": { "personality": "人物の性格", "note": "記憶・口癖など" },
   "acquisitionMethod": [{ "type": "explore", "label": "NULL CITY 探索", "worldId": "WORLD-001" }],
   "relatedMemories": ["MEM-0001"],
-  "storyId": "REC-0013"
+  "storyId": "REC-0017"
 }
 ```
 

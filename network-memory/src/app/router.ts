@@ -8,8 +8,11 @@ import type { MenuScreenId } from './screens';
  */
 export type Route =
   | { name: 'lobby' }
-  | { name: 'memory'; tab: 'list' | 'team' }
+  | { name: 'memory'; tab: 'list' | 'loadout' }
   | { name: 'memoryDetail'; instanceId: string }
+  | { name: 'sync'; memoryId: string }
+  | { name: 'battle' }
+  | { name: 'battleRun'; encounterId: string }
   | { name: 'profile' }
   | { name: 'settings' }
   | { name: 'planned'; screen: MenuScreenId };
@@ -18,7 +21,6 @@ const PLANNED: Record<string, MenuScreenId> = {
   story: 'STORY',
   world: 'WORLD',
   archive: 'ARCHIVE',
-  battle: 'BATTLE',
   shop: 'SHOP',
 };
 
@@ -34,9 +36,14 @@ export function parseHash(hash: string): Route {
     case 'lobby':
       return { name: 'lobby' };
     case 'memory':
-      if (sub === 'team') return { name: 'memory', tab: 'team' };
+      // 'team' は PHASE 1 の URL（互換のため装備画面へ）
+      if (sub === 'loadout' || sub === 'team') return { name: 'memory', tab: 'loadout' };
       if (sub) return { name: 'memoryDetail', instanceId: sub };
       return { name: 'memory', tab: 'list' };
+    case 'sync':
+      return sub ? { name: 'sync', memoryId: sub } : { name: 'memory', tab: 'list' };
+    case 'battle':
+      return sub ? { name: 'battleRun', encounterId: sub } : { name: 'battle' };
     case 'profile':
       return { name: 'profile' };
     case 'settings':
@@ -52,9 +59,15 @@ export function toHash(route: Route): string {
     case 'lobby':
       return '#/lobby';
     case 'memory':
-      return route.tab === 'team' ? '#/memory/team' : '#/memory';
+      return route.tab === 'loadout' ? '#/memory/loadout' : '#/memory';
     case 'memoryDetail':
       return `#/memory/${encodeURIComponent(route.instanceId)}`;
+    case 'sync':
+      return `#/sync/${encodeURIComponent(route.memoryId)}`;
+    case 'battle':
+      return '#/battle';
+    case 'battleRun':
+      return `#/battle/${encodeURIComponent(route.encounterId)}`;
     case 'profile':
       return '#/profile';
     case 'settings':

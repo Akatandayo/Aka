@@ -6,13 +6,14 @@ import { MemoryArt } from '../../components/memory/MemoryArt';
 import { MemoryCard } from '../../components/memory/MemoryCard';
 import { StatHexagon } from '../../components/memory/StatHexagon';
 import { useToast } from '../../components/ui/Toast';
-import { ATTRIBUTE_META, CATEGORY_META, MAX_LIMIT_BREAK, RARITY_META, STAT_META, STATUS_META, TARGET_LABEL } from '../../core/constants';
+import { ATTRIBUTE_META, CATEGORY_META, MAX_LIMIT_BREAK, RARITY_META, SLOT_RULES, STAT_META, STATUS_META, TARGET_LABEL } from '../../core/constants';
 import type { GameData } from '../../core/data/gameData';
 import { applyQuery, buildEntries, toEntry, type MemoryEntry } from '../../core/memory/query';
 import { describeUnlock, evaluateFragments, ownedMemoryIdSet } from '../../core/memory/records';
 import { baseStats, expToNext, maxLevel } from '../../core/memory/stats';
 import { discoveryState } from '../../core/player/discovery';
-import { teamMembership } from '../../core/player/teams';
+import { loadoutMembership, placementLabel } from '../../core/player/loadout';
+import { checkSyncConditions } from '../../core/player/sync';
 import { usePlayer } from '../../state/GameProvider';
 import { useSessionState } from '../../state/sessionState';
 import { STAT_KEYS } from '../../types/memory';
@@ -75,7 +76,8 @@ export function MemoryDetailScreen({ instanceId }: { instanceId: string }) {
 
   const entry = toEntry(instance, def);
   const cap = maxLevel(def.rarity, instance.limitBreak);
-  const memberOf = teamMembership(save).get(instance.instanceId) ?? [];
+  const placements = loadoutMembership(save).get(instance.instanceId) ?? [];
+  const combat = def.skills.length > 0 || def.passiveSkills.length > 0;
   const vars = {
     ['--rarity-c' as string]: RARITY_META[def.rarity].color,
     ['--attr-c' as string]: ATTRIBUTE_META[def.attribute].color,
@@ -135,7 +137,10 @@ export function MemoryDetailScreen({ instanceId }: { instanceId: string }) {
               <div className="meter" style={{ ['--meter-c' as string]: ATTRIBUTE_META[def.attribute].color }}>
                 <div className="meter__fill" style={{ width: `${Math.min(100, (instance.exp / expToNext(instance.level)) * 100)}%` }} />
               </div>
-              <p className="mdetail__hint">レベルアップ・スキル強化・限界突破・融合は PHASE 2（育成）で実装予定です。</p>
+              <p className="mdetail__hint">
+                {combat ? '装備して戦うと同期経験値を得てレベルが上がり、補正値が成長します。' : 'この記録は戦闘では使用しません（探索・ストーリー用）。'}
+                スキル強化・限界突破・融合は未実装です（拡張フェーズで実装予定）。
+              </p>
             </div>
 
             {def.quote && <blockquote className="mdetail__quote">{def.quote}</blockquote>}
@@ -150,9 +155,11 @@ export function MemoryDetailScreen({ instanceId }: { instanceId: string }) {
               >
                 {instance.favorite ? '★ お気に入り' : '☆ お気に入り'}
               </button>
-              <button type="button" className="btn btn--sm btn--purple" onClick={() => nav({ name: 'memory', tab: 'team' })}>
-                編成{memberOf.length > 0 && `（${memberOf.map((t) => t.replace('TEAM-', 'T')).join(' ')} 所属）`}
-              </button>
+              {combat && (
+                <button type="button" className="btn btn--sm btn--purple" onClick={() => nav({ name: 'memory', tab: 'loadout' })}>
+                  装備{placements.length > 0 && `（${placements.map(placementLabel).join(' / ')}）`}
+                </button>
+              )}
             </div>
           </div>
         </section>
@@ -209,12 +216,21 @@ function RecordTabs({ tab, setTab, save, data, entry }: { tab: DetailTab; setTab
 function StatusTab({ entry }: { entry: MemoryEntry }) {
   const base = baseStats(entry.def);
   const color = ATTRIBUTE_META[entry.def.attribute].color;
+  const combat = entry.def.skills.length > 0 || entry.def.passiveSkills.length > 0;
   return (
     <div className="mdetail__status">
       <div className="panel">
         <p className="section-label">DESCRIPTION</p>
         <p className="mdetail__desc">{entry.def.description}</p>
       </div>
+      {entry.def.persona && (
+        <div className="panel mdetail__persona">
+          <p className="section-label">PERSONA 人格記録</p>
+          <p className="mdetail__desc">{entry.def.persona.personality}</p>
+          {entry.def.persona.note && <p className="dim mdetail__persona-note">{entry.def.persona.note}</p>}
+        </div>
+      )}
+      {!combat && <p className="notice notice--planned">この記録は戦闘能力を持たず、ステータス補正もありません。探索能力やストーリー進行に使われます（SKILLタブ参照）。</p>}
       <div className="mdetail__status-grid">
         <div className="panel">
           <p className="section-label">PARAMETER</p>
@@ -236,7 +252,9 @@ function StatusTab({ entry }: { entry: MemoryEntry }) {
               ))}
             </tbody>
           </table>
-          <p className="mdetail__hint">数値は現在のレベルでの値。バーは基礎値（資質）を示します。</p>
+          <p className="mdetail__hint">
+            数値はこのMemoryの<strong>ステータス補正</strong>（現在のレベル）。装備すると主人公に加算されます: {(['main', 'sub', 'passive'] as const).map((t) => `${SLOT_RULES[t].ja} ${Math.round(SLOT_RULES[t].statRate * 100)}%`).join(' / ')}。バーは資質を示します。
+          </p>
         </div>
         <div className="panel mdetail__hex">
           <p className="section-label">APTITUDE</p>
@@ -262,6 +280,7 @@ function SkillCard({ skill, level }: { skill: SkillDefinition; level?: number })
       <div className="skill__meta">
         {skill.attribute && <AttributeTag attribute={skill.attribute} />}
         {skill.target && <span className="tag">{TARGET_LABEL[skill.target]}</span>}
+        {skill.kind === 'active' && <span className="tag">SP {skill.cost ?? 0}</span>}
         {skill.kind === 'active' && <span className="tag">CT {skill.cooldown ?? 0}</span>}
         {skill.kind === 'passive' && skill.trigger && <span className="tag">{TRIGGER_LABEL[skill.trigger]}</span>}
       </div>
@@ -285,14 +304,35 @@ function SkillTab({ entry, data }: { entry: MemoryEntry; data: GameData }) {
   const rewrite = entry.def.rewrite ? data.skillById.get(entry.def.rewrite) : undefined;
   return (
     <div className="mdetail__skills">
-      <p className="notice notice--planned">スキルの効果は PHASE 2 の戦闘システム（Battle Engine）で使用されます。現在は内容の確認のみ可能です。</p>
-      <p className="section-label">ACTIVE SKILL</p>
+      {actives.length + passives.length === 0 ? (
+        <p className="notice notice--planned">この記録は戦闘スキルを持たない。</p>
+      ) : (
+        <p className="notice">メイン・サブ枠に装備するとアクティブスキル（MEMORY SKILL）、メイン・パッシブ枠に装備するとパッシブ効果が戦闘で使えます。REWRITEはメイン装備時のみ。</p>
+      )}
+      {(entry.def.fieldAbilities?.length ?? 0) > 0 && (
+        <>
+          <p className="section-label">FIELD ABILITY 探索能力</p>
+          <div className="skill-grid">
+            {entry.def.fieldAbilities!.map((f) => (
+              <article key={f.id} className="skill skill--field">
+                <header className="skill__head">
+                  <span className="skill__kind mono">FIELD</span>
+                  <h4 className="skill__name">{f.name}</h4>
+                </header>
+                <p className="skill__desc">{f.description}</p>
+                <p className="mdetail__hint">WORLD探索（PHASE 4）で使用されます。</p>
+              </article>
+            ))}
+          </div>
+        </>
+      )}
+      {actives.length > 0 && <p className="section-label">ACTIVE SKILL</p>}
       <div className="skill-grid">
         {actives.map((s) => (
           <SkillCard key={s.id} skill={s} level={entry.instance.skillLevels[s.id] ?? 1} />
         ))}
       </div>
-      <p className="section-label">PASSIVE SKILL</p>
+      {passives.length > 0 && <p className="section-label">PASSIVE SKILL</p>}
       <div className="skill-grid">
         {passives.map((s) => (
           <SkillCard key={s.id} skill={s} />
@@ -419,6 +459,10 @@ function LinkTab({ entry, save, data }: { entry: MemoryEntry; save: PlayerSave; 
 
       <div className="links__info">
         <div className="panel">
+          <p className="section-label">SYNC CONDITION 同期条件</p>
+          <SyncConditions memoryId={entry.def.id} save={save} data={data} />
+        </div>
+        <div className="panel">
           <p className="section-label">ACQUISITION 入手方法</p>
           <ul className="links__list">
             {entry.def.acquisitionMethod.map((a, i) => (
@@ -450,5 +494,22 @@ function LinkTab({ entry, save, data }: { entry: MemoryEntry; save: PlayerSave; 
         </div>
       </div>
     </div>
+  );
+}
+
+function SyncConditions({ memoryId, save, data }: { memoryId: string; save: PlayerSave; data: GameData }) {
+  const check = checkSyncConditions(save, data, memoryId);
+  if (check.conditions.length === 0) return <p className="dim" style={{ fontSize: 13 }}>条件なし（接触するだけで同期できる）</p>;
+  return (
+    <ul className="links__list">
+      {check.conditions.map((c, i) => (
+        <li key={i}>
+          <span className={`tag ${c.met ? '' : 'tag--planned'}`} style={c.met ? ({ ['--tag-c' as string]: 'var(--c-success)' } as CSSProperties) : undefined}>
+            {c.met ? '達成' : '未達'}
+          </span>{' '}
+          {c.text}
+        </li>
+      ))}
+    </ul>
   );
 }

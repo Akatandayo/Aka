@@ -2,7 +2,7 @@
  * プレイヤーデータ（セーブデータ）の型定義。
  *
  * ローカル保存（localStorage）を一次ストレージとし、
- * PHASE 5 で Supabase（PlayerProfiles / PlayerMemories / PlayerTeams / Inventory / Transactions）と同期する。
+ * PHASE 5 で Supabase（PlayerProfiles / PlayerMemories / PlayerLoadouts / Inventory / Transactions / BattleRecords）と同期する。
  * 構造を変更するときは SAVE_VERSION を上げ、core/save/migrations.ts にマイグレーションを追加すること。
  */
 
@@ -21,6 +21,7 @@ export const TRANSACTION_REASONS = [
   'QUEST_REWARD',
   'BATTLE_REWARD',
   'STORY_REWARD',
+  'DUPLICATE_MEMORY',
   'ADJUSTMENT',
 ] as const;
 export type TransactionReason = (typeof TRANSACTION_REASONS)[number];
@@ -37,12 +38,21 @@ export interface Transaction {
   note?: string;
 }
 
+/** 主人公の外見（将来の外見カスタマイズ用。現在はプリセットとカラーのみ） */
+export interface PlayerAvatar {
+  preset: string;
+  color: string;
+}
+
+/** 主人公（プレイヤー自身が操作する唯一の戦闘キャラクター） */
 export interface PlayerProfile {
   playerId: string;
   name: string;
   title: string;
   level: number;
   exp: number;
+  avatar: PlayerAvatar;
+  bio: string;
   createdAt: string;
   lastLoginAt: string;
 }
@@ -65,13 +75,44 @@ export interface PlayerMemory {
   acquiredFrom: string;
 }
 
-export const TEAM_SIZE = 3;
+/** Memory 装備枠の種類 */
+export const LOADOUT_SLOT_TYPES = ['main', 'sub', 'passive'] as const;
+export type LoadoutSlotType = (typeof LOADOUT_SLOT_TYPES)[number];
+export type LoadoutCapacity = Record<LoadoutSlotType, number>;
 
-export interface PlayerTeam {
+/** Memory 装備（プリセット）。各配列の要素は PlayerMemory.instanceId（空き枠は null） */
+export interface PlayerLoadout {
   id: string;
   name: string;
-  /** PlayerMemory.instanceId（空き枠は null）。長さは常に TEAM_SIZE */
-  slots: (string | null)[];
+  slots: Record<LoadoutSlotType, (string | null)[]>;
+}
+
+export interface EncounterProgress {
+  clears: number;
+  bestRounds: number;
+  firstClearedAt: string;
+}
+
+export type BattleResultKind = 'victory' | 'defeat' | 'retreat';
+
+/** ローカルの戦闘記録（PHASE 5 で BattleRecords と同期・サーバー再計算に使用） */
+export interface BattleRecordEntry {
+  id: string;
+  encounterId: string;
+  result: BattleResultKind;
+  rounds: number;
+  seed: number;
+  /** 入力コマンド（シードと合わせて戦闘を再現できる） */
+  commands: unknown[];
+  at: string;
+}
+
+export interface BattleProgress {
+  encounters: Record<string, EncounterProgress>;
+  wins: number;
+  losses: number;
+  retreats: number;
+  records: BattleRecordEntry[];
 }
 
 export type FxLevel = 'full' | 'reduced';
@@ -91,6 +132,8 @@ export interface ArchiveState {
   discoveredMemoryIds: string[];
   /** 閲覧済みの記録断片 ID */
   readFragmentIds: string[];
+  /** 検出済みで、まだ同期していない Memory（MEMORY SYNC 待ち） */
+  pendingSyncIds: string[];
 }
 
 export interface ProgressState {
@@ -107,9 +150,12 @@ export interface PlayerSave {
   wallet: Wallet;
   transactions: Transaction[];
   memories: PlayerMemory[];
-  teams: PlayerTeam[];
-  activeTeamId: string;
+  loadouts: PlayerLoadout[];
+  activeLoadoutId: string;
+  /** 装備枠の数（将来の拡張に備えてプレイヤーごとに保持） */
+  loadoutCapacity: LoadoutCapacity;
   archive: ArchiveState;
+  battle: BattleProgress;
   /** アイテム ID → 所持数 */
   inventory: Record<string, number>;
   progress: ProgressState;

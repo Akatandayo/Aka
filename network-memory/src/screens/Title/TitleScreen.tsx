@@ -7,7 +7,7 @@ import './TitleScreen.css';
 
 type Phase = 'boot' | 'title' | 'register' | 'receive';
 
-const APP_VERSION = '0.1.0';
+const APP_VERSION = '0.2.0';
 
 /**
  * 起動シーケンス → タイトル → 探索者登録 → 初期Memory受領。
@@ -75,7 +75,7 @@ export function TitleScreen({ onEnter }: { onEnter: () => void }) {
           </h1>
           <p className="title__sub">
             <span className="title__dash" />
-            Memory: <em>Re:Collection</em>
+            Memory: <em>ReCollection</em>
             <span className="title__dash" />
           </p>
         </header>
@@ -109,7 +109,8 @@ export function TitleScreen({ onEnter }: { onEnter: () => void }) {
               <p>Networkは、あらゆる存在が「記録」として刻まれる世界。</p>
               <p>人も、生き物も、概念も、出来事も——すべてはMemoryとして保存されている。</p>
               <p className="is-alert">しかし今、そのMemoryがNetwork各地へ流出し続けている。</p>
-              <p>流出したMemoryを回収し、記録に隠された真実を解き明かす。それが、探索者の役目だ。</p>
+              <p>あなたは、Memoryに触れることで、その記録に宿る能力を自身に同期できる特殊な探索者だ。</p>
+              <p>流出したMemoryを回収し、失われた世界を修復し、記録に隠された真実を解き明かす。</p>
             </div>
             <label className="field">
               <span className="field__label">探索者名（{PLAYER_NAME_MAX}文字まで）</span>
@@ -137,7 +138,7 @@ export function TitleScreen({ onEnter }: { onEnter: () => void }) {
         {phase === 'receive' && save && <ReceiveStarter onDone={onEnter} />}
       </div>
       <footer className="title__footer mono">
-        v{APP_VERSION} · PHASE 1 BUILD · LOCAL SAVE
+        v{APP_VERSION} · PHASE 2 BUILD · LOCAL SAVE
       </footer>
     </div>
   );
@@ -156,9 +157,9 @@ function ReceiveStarter({ onDone }: { onDone: () => void }) {
     <section className="receive">
       <p className="mono title__sys reveal">{'> CONNECTION ESTABLISHED. WELCOME, EXPLORER.'}</p>
       <h2 className="receive__title reveal">
-        {entries.length}件のMemoryを受領しました
+        {entries.length}件のMemoryと同期しました
       </h2>
-      <p className="receive__text reveal dim">流出を免れた記録の一部が、あなたの探索者端末に転送されました。</p>
+      <p className="receive__text reveal dim">流出を免れた記録の一部に触れ、その能力があなたに同期されました。戦闘ではMemoryを装備し、あなた自身がその力を使って戦います。</p>
       <div className="receive__grid">
         {entries.map((e, i) => (
           <div key={e.instance.instanceId} className="receive__card" style={{ animationDelay: `${0.25 + i * 0.11}s` }}>

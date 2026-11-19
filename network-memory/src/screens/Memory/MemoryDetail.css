@@ -675,3 +675,22 @@
   color: var(--c-text-mute);
   letter-spacing: 0;
 }
+
+.mdetail__persona::before {
+  background: var(--attr-c);
+  box-shadow: 0 0 12px var(--attr-c);
+}
+
+.mdetail__persona-note {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.skill--field::before {
+  background: var(--c-warn);
+  box-shadow: none;
+}
+
+.skill--field .skill__kind {
+  color: var(--c-warn);
+}
