@@ -1,0 +1,197 @@
+.mcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+}
+
+button.mcard {
+  transition: transform 0.18s var(--ease-out);
+}
+
+button.mcard:hover:not(:disabled) {
+  transform: translateY(-3px);
+}
+
+button.mcard:hover:not(:disabled) .mcard__frame {
+  box-shadow:
+    0 0 0 1px var(--rarity-c),
+    0 0 22px color-mix(in srgb, var(--rarity-c) 45%, transparent);
+}
+
+button.mcard:disabled {
+  opacity: 0.45;
+}
+
+.mcard__frame {
+  position: relative;
+  padding: 3px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--rarity-c) 80%, #fff 0%), color-mix(in srgb, var(--rarity-c) 25%, #000) 60%, color-mix(in srgb, var(--rarity-c) 70%, transparent));
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  transition: box-shadow 0.2s;
+}
+
+.mcard__frame .memory-art {
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.mcard__rarity {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  padding: 1px 7px 1px 6px;
+  background: var(--rarity-c);
+  color: #050a14;
+  font-family: var(--f-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.mcard__attr {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 10px;
+  height: 10px;
+  background: var(--attr-c);
+  transform: rotate(45deg);
+  box-shadow: 0 0 8px var(--attr-c);
+}
+
+.mcard__fav {
+  position: absolute;
+  bottom: 8px;
+  right: 9px;
+  color: var(--c-warn);
+  font-size: 15px;
+  line-height: 1;
+  text-shadow: 0 0 8px rgba(255, 201, 77, 0.8);
+}
+
+.mcard__badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  padding: 0 6px;
+  background: rgba(3, 8, 18, 0.85);
+  border: 1px solid var(--c-cyan);
+  color: var(--c-cyan);
+  font-family: var(--f-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.mcard__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 0 2px;
+}
+
+.mcard__name {
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mcard__sub {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--c-text-dim);
+}
+
+.mcard__cp {
+  color: var(--c-text-mute);
+}
+
+.mcard--sm .mcard__name {
+  font-size: 12px;
+}
+
+.mcard--sm .mcard__cp {
+  display: none;
+}
+
+.mcard.is-selected .mcard__frame {
+  box-shadow:
+    0 0 0 2px var(--c-cyan),
+    0 0 20px rgba(62, 232, 255, 0.6);
+}
+
+.mcard.is-masked .mcard__frame {
+  background: linear-gradient(160deg, #3a4867, #141d33);
+}
+
+.mcard.is-masked .mcard__name {
+  color: var(--c-text-mute);
+}
+
+/* 高レアリティの演出 */
+.mcard--legend .mcard__frame::after,
+.mcard--irregular .mcard__frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.35) 45%, transparent 60%);
+  background-size: 250% 100%;
+  animation: card-shine 4.5s ease-in-out infinite;
+  mix-blend-mode: overlay;
+}
+
+.mcard--irregular .mcard__frame {
+  background: linear-gradient(160deg, #ff3b5c, #3ee8ff 45%, #ff3b5c 55%, #12051a);
+  animation: irregular-shift 3s steps(1) infinite;
+}
+
+.mcard.is-masked .mcard__frame::after {
+  display: none;
+}
+
+.mcard.is-masked.mcard--irregular .mcard__frame {
+  animation: none;
+  background: linear-gradient(160deg, #3a4867, #141d33);
+}
+
+@keyframes card-shine {
+  0%,
+  60% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@keyframes irregular-shift {
+  0%,
+  90%,
+  100% {
+    filter: none;
+    transform: none;
+  }
+  92% {
+    filter: hue-rotate(60deg);
+    transform: translateX(-1px);
+  }
+  95% {
+    filter: hue-rotate(-40deg);
+    transform: translateX(1px);
+  }
+}

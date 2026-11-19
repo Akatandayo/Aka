@@ -1,0 +1,147 @@
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.settings__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(110, 190, 255, 0.08);
+}
+
+.settings__row:last-child {
+  border-bottom: 0;
+}
+
+.settings__row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.settings__row-label {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.settings__row-desc {
+  font-size: 12px;
+  color: var(--c-text-mute);
+}
+
+.settings__row-control {
+  flex: 0 0 auto;
+}
+
+.settings__row-control input[type='range'] {
+  width: 160px;
+  accent-color: var(--c-cyan);
+}
+
+@media (max-width: 520px) {
+  .settings__row-control input[type='range'] {
+    width: 110px;
+  }
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--c-line-strong);
+}
+
+.segmented__item {
+  min-width: 64px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  background: transparent;
+  color: var(--c-text-dim);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.segmented__item[aria-checked='true'] {
+  background: var(--c-cyan);
+  color: #021018;
+}
+
+.settings__status {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px 18px;
+  margin: 0;
+}
+
+.settings__status dt {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--c-text-mute);
+}
+
+.settings__status dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+}
+
+.settings__note {
+  font-size: 12px;
+}
+
+.settings__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.settings__buttons .btn {
+  min-height: var(--touch);
+}
+
+.settings__dev {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings__issue {
+  color: var(--c-error);
+}
+
+.settings__preview {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.settings__preview dt {
+  color: var(--c-text-mute);
+}
+
+.settings__preview dd {
+  margin: 0;
+  color: var(--c-text);
+}
+
+.settings__about {
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--c-text-mute);
+  padding: 8px 0;
+}

@@ -1,0 +1,151 @@
+.memory-art {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #050b18;
+}
+
+.memory-art svg,
+.memory-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* アニメーションは is-animated のときのみ（一覧の負荷軽減） */
+.memory-art .art-spin,
+.memory-art .art-float,
+.memory-art .art-pulse,
+.memory-art .art-glitch {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.memory-art.is-animated .art-spin {
+  animation: art-spin 40s linear infinite;
+}
+
+.memory-art.is-animated .art-spin--slow {
+  animation-duration: 90s;
+}
+
+.memory-art.is-animated .art-spin--reverse {
+  animation-direction: reverse;
+  animation-duration: 60s;
+}
+
+.memory-art.is-animated .art-float {
+  animation: art-float 5s ease-in-out infinite;
+}
+
+.memory-art.is-animated .art-pulse {
+  animation: art-pulse 2.6s ease-in-out infinite;
+}
+
+.memory-art.is-animated .art-blink {
+  animation: art-blink 5s steps(1) infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.memory-art.is-animated .art-blink-fast {
+  animation: art-blink-fast 1.1s steps(1) infinite;
+}
+
+.memory-art.is-animated .art-glitch {
+  animation: art-glitch 2.4s steps(1) infinite;
+}
+
+.memory-art.is-animated .art-glitch--alt {
+  animation-duration: 3.1s;
+}
+
+.memory-art.is-animated .art-rain {
+  animation: art-rain 1.2s linear infinite;
+}
+
+@keyframes art-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes art-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes art-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes art-blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  95%,
+  97% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes art-blink-fast {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes art-glitch {
+  0%,
+  85%,
+  100% {
+    transform: translateX(0);
+  }
+  86% {
+    transform: translateX(-6px);
+  }
+  90% {
+    transform: translateX(5px);
+  }
+  94% {
+    transform: translateX(-2px);
+  }
+}
+
+@keyframes art-rain {
+  from {
+    transform: translate(0, -20px);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(-6px, 30px);
+    opacity: 0;
+  }
+}
+
+/* 発見済み・未所持: 形だけが分かる */
+.memory-art.is-silhouette svg {
+  filter: grayscale(1) brightness(0.75);
+}

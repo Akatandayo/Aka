@@ -1,0 +1,30 @@
+{
+  "name": "network-memory-recollection",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "NETWORK - Memory: Re:Collection — Memory収集型ストーリーRPG",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "validate:data": "vitest run src/data"
+  },
+  "dependencies": {
+    "@fontsource/chakra-petch": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1"
+  }
+}

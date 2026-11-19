@@ -1,0 +1,55 @@
+/* デザイントークン — CYBERPUNK × DIGITAL FANTASY
+ * 色・余白・フォントはここで一元管理する。 */
+:root {
+  /* base: ダークネイビー */
+  --c-bg-0: #04070f;
+  --c-bg-1: #070c1a;
+  --c-bg-2: #0b1428;
+  --c-panel: rgba(12, 22, 44, 0.72);
+  --c-panel-strong: rgba(14, 26, 52, 0.92);
+  --c-panel-hover: rgba(22, 40, 76, 0.85);
+
+  /* lines */
+  --c-line: rgba(110, 190, 255, 0.18);
+  --c-line-strong: rgba(62, 232, 255, 0.45);
+
+  /* text（コントラスト優先） */
+  --c-text: #e8f2ff;
+  --c-text-dim: #a9bad6;
+  --c-text-mute: #7489ab;
+
+  /* accent */
+  --c-cyan: #3ee8ff;
+  --c-cyan-soft: rgba(62, 232, 255, 0.14);
+  --c-purple: #9b6bff;
+  --c-purple-soft: rgba(155, 107, 255, 0.16);
+  --c-error: #ff3b5c;
+  --c-error-soft: rgba(255, 59, 92, 0.14);
+  --c-success: #4dffa6;
+  --c-warn: #ffc94d;
+
+  /* fonts */
+  --f-display: 'Chakra Petch', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic UI', 'Meiryo', sans-serif;
+  --f-body: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', 'Yu Gothic UI', 'Meiryo', system-ui, sans-serif;
+  --f-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  /* sizing */
+  --radius: 4px;
+  --gutter: 16px;
+  --touch: 44px;
+  --topbar-h: 56px;
+  --max-w: 1180px;
+
+  /* 角を切り落としたパネル形状 */
+  --cut: 10px;
+  --clip-panel: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: dark;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --gutter: 24px;
+  }
+}

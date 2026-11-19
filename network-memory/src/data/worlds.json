@@ -1,0 +1,42 @@
+[
+  {
+    "id": "WORLD-001",
+    "name": "NULL CITY",
+    "subtitle": "値を失った街",
+    "description": "記録の途絶えた区画から順に灯りが消えていく、夜と雨の都市。大流出の影響を最初に受けた世界のひとつ。",
+    "attribute": "DATA",
+    "unlock": { "type": "initial" }
+  },
+  {
+    "id": "WORLD-002",
+    "name": "ARCHIVE",
+    "subtitle": "全記録保管庫",
+    "description": "Networkのあらゆる記録を分類・保管する巨大な書庫。封印書架の奥には、司書でさえ閲覧を許されない記録が眠る。",
+    "attribute": "ORDER",
+    "unlock": { "type": "worldClear", "worldId": "WORLD-001" }
+  },
+  {
+    "id": "WORLD-003",
+    "name": "LOST GARDEN",
+    "subtitle": "忘れられた記録の庭",
+    "description": "忘れられた記録が花となって咲く庭園。最深部では、花々が色を失って散り始めている。",
+    "attribute": "LIFE",
+    "unlock": { "type": "worldClear", "worldId": "WORLD-002" }
+  },
+  {
+    "id": "WORLD-004",
+    "name": "ERROR ZONE",
+    "subtitle": "破損領域",
+    "description": "破損したデータが堆積し、地形そのものが歪んだ危険地帯。破損を喰らう猟犬の群れが徘徊している。",
+    "attribute": "ERROR",
+    "unlock": { "type": "worldClear", "worldId": "WORLD-003" }
+  },
+  {
+    "id": "WORLD-005",
+    "name": "UNKNOWN",
+    "subtitle": "観測不能領域",
+    "description": "Networkの地図に存在しない領域。そこに何があるのか、誰も記録していない。",
+    "attribute": "VOID",
+    "unlock": { "type": "flag", "flag": "world.unknown.signal", "label": "未知のシグナルを受信する" }
+  }
+]
