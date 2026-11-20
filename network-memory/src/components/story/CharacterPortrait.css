@@ -65,7 +65,11 @@
   }
 }
 
-/* 画像の立ち絵（全身）: 下揃えで表示 */
+/*
+ * 画像の立ち絵（全身）: 全員を同じ高さで表示する。
+ * 画像は上下を同じ枠で切り出してあるので、高さをそろえれば人物どうしの縮尺もそろう。
+ * 横幅は人物ごとに違い、枠より広い絵（ハルカの白衣など）は左右にはみ出して中央に置く。
+ */
 .portrait.is-image {
   display: flex;
   align-items: flex-end;
@@ -73,10 +77,11 @@
 }
 
 .portrait.is-image img {
-  width: 100%;
+  flex: none;
+  width: auto;
   height: 100%;
+  max-width: none;
   object-fit: contain;
-  object-position: bottom center;
   user-select: none;
   -webkit-user-drag: none;
 }
@@ -112,7 +117,11 @@
 }
 
 /* 小さな枠（CAST・ARCHIVE）では全身画像の上半身を表示する */
+.portrait.is-bust.is-image {
+  overflow: hidden;
+  align-items: flex-start;
+}
+
 .portrait.is-bust.is-image img {
-  object-fit: cover;
-  object-position: top center;
+  height: 175%;
 }

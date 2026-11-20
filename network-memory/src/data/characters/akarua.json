@@ -14,7 +14,8 @@
       { "name": "全知全能", "description": "あらゆる知識のひとつを選び、その代わりとして用いることができる。" },
       { "name": "未確認学", "description": "この世の森羅万象を生み出し、操ることができる。不可能を可能にする。" }
     ],
-    "expressions": ["normal", "smile", "serious", "worried", "surprised"]
+    "expressions": ["normal", "smile", "serious", "worried", "surprised"],
+    "portraits": { "normal": "portraits/CHR-HARUKA.png" }
   },
   {
     "id": "CHR-HITORI",

@@ -136,7 +136,7 @@
 
 - 再生画面: 文字送り（SETTINGS のテキスト速度）、AUTO、SKIP（次の選択肢まで）、LOG、中断（位置は自動保存）。フェード中は旧画面を保持して切り替える。
 - 進行の保存: `save.story`（クリア済みの章・中断位置・選択肢）。再開は保存した選択肢で先頭から決定的に早送りして復元する。
-- 立ち絵: キャラクターデータの `portraits`（表情 ID → 画像）に画像があればそれを使う。独と紅葉は作者の立ち絵画像（`src/assets/portraits/`、白背景を透過・余白を切り詰め済み）。表情ごとの画像が無い表情は `normal` の画像を使う。画像が無い人物（現在はハルカ）は手続き生成で描く。全身画像は、CAST・ARCHIVE の小さな枠では上半身を表示する。
+- 立ち絵: キャラクターデータの `portraits`（表情 ID → 画像）に画像があればそれを使う。アカルアの三人は作者の立ち絵画像（`src/assets/portraits/`、白背景を透過し、全員同じ上下の枠で切り出し済み）。画像は全員同じ高さで表示するので、人物どうしの縮尺がそろう。表情ごとの画像が無い表情は `normal` の画像を使う。画像が無い人物は手続き生成で描く。全身画像は、CAST・ARCHIVE の小さな枠では上半身を表示する。
 - 背景は手続き生成（`components/story/SceneBackground.tsx`）。
 - 背景: network-void / null-city-rain（修復率で窓が灯る）/ akarua-office / akarua-night / archive-stacks。BGM: void / rain / akarua / tension / night / archive。
 - BGM / SE: 音声素材が無いため Web Audio で合成（`audio/audio.ts`）。呼び出しは ID のみなので、素材が揃えばファイル再生に差し替えられる。

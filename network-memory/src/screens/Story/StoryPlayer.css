@@ -457,7 +457,7 @@
 /* ---- スマホ */
 @media (max-width: 640px) {
   .story__actor {
-    height: 62dvh;
+    height: 56dvh;
     max-width: 46vw;
   }
 
