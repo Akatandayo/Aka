@@ -1,10 +1,12 @@
 import { useId } from 'react';
 import type { CharacterDefinition } from '../../types/story';
+import { resolvePortrait } from '../../assets/portraits';
 import './CharacterPortrait.css';
 
 /**
  * 立ち絵（表情差分つき）。
- * 画像（portraits[expr]）があればそれを表示し、無ければ手続き生成の立ち絵を描く。
+ * 画像（portraits[expr]、無ければ portraits.normal）があればそれを表示し、無ければ手続き生成の立ち絵を描く。
+ * 独・紅葉は作者の立ち絵画像を使う（表情差分の画像を足せば表情ごとに切り替わる）。
  *
  * 人物ごとの見た目（作者の立ち絵を参考にしたデザイン）
  * - HITORI: 目にかかる長い前髪の黒髪、眠たげな垂れ目とクマ、ゆるめたネクタイ、肩から落ちかけたジャケット、ネクタイに指をかける仕草 + {Glitch}
@@ -53,8 +55,8 @@ export function CharacterPortrait({ character, expr, speaking = false, className
   const cls = `portrait ${speaking ? 'is-speaking' : ''} portrait--${character.id.toLowerCase()} ${className}`;
   if (image) {
     return (
-      <div className={cls}>
-        <img src={image} alt={`${character.name}（${expr}）`} />
+      <div className={`${cls} is-image ${character.id === 'CHR-HITORI' ? 'is-glitch' : ''}`}>
+        <img src={resolvePortrait(image)} alt={`${character.name}（${expr}）`} draggable={false} />
       </div>
     );
   }

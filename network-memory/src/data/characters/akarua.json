@@ -31,7 +31,8 @@
       { "name": "{Glitch}", "description": "かつて【自我】と呼ばれた力が、転生を経て完成したもの。ゲームのバグを具現化したような力で、テレポートや攻撃の無力化など汎用性は高いが、自身の身体を犠牲にする諸刃の剣。" },
       { "name": "{upset}【大番狂わせ】", "description": "呪いだった {Glitch} から魂を解き放ち、護る「目印」を定めた独が、自分の意思で生み出した力。自分よりも上の存在にのみ使え、自身と相手を対等な立場に置く。" }
     ],
-    "expressions": ["normal", "smirk", "serious", "annoyed", "surprised", "sad"]
+    "expressions": ["normal", "smirk", "serious", "annoyed", "surprised", "sad"],
+    "portraits": { "normal": "portraits/CHR-HITORI.png" }
   },
   {
     "id": "CHR-MOMIJI",
@@ -49,6 +50,7 @@
       { "name": "{heartache}", "description": "ダメージや効果を受けたとき、代わりに自分の心をすり減らすことができる。" },
       { "name": "{CHAOS LOVE}", "description": "独に向けられた効果やダメージ、技能を、強制的に引き受ける。" }
     ],
-    "expressions": ["normal", "smile", "worried", "pout", "surprised", "sad"]
+    "expressions": ["normal", "smile", "worried", "pout", "surprised", "sad"],
+    "portraits": { "normal": "portraits/CHR-MOMIJI.png" }
   }
 ]

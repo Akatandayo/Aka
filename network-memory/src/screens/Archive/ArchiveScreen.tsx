@@ -121,7 +121,7 @@ export function ArchiveEntryScreen({ entryId }: { entryId: string }) {
         <header className={`panel archive-entry__head ${character ? 'has-art' : ''}`}>
           {character && (
             <div className="archive-entry__art">
-              <CharacterPortrait character={character} expr="normal" speaking />
+              <CharacterPortrait character={character} expr="normal" speaking className="is-bust" />
             </div>
           )}
           <div>

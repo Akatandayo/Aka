@@ -113,7 +113,7 @@ export function StoryScreen() {
             {data.characters.map((c) => (
               <article key={c.id} className="story-cast__card" style={{ ['--spk-c' as string]: c.color } as CSSProperties}>
                 <div className="story-cast__art">
-                  <CharacterPortrait character={c} expr={c.expressions.includes('smile') ? 'smile' : 'normal'} speaking />
+                  <CharacterPortrait character={c} expr={c.expressions.includes('smile') ? 'smile' : 'normal'} speaking className="is-bust" />
                 </div>
                 <div className="story-cast__body">
                   <h3>{c.name}</h3>
