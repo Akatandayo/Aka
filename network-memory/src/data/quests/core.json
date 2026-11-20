@@ -1,0 +1,72 @@
+[
+  {
+    "id": "Q-001",
+    "worldId": "WORLD-001",
+    "title": "街灯を灯して",
+    "giver": "CHR-HARUKA",
+    "description": "消えかけの街灯通りで、灯りを喰う影が暴れているの。点灯夫さんが困っているはずだから、話を聞いてあげて。",
+    "unlock": [{ "type": "storyCleared", "chapterId": "CH-000" }],
+    "objectives": [
+      { "label": "流出反応「消えかけの街灯」を鎮静化する", "cond": { "type": "encounterCleared", "encounterId": "ENC-002" } },
+      { "label": "点灯夫ルクスと話す", "cond": { "type": "flag", "flag": "talked.lux" } }
+    ],
+    "rewards": { "currencies": { "DATA": 400 }, "items": { "ITEM-0004": 1 } },
+    "completeText": "ありがとう。今夜の通りは、きっと最後まで明るいわね。"
+  },
+  {
+    "id": "Q-002",
+    "worldId": "WORLD-001",
+    "title": "雨の日の落とし物",
+    "giver": "CHR-MOMIJI",
+    "description": "雨の日にしか出てこない路地に、白い傘の落とし物があるんだって。雨の音をよーく聞くと、道が分かるらしいよ！",
+    "unlock": [{ "type": "storyCleared", "chapterId": "CH-000" }],
+    "objectives": [
+      { "label": "雨音の路地で、白い傘を見つける", "cond": { "type": "flag", "flag": "explore.rainalley.umbrella" } }
+    ],
+    "rewards": { "currencies": { "FRAGMENT": 40 }, "items": { "ITEM-0001": 2 } },
+    "completeText": "ほんとにあった！　……でも、持ち主の名前だけ読めないね。大事に預かっておこう。"
+  },
+  {
+    "id": "Q-003",
+    "worldId": "WORLD-001",
+    "title": "巡回ルートの点検",
+    "giver": "CHR-HITORI",
+    "description": "巡回ドローンの航路の起点に、探索者認証のゲートがあるはずだ。ドローンの記録と同期して、ゲートの中を確かめてきてくれ。",
+    "unlock": [{ "type": "storyCleared", "chapterId": "CH-000" }],
+    "objectives": [
+      { "label": "夜間巡回ドローンと同期する", "cond": { "type": "ownedMemory", "memoryId": "MEM-0013" } },
+      { "label": "雨の交差点の認証ゲートを調べる", "cond": { "type": "flag", "flag": "explore.gate.checked" } }
+    ],
+    "rewards": { "currencies": { "CORE": 2, "DATA": 200 } },
+    "completeText": "……整備記録、助かった。これで航路の穴が埋まる。"
+  },
+  {
+    "id": "Q-004",
+    "worldId": "WORLD-002",
+    "title": "第三書架の目録",
+    "giver": "CHR-LIBRA",
+    "description": "流れ出した記録の行き先を、少しでも書き留めておきたいのです。閲覧室の記録箱と、誤植だらけの辞書が手がかりになるはずです。",
+    "unlock": [{ "type": "storyCleared", "chapterId": "CH-002" }, { "type": "ownedMemory", "memoryId": "MEM-0007" }],
+    "objectives": [
+      { "label": "閲覧室の鍵のかかった記録箱を開ける", "cond": { "type": "flag", "flag": "explore.archive.box" } },
+      { "label": "誤植だらけの辞書と同期する", "cond": { "type": "ownedMemory", "memoryId": "MEM-0014" } },
+      { "label": "第三書架の目録カードを調べる", "cond": { "type": "flag", "flag": "explore.stack3.catalog" } }
+    ],
+    "rewards": { "currencies": { "FRAGMENT": 80, "CORE": 3 } },
+    "completeText": "目録の一行目が、ようやく埋まりました。記録は嘘をつきません。……ありがとうございます。"
+  },
+  {
+    "id": "Q-005",
+    "worldId": "WORLD-003",
+    "title": "色を取り戻す庭",
+    "giver": "CHR-HARUKA",
+    "description": "LOST GARDEN の花が、色を喰われて泣いているそうなの。花の声を聞いて、色喰いを鎮めてあげて。",
+    "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-004" }],
+    "objectives": [
+      { "label": "枯れかけの花壇で、花の声を聞く", "cond": { "type": "flag", "flag": "explore.garden.voice" } },
+      { "label": "流出反応「色喰い」を鎮静化する", "cond": { "type": "encounterCleared", "encounterId": "ENC-006" } }
+    ],
+    "rewards": { "currencies": { "CORE": 5, "FRAGMENT": 60 } },
+    "completeText": "庭の色、戻ったのね。……忘れられた記録も、ちゃんと咲けるんだわ。"
+  }
+]

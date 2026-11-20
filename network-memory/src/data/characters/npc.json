@@ -1,0 +1,29 @@
+[
+  {
+    "id": "CHR-LUX",
+    "name": "点灯夫ルクス",
+    "role": "NULL CITY の点灯夫（世界修復で帰還した人物）",
+    "color": "#4dffa6",
+    "profile": "記録の途絶えた街路に、一本ずつ灯りを点して回る男。無口で面倒見がよく、皮肉っぽい物言いの奥に、消えていくものへの深い執着がある。",
+    "cast": false,
+    "expressions": ["normal"]
+  },
+  {
+    "id": "CHR-LIBRA",
+    "name": "記録司書リブラ",
+    "role": "ARCHIVE 第三司書（世界修復で帰還した人物）",
+    "color": "#ffd36b",
+    "profile": "ARCHIVE で無数の記録を分類・保管してきた司書。几帳面で理知的。自分自身の記録の欠落にだけは怯えている。",
+    "cast": false,
+    "expressions": ["normal"]
+  },
+  {
+    "id": "CHR-BLANK",
+    "name": "白紙の少女",
+    "role": "記録されていない誰か",
+    "color": "#c8c2ff",
+    "profile": "Network のどこにも記録が存在しないはずの少女。いくつもの Memory の片隅に、彼女の姿だけが白く抜け落ちたまま残っている。",
+    "cast": false,
+    "expressions": ["normal"]
+  }
+]

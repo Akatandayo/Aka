@@ -204,7 +204,7 @@ export function SettingsScreen() {
           )}
         </Section>
 
-        <p className="settings__about mono">NETWORK - Memory: ReCollection · v0.3.0 · PHASE 3</p>
+        <p className="settings__about mono">NETWORK - Memory: ReCollection · v0.4.0 · PHASE 4</p>
       </div>
 
       <ConfirmDialog

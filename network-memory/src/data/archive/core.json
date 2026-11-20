@@ -38,7 +38,7 @@
     "id": "TERM-AKARUA", "category": "term", "title": "何でも屋「アカルア」", "unlock": [{ "type": "storyCleared", "chapterId": "CH-000" }],
     "related": { "characterId": "CHR-HARUKA" },
     "sections": [
-      { "id": "1", "title": "概要", "text": "白石ハルカが店長を務める、NULL CITY の何でも屋。電子独と電子紅葉が所属し、{player} も身を寄せている。雨の街の中で、古い看板の灯りだけがいつも温かい。" },
+      { "id": "1", "title": "概要", "text": "白石ハルカが店長を務める、NULL CITY の何でも屋。電子独と電子紅葉が所属し、{player}も身を寄せている。雨の街の中で、古い看板の灯りだけがいつも温かい。" },
       { "id": "2", "title": "お仕事", "text": "探し物から流出反応の鎮静化まで、頼まれれば何でも引き受ける。Memory の回収を始めてから、店の端末はひっきりなしに反応を拾うようになった。", "unlock": [{ "type": "storyCleared", "chapterId": "CH-001" }] }
     ]
   },
@@ -87,8 +87,8 @@
     "id": "EVT-FIRSTCONNECT", "category": "event", "title": "最初の接続", "unlock": [{ "type": "ownedMemory", "memoryId": "MEM-0006" }],
     "related": { "memoryIds": ["MEM-0006"] },
     "sections": [
-      { "id": "1", "title": "概要", "text": "{player} が初めて Network に接続した瞬間。その記録のタイムスタンプは、大流出が起きた時刻よりも前を指している。" },
-      { "id": "2", "title": "雨の路地で", "text": "目を覚ました {player} を見つけたのは、何でも屋「アカルア」の独と紅葉だった。", "unlock": [{ "type": "storyCleared", "chapterId": "CH-000" }] }
+      { "id": "1", "title": "概要", "text": "{player}が初めて Network に接続した瞬間。その記録のタイムスタンプは、大流出が起きた時刻よりも前を指している。" },
+      { "id": "2", "title": "雨の路地で", "text": "目を覚ました{player}を見つけたのは、何でも屋「アカルア」の独と紅葉だった。", "unlock": [{ "type": "storyCleared", "chapterId": "CH-000" }] }
     ]
   },
   {

@@ -35,9 +35,9 @@ export const MENU: MenuEntry[] = [
     id: 'WORLD',
     code: '02',
     ja: 'ワールド',
-    summary: '世界の修復状況（エリア探索は PHASE 4）',
+    summary: 'Network 各地を探索し、世界を修復する',
     status: 'available',
-    phase: 3,
+    phase: 4,
     route: { name: 'world' },
   },
   {

@@ -62,10 +62,25 @@ describe('bundled master data', () => {
 
   it('every world has restoration targets and story/archive data loads', () => {
     for (const w of gameData.worlds) expect(w.restorations.length, w.id).toBeGreaterThan(0);
-    expect(gameData.characters.map((c) => c.id).sort()).toEqual(['CHR-HARUKA', 'CHR-HITORI', 'CHR-MOMIJI']);
+    expect(gameData.characters.filter((c) => c.cast !== false).map((c) => c.id).sort()).toEqual(['CHR-HARUKA', 'CHR-HITORI', 'CHR-MOMIJI']);
+    expect(gameData.characters.filter((c) => c.cast === false).map((c) => c.id).sort()).toEqual(['CHR-BLANK', 'CHR-LIBRA', 'CHR-LUX']);
     expect(gameData.chapters.map((c) => c.id)).toEqual(['CH-000', 'CH-001', 'INT-001', 'CH-002']);
     const cats = new Set(gameData.archive.map((a) => a.category));
     for (const c of ['character', 'event', 'term', 'fragment']) expect(cats.has(c as never), c).toBe(true);
+  });
+
+  it('exploration data (PHASE 4): every world is explorable and every signal sits in exactly one area', () => {
+    expect(gameData.areas.length).toBe(13);
+    for (const w of gameData.worlds) expect(gameData.areas.filter((a) => a.worldId === w.id && a.entry).length, w.id).toBe(1);
+    for (const e of gameData.encounters) {
+      const spots = gameData.areas.flatMap((a) => a.points.filter((p) => p.type === 'signal' && p.encounterId === e.id && a.worldId === e.worldId));
+      expect(spots.length, e.id).toBe(1);
+    }
+    expect(gameData.events.length).toBe(9);
+    expect(gameData.quests.length).toBe(5);
+    // 探索能力はすべてどこかで使われる（MEM-0013 の巡回ルートはマップの表示に使う）
+    const used = new Set(gameData.areas.flatMap((a) => [a.revealedBy, ...a.points.map((p) => p.fieldAbility)]).filter(Boolean));
+    for (const id of gameData.fieldAbilityById.keys()) expect(used.has(id), id).toBe(true);
   });
 
   it('accepts the Ver.1/Ver.2 memory format (flat stats, passiveSkills, rewrite, storyId, syncCondition)', () => {

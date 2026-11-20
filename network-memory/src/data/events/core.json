@@ -1,0 +1,183 @@
+[
+  {
+    "id": "EV-ALLEY-CATS",
+    "title": "路地裏の猫たち",
+    "rewards": { "currencies": { "FRAGMENT": 10 } },
+    "script": [
+      { "t": "bgm", "id": "rain" },
+      { "t": "bg", "id": "null-city-rain", "fx": "fade" },
+      { "t": "narr", "text": "段ボール箱の陰から、0と1でできた小さな影がいくつも顔を出した。" },
+      { "t": "narr", "text": "ビットキャットたちだ。記録が戻ってから、この路地は少しだけにぎやかになった。" },
+      { "t": "narr", "text": "一匹が、くわえていた光る欠片を{player}の足元にそっと置いていく。" },
+      { "t": "narr", "text": "（……にゃ。）" },
+      { "t": "narr", "text": "欠片には、誰かが書きかけて消したような文字が残っていた。" },
+      { "t": "end" }
+    ]
+  },
+  {
+    "id": "EV-LUX",
+    "title": "点灯夫ルクス",
+    "script": [
+      { "t": "bgm", "id": "rain" },
+      { "t": "bg", "id": "null-city-rain", "fx": "fade" },
+      { "t": "narr", "text": "灯竿を担いだ男が、消えかけた街灯を見上げている。" },
+      { "t": "say", "char": "CHR-LUX", "expr": "normal", "text": "……新入りか。アカルアのところの。" },
+      { "t": "if", "cond": [{ "type": "encounterCleared", "encounterId": "ENC-002" }], "goto": "lit", "else": "dark" },
+      { "t": "label", "id": "dark" },
+      { "t": "say", "char": "CHR-LUX", "expr": "normal", "text": "この通りの奥に、灯りを喰う影がいる。あれがいる限り、何本灯しても朝までもたない。" },
+      { "t": "say", "char": "CHR-LUX", "expr": "normal", "text": "暗いままじゃ、誰も帰り道を思い出せないだろう。……頼めるか。" },
+      { "t": "goto", "label": "cross" },
+      { "t": "label", "id": "lit" },
+      { "t": "say", "char": "CHR-LUX", "expr": "normal", "text": "影を鎮めたのはおまえか。……おかげで、今夜は最後の一本まで灯せた。" },
+      { "t": "say", "char": "CHR-LUX", "expr": "normal", "text": "礼は言わない。灯りが残ってりゃ、それで足りる。" },
+      { "t": "label", "id": "cross" },
+      { "t": "say", "char": "CHR-LUX", "expr": "normal", "text": "ひとつ覚えておけ。第七区画の交差点にだけは、俺は灯りを点さない。" },
+      { "t": "say", "char": "CHR-LUX", "expr": "normal", "text": "あそこではまだ、誰かが待ってる。明るくしたら、向こうから見つけてもらえなくなるだろう。" },
+      { "t": "set", "flag": "talked.lux", "value": true },
+      { "t": "end" }
+    ]
+  },
+  {
+    "id": "EV-HARUKA",
+    "title": "ハルカと話す",
+    "script": [
+      { "t": "bgm", "id": "akarua" },
+      { "t": "bg", "id": "akarua-office", "fx": "fade" },
+      { "t": "show", "char": "CHR-HARUKA", "pos": "center", "expr": "smile" },
+      { "t": "say", "char": "CHR-HARUKA", "expr": "smile", "text": "おかえりなさい、{player}さん。お仕事の帰り？　それとも、ちょっと休憩かしら。" },
+      { "t": "if", "cond": [{ "type": "storyCleared", "chapterId": "CH-002" }], "goto": "after-upset", "else": "default" },
+      { "t": "label", "id": "after-upset" },
+      { "t": "say", "char": "CHR-HARUKA", "expr": "smile", "text": "独くんね、{upset} を使ってから、少しだけ肩の力が抜けたみたい。……あなたのおかげよ。" },
+      { "t": "goto", "label": "work" },
+      { "t": "label", "id": "default" },
+      { "t": "say", "char": "CHR-HARUKA", "expr": "normal", "text": "NULL CITY は、まだ灯りの消えたところが多いわ。歩いてみると、何か見つかるかもしれない。" },
+      { "t": "label", "id": "work" },
+      { "t": "say", "char": "CHR-HARUKA", "expr": "normal", "text": "困っている人のお願いは、ここに貼り出しておくわね。……サブクエスト、っていうのかしら。できそうなものからでいいのよ。" },
+      { "t": "say", "char": "CHR-HARUKA", "expr": "smile", "text": "それから、無理はしないこと。帰ってきたら、温かいものを用意しておくから。" },
+      { "t": "set", "flag": "talked.haruka", "value": true },
+      { "t": "end" }
+    ]
+  },
+  {
+    "id": "EV-HITORI",
+    "title": "独と話す",
+    "script": [
+      { "t": "bgm", "id": "akarua" },
+      { "t": "bg", "id": "akarua-office", "fx": "fade" },
+      { "t": "show", "char": "CHR-HITORI", "pos": "center", "expr": "normal" },
+      { "t": "say", "char": "CHR-HITORI", "expr": "normal", "text": "……何だよ。用がないなら、端末の前どいてくれ。" },
+      { "t": "if", "cond": [{ "type": "ownedMemory", "memoryId": "MEM-0013" }], "goto": "drone", "else": "nodrone" },
+      { "t": "label", "id": "drone" },
+      { "t": "say", "char": "CHR-HITORI", "expr": "smirk", "text": "巡回ドローンの記録、ちゃんと使えてるか？　あれの航路をなぞれば、地図に載ってない路地の場所くらいは分かる。" },
+      { "t": "goto", "label": "rest" },
+      { "t": "label", "id": "nodrone" },
+      { "t": "say", "char": "CHR-HITORI", "expr": "normal", "text": "第七区画の流出反応、まだ残ってるぞ。弱いやつから片付けとけ。" },
+      { "t": "label", "id": "rest" },
+      { "t": "say", "char": "CHR-HITORI", "expr": "annoyed", "text": "……それと。紅葉に、また変な依頼を押し付けられてないか？" },
+      { "t": "say", "char": "CHR-HITORI", "expr": "normal", "text": "断っていいんだからな。……まあ、手伝うなら、それはそれで助かるけど。" },
+      { "t": "end" }
+    ]
+  },
+  {
+    "id": "EV-MOMIJI",
+    "title": "紅葉と話す",
+    "script": [
+      { "t": "bgm", "id": "akarua" },
+      { "t": "bg", "id": "akarua-office", "fx": "fade" },
+      { "t": "show", "char": "CHR-MOMIJI", "pos": "center", "expr": "smile" },
+      { "t": "say", "char": "CHR-MOMIJI", "expr": "smile", "text": "{player}さん、おかえり！　怪我してない？　してない？　……よし！" },
+      { "t": "say", "char": "CHR-MOMIJI", "expr": "worried", "text": "あのね、ちょっとお願いがあって。雨の日にしか出てこない路地に、大事な落とし物があるって依頼が来てて……" },
+      { "t": "say", "char": "CHR-MOMIJI", "expr": "pout", "text": "独くんに頼んだら「地図に載ってない路地なんてあるか」って言うんだよ。あるもん。" },
+      { "t": "say", "char": "CHR-MOMIJI", "expr": "smile", "text": "雨の音をよーく聞くと、道が分かるんだって。{player}さんなら見つけられる気がする！" },
+      { "t": "end" }
+    ]
+  },
+  {
+    "id": "EV-LIBRA",
+    "title": "記録司書リブラ",
+    "script": [
+      { "t": "bgm", "id": "archive" },
+      { "t": "bg", "id": "archive-stacks", "fx": "fade" },
+      { "t": "narr", "text": "空っぽの第三書架の前に、眼鏡をかけた女性が立っていた。手には、真新しい目録カードの束。" },
+      { "t": "say", "char": "CHR-LIBRA", "expr": "normal", "text": "……閲覧者の方ですね。こちらは第三書架です。現在、所蔵記録は 0 件。" },
+      { "t": "say", "char": "CHR-LIBRA", "expr": "normal", "text": "大流出の日、この書架の記録だけが、すべて流れ出しました。その理由を、私は記録していません。" },
+      { "t": "say", "char": "CHR-LIBRA", "expr": "normal", "text": "記録は嘘をつきません。嘘をつくのは、いつも読む側です。……けれど、読むものが何もなければ、嘘のつきようもありませんね。" },
+      { "t": "if", "cond": [{ "type": "storyCleared", "chapterId": "CH-002" }], "goto": "thanks", "else": "end" },
+      { "t": "label", "id": "thanks" },
+      { "t": "say", "char": "CHR-LIBRA", "expr": "normal", "text": "封印の扉を開けてくださったのは、あなた方だと聞きました。……ありがとうございます。" },
+      { "t": "say", "char": "CHR-LIBRA", "expr": "normal", "text": "もしよろしければ、書架の目録づくりを手伝っていただけませんか。流れ出した記録の行き先を、少しでも書き留めておきたいのです。" },
+      { "t": "label", "id": "end" },
+      { "t": "set", "flag": "talked.libra", "value": true },
+      { "t": "end" }
+    ]
+  },
+  {
+    "id": "EV-GARDEN-BLOOM",
+    "title": "色の戻った庭",
+    "rewards": { "currencies": { "CORE": 5 } },
+    "script": [
+      { "t": "bgm", "id": "night" },
+      { "t": "bg", "id": "lost-garden", "fx": "fade" },
+      { "t": "narr", "text": "色を喰われていた花々に、ひとつ、またひとつと色が戻っていく。" },
+      { "t": "narr", "text": "白かった花弁が青に。灰色の葉が緑に。忘れられた記録が、花の形をして思い出されていく。" },
+      { "t": "narr", "text": "どこからか、小さな声が聞こえた。——わすれないで。わすれないで。" },
+      { "t": "narr", "text": "それは、もう怯えた声ではなかった。" },
+      { "t": "end" }
+    ]
+  },
+  {
+    "id": "EV-UNKNOWN-SIGNAL",
+    "title": "未知のシグナル",
+    "script": [
+      { "t": "bgm", "id": "tension" },
+      { "t": "bg", "id": "error-zone", "fx": "fade" },
+      { "t": "fx", "type": "glitch", "ms": 800 },
+      { "t": "se", "id": "glitch" },
+      { "t": "narr", "text": "ハウンド・アルファが崩れたあと、破損領域の奥で、何かが鳴っていた。" },
+      { "t": "narr", "text": "流出経路を辿る記録が、ひとつの反応を指し示す。——地図のどこにも、存在しない座標を。" },
+      { "t": "narr", "text": "> SIGNAL: ???? / 座標 = NOT FOUND / 発信者 = NOT FOUND" },
+      { "t": "show", "char": "CHR-HITORI", "pos": "left", "expr": "serious" },
+      { "t": "say", "char": "CHR-HITORI", "expr": "serious", "text": "……聞こえるか、{player}。こっちの端末でも拾った。地図に無い場所からの信号だ。" },
+      { "t": "show", "char": "CHR-HARUKA", "pos": "right", "expr": "serious" },
+      { "t": "say", "char": "CHR-HARUKA", "expr": "serious", "text": "観測できない領域……。Network の地図に存在しないはずの場所よ。" },
+      { "t": "say", "char": "CHR-HARUKA", "expr": "worried", "text": "行くなら、必ず三人と一緒に。それから——ちゃんと帰ってくること。" },
+      { "t": "say", "char": "CHR-HITORI", "expr": "smirk", "text": "記録がないなら、こっちで作ればいい。……接続先、登録しといたぞ。" },
+      { "t": "set", "flag": "world.unknown.signal", "value": true },
+      { "t": "title", "text": "WORLD-005 UNKNOWN", "sub": "未知の領域に接続できるようになった" },
+      { "t": "end" }
+    ]
+  },
+  {
+    "id": "EV-BLANK",
+    "title": "白紙の少女",
+    "script": [
+      { "t": "bgm", "id": "void" },
+      { "t": "bg", "id": "network-void", "fx": "fade" },
+      { "t": "fx", "type": "noise", "ms": 900 },
+      { "t": "narr", "text": "音も、色も、記録もない場所。その真ん中に、白い傘を差した少女が立っていた。" },
+      { "t": "narr", "text": "顔のところだけが、白く抜け落ちている。" },
+      { "t": "say", "char": "CHR-BLANK", "expr": "normal", "text": "……あなたは、わたしを覚えてる？" },
+      {
+        "t": "choice",
+        "id": "remember",
+        "options": [
+          { "value": "yes", "text": "……どこかで、会った気がする", "goto": "yes" },
+          { "value": "no", "text": "ごめん、思い出せない", "goto": "no" }
+        ]
+      },
+      { "t": "label", "id": "yes" },
+      { "t": "say", "char": "CHR-BLANK", "expr": "normal", "text": "そっか。……うれしい。わたしは、何も覚えてないのに。" },
+      { "t": "goto", "label": "promise" },
+      { "t": "label", "id": "no" },
+      { "t": "say", "char": "CHR-BLANK", "expr": "normal", "text": "ううん、いいの。わたしも、あなたのこと覚えてないから。……おあいこ、だね。" },
+      { "t": "label", "id": "promise" },
+      { "t": "say", "char": "CHR-BLANK", "expr": "normal", "text": "赤信号が変わったら、渡ってきてくれるって約束したの。でも、誰と約束したのかは、覚えてないんだ。" },
+      { "t": "fx", "type": "glitch", "ms": 700 },
+      { "t": "se", "id": "glitch" },
+      { "t": "narr", "text": "少女の輪郭が、ノイズにほどけていく。伸ばした指先は、白い何かに触れただけだった。" },
+      { "t": "say", "char": "CHR-BLANK", "expr": "normal", "text": "またね。……今度は、あなたが見つけて。" },
+      { "t": "set", "flag": "explore.blank.met", "value": true },
+      { "t": "end" }
+    ]
+  }
+]

@@ -77,3 +77,24 @@
     opacity: 0.3;
   }
 }
+
+.scene__flicker {
+  animation: scene-flicker 2.4s steps(1) infinite;
+}
+
+@keyframes scene-flicker {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  30% {
+    opacity: 0.05;
+  }
+  55% {
+    opacity: 0.5;
+    transform: translateX(6px);
+  }
+  70% {
+    opacity: 0.15;
+  }
+}

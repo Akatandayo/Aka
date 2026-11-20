@@ -18,6 +18,8 @@ export type Route =
   | { name: 'storyPlay'; chapterId: string }
   | { name: 'world' }
   | { name: 'worldDetail'; worldId: string }
+  | { name: 'worldArea'; worldId: string; areaId: string }
+  | { name: 'eventPlay'; eventId: string }
   | { name: 'archive'; category: ArchiveCategory }
   | { name: 'archiveEntry'; entryId: string }
   | { name: 'profile' }
@@ -53,7 +55,10 @@ export function parseHash(hash: string): Route {
     case 'story':
       return sub ? { name: 'storyPlay', chapterId: sub } : { name: 'story' };
     case 'world':
+      if (sub && third) return { name: 'worldArea', worldId: sub, areaId: third };
       return sub ? { name: 'worldDetail', worldId: sub } : { name: 'world' };
+    case 'event':
+      return sub ? { name: 'eventPlay', eventId: sub } : { name: 'world' };
     case 'archive':
       if (sub === 'entry' && third) return { name: 'archiveEntry', entryId: third };
       return { name: 'archive', category: isArchiveCategory(sub) ? sub : 'memory' };
@@ -89,6 +94,10 @@ export function toHash(route: Route): string {
       return '#/world';
     case 'worldDetail':
       return `#/world/${encodeURIComponent(route.worldId)}`;
+    case 'worldArea':
+      return `#/world/${encodeURIComponent(route.worldId)}/${encodeURIComponent(route.areaId)}`;
+    case 'eventPlay':
+      return `#/event/${encodeURIComponent(route.eventId)}`;
     case 'archive':
       return route.category === 'memory' ? '#/archive' : `#/archive/${route.category}`;
     case 'archiveEntry':

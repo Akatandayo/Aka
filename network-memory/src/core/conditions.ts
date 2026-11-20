@@ -30,6 +30,12 @@ export function evaluateCondition(c: Condition, { save, data }: ConditionContext
       return Boolean(save.battle.encounters[c.encounterId]);
     case 'worldRestoration':
       return worldRestorationRate(save, data, c.worldId) >= c.value;
+    case 'restored': {
+      const t = data.restorationById.get(c.targetId);
+      return Boolean(t && save.memories.some((m) => m.memoryId === t.memoryId));
+    }
+    case 'questCompleted':
+      return save.quests[c.questId]?.status === 'completed';
     case 'unknown':
       return false;
   }
@@ -67,6 +73,16 @@ export function describeCondition(c: Condition, { save, data }: ConditionContext
     case 'worldRestoration': {
       const w = data.worldById.get(c.worldId);
       return `${w?.name ?? c.worldId} の修復率 ${Math.round(c.value * 100)}% 以上`;
+    }
+    case 'restored': {
+      const t = data.restorationById.get(c.targetId);
+      if (!t) return '未知の記録が復元される';
+      const done = save.memories.some((m) => m.memoryId === t.memoryId);
+      return done || isKnownMemory(save, t.memoryId) ? `「${t.name}」が復元される` : '未知の記録が復元される';
+    }
+    case 'questCompleted': {
+      const q = data.questById.get(c.questId);
+      return `サブクエスト「${q?.title ?? c.questId}」を達成`;
     }
     case 'unknown':
       return 'ERROR: 条件を解析できない';

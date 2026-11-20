@@ -19,6 +19,10 @@ export type Condition =
   | { type: 'encounterCleared'; encounterId: string }
   /** WORLD の修復率（0〜1）が一定以上 */
   | { type: 'worldRestoration'; worldId: string; value: number }
+  /** WORLD の修復対象が復元されている（対象の Memory を回収済み） */
+  | { type: 'restored'; targetId: string }
+  /** サブクエストを報告済み */
+  | { type: 'questCompleted'; questId: string }
   /** 条件不明（満たされない） */
   | { type: 'unknown' };
 
@@ -31,5 +35,7 @@ export const CONDITION_TYPES = [
   'storyCleared',
   'encounterCleared',
   'worldRestoration',
+  'restored',
+  'questCompleted',
   'unknown',
 ] as const;

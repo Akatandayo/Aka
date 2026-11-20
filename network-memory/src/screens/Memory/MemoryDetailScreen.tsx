@@ -14,6 +14,7 @@ import { baseStats, expToNext, maxLevel } from '../../core/memory/stats';
 import { discoveryState } from '../../core/player/discovery';
 import { loadoutMembership, placementLabel } from '../../core/player/loadout';
 import { checkSyncConditions } from '../../core/player/sync';
+import { fieldAbilityUses } from '../../core/world/exploration';
 import { usePlayer } from '../../state/GameProvider';
 import { useSessionState } from '../../state/sessionState';
 import { STAT_KEYS } from '../../types/memory';
@@ -364,7 +365,13 @@ function SkillTab({ entry, data }: { entry: MemoryEntry; data: GameData }) {
                   <h4 className="skill__name">{f.name}</h4>
                 </header>
                 <p className="skill__desc">{f.description}</p>
-                <p className="mdetail__hint">WORLD探索（PHASE 4）で使用されます。</p>
+                <p className="mdetail__hint">
+                  同期していれば WORLD の探索で使える（装備は不要）。
+                  {/* 隠しエリアの名前は伏せる */}
+                  {fieldAbilityUses(data, f.id).some((u) => !u.area.hidden) &&
+                    ` 使う場所: ${[...new Set(fieldAbilityUses(data, f.id).filter((u) => !u.area.hidden).map((u) => `${data.worldById.get(u.area.worldId)?.name ?? ''}「${u.area.name}」`))].join('、')}`}
+                  {fieldAbilityUses(data, f.id).some((u) => u.area.hidden) && ' ほか、まだ見つかっていない場所'}
+                </p>
               </article>
             ))}
           </div>

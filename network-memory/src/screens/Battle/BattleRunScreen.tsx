@@ -49,6 +49,9 @@ export function BattleRunScreen({ encounterId }: { encounterId: string }) {
   const saveRef = useRef(save);
   saveRef.current = save;
   const enc = data.encounterById.get(encounterId);
+  // 同じ WORLD を探索していた場合は、戦闘後にそのエリアへ戻れるようにする
+  const lastArea = save.exploration.lastArea ? data.areaById.get(save.exploration.lastArea) : undefined;
+  const returnArea = lastArea && enc && lastArea.worldId === enc.worldId ? lastArea : undefined;
 
   const init = useCallback((): Session => {
     const r = createBattleSetup(saveRef.current, data, encounterId, createSeed());
@@ -407,6 +410,7 @@ export function BattleRunScreen({ encounterId }: { encounterId: string }) {
           encounterName={enc.name}
           onRetry={restart}
           onExit={() => nav({ name: 'battle' })}
+          onReturnToArea={returnArea ? { label: `探索に戻る（${returnArea.name}）`, go: () => nav({ name: 'worldArea', worldId: returnArea.worldId, areaId: returnArea.id }) } : undefined}
           onSync={(memoryId) => nav({ name: 'sync', memoryId })}
         />
       )}

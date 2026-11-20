@@ -6,15 +6,20 @@ import { SceneBackground } from '../../components/story/SceneBackground';
 import { encounterStatus } from '../../core/battle/setup';
 import { ATTRIBUTE_META } from '../../core/constants';
 import { discoveryState } from '../../core/player/discovery';
+import { canExplore, entryArea, explorationProgress } from '../../core/world/exploration';
+import { questStatus } from '../../core/world/quests';
 import { KIND_LABEL, computeWorldState, overallRestoration, restorationViews, worldConnection } from '../../core/world/restoration';
 import { usePlayer } from '../../state/GameProvider';
 import { RESTORATION_KINDS } from '../../types/world';
 import type { WorldDefinition } from '../../types/world';
+import { AreaMap } from './AreaMap';
+import { QuestList } from './QuestList';
 import './WorldScreen.css';
+import './Explore.css';
 
 const pct = (v: number) => `${Math.round(v * 100)}%`;
 
-/** WORLD: 各世界の修復状況（GDD Ver.3 §5）。エリア探索は PHASE 4 で実装予定 */
+/** WORLD: 各世界の修復状況（GDD Ver.3 §5）と探索（PHASE 4） */
 export function WorldScreen({ worldId }: { worldId?: string }) {
   const { data } = usePlayer();
   const world = worldId ? data.worldById.get(worldId) : undefined;
@@ -51,13 +56,20 @@ function WorldList() {
           </div>
         </section>
 
-        <p className="notice notice--planned">エリア探索・サブクエスト・WORLD 内のイベントは PHASE 4 で実装予定です。現在は修復状況の確認と、BATTLE からの流出反応への接続ができます。</p>
+        <section className="panel">
+          <div className="panel__title">
+            <span>QUESTS</span>
+            <small>受注中・報告できる依頼</small>
+          </div>
+          <QuestList quests={data.quests.filter((q) => ['active', 'ready', 'available'].includes(questStatus(save, data, q)))} showLocked={false} />
+        </section>
 
         <ul className="world__list">
           {data.worlds.map((w) => {
             const conn = worldConnection(save, data, w);
             const st = computeWorldState(save, data, w, '');
             const color = ATTRIBUTE_META[w.attribute].color;
+            const ex = explorationProgress(save, data, w.id);
             return (
               <li key={w.id}>
                 <button
@@ -75,6 +87,11 @@ function WorldList() {
                       {pct(st.restorationRate)} · {st.recoveredMemories.length}/{st.requiredMemories.length}
                     </span>
                   </span>
+                  {conn.connected && ex.total > 0 && (
+                    <span className="world-card__explore mono">
+                      EXPLORED {ex.done}/{ex.total}
+                    </span>
+                  )}
                   {!conn.connected && conn.requirement && <span className="world-card__req">接続条件: {conn.requirement}</span>}
                 </button>
               </li>
@@ -96,12 +113,18 @@ function WorldDetail({ world }: { world: WorldDefinition }) {
   const color = ATTRIBUTE_META[world.attribute].color;
   const encounters = data.encounters.filter((e) => e.worldId === world.id);
   const name = conn.known ? world.name : '？？？';
+  const entry = entryArea(data, world.id);
+  const explorable = canExplore(save, data, world.id);
+  const last = save.exploration.lastArea ? data.areaById.get(save.exploration.lastArea) : undefined;
+  const resume = last && last.worldId === world.id ? last : entry;
+  const ex = explorationProgress(save, data, world.id);
+  const quests = data.quests.filter((q) => q.worldId === world.id);
 
   return (
     <ScreenFrame code="02" title={name} subtitle={conn.known ? world.subtitle : '未接続の世界'} back={{ route: { name: 'world' }, label: 'WORLD' }}>
       <div className="world" style={{ ['--w-c' as string]: color } as CSSProperties}>
         <section className="world-hero">
-          {world.id === 'WORLD-001' ? <SceneBackground id="null-city-rain" lit={0.06 + st.restorationRate * 0.6} /> : <div className="world-hero__bg" />}
+          {conn.connected && entry ? <SceneBackground id={world.id === 'WORLD-001' ? 'null-city-rain' : entry.bg} lit={0.06 + st.restorationRate * 0.6} /> : <div className="world-hero__bg" />}
           <div className="world-hero__body">
             <AttributeTag attribute={world.attribute} withJa />
             <h2 className="world-hero__name">{name}</h2>
@@ -115,6 +138,33 @@ function WorldDetail({ world }: { world: WorldDefinition }) {
             </div>
           </div>
         </section>
+
+        {explorable && resume && (
+          <section className="panel">
+            <div className="panel__title">
+              <span>EXPLORE</span>
+              <small className="mono">
+                EXPLORED {ex.done}/{ex.total}
+              </small>
+            </div>
+            <AreaMap worldId={world.id} />
+            <div className="world__actions">
+              <button type="button" className="btn btn--primary" onClick={() => nav({ name: 'worldArea', worldId: world.id, areaId: resume.id })}>
+                {resume.id === entry?.id ? '探索を始める' : '探索を続ける'}
+              </button>
+            </div>
+          </section>
+        )}
+
+        {quests.length > 0 && conn.connected && (
+          <section className="panel">
+            <div className="panel__title">
+              <span>QUESTS</span>
+              <small>この世界の依頼</small>
+            </div>
+            <QuestList quests={quests} />
+          </section>
+        )}
 
         <section className="panel">
           <div className="panel__title">
@@ -218,7 +268,6 @@ function WorldDetail({ world }: { world: WorldDefinition }) {
           )}
         </section>
 
-        <p className="notice notice--planned">この世界のエリア探索・NPC との会話・サブクエストは PHASE 4 で実装予定です（現在は利用できません）。</p>
         <div className="world__actions">
           <button type="button" className="btn" onClick={() => nav({ name: 'archive', category: 'world' })}>
             WORLD RECORD を見る

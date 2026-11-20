@@ -1,0 +1,32 @@
+[
+  {
+    "id": "A005-VOID",
+    "worldId": "WORLD-005",
+    "name": "観測不能領域",
+    "description": "音も、色も、記録もない場所。足元の感触だけが、ここが「どこか」であることを教えてくれる。",
+    "bg": "network-void",
+    "pos": { "x": 50, "y": 50 },
+    "links": [],
+    "unlock": [],
+    "entry": true,
+    "points": [
+      {
+        "id": "P005-GIRL",
+        "type": "event",
+        "name": "白い傘の少女",
+        "description": "何もない場所の真ん中に、白い傘が見える。",
+        "eventId": "EV-BLANK"
+      },
+      {
+        "id": "P005-BLANK",
+        "type": "search",
+        "name": "白く抜け落ちた場所",
+        "description": "少女が立っていた場所だけ、白く抜け落ちている。",
+        "visible": [{ "type": "flag", "flag": "explore.blank.met", "label": "白い傘の少女に会う" }],
+        "resultText": "抜け落ちた白の中に、一行だけ文字が浮かんでいた。『Re:Collection』——それが何を意味するのか、まだ誰にも分からない。",
+        "rewards": { "currencies": { "FRAGMENT": 60, "CORE": 3 } },
+        "discover": ["MEM-0012"]
+      }
+    ]
+  }
+]

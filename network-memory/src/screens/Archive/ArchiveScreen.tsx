@@ -3,6 +3,7 @@ import { useNav } from '../../app/nav';
 import { ScreenFrame } from '../../components/layout/ScreenFrame';
 import { CharacterPortrait } from '../../components/story/CharacterPortrait';
 import { ARCHIVE_CATEGORY_META, archiveProgress, buildArchive, type ArchiveItem } from '../../core/archive/archive';
+import { fillText } from '../../core/story/engine';
 import { usePlayer } from '../../state/GameProvider';
 import { ARCHIVE_CATEGORIES, type ArchiveCategory } from '../../types/archive';
 import './ArchiveScreen.css';
@@ -169,7 +170,7 @@ export function ArchiveEntryScreen({ entryId }: { entryId: string }) {
             {s.unlocked ? (
               <>
                 {s.contentNote && <p className="archive-section__note">{s.contentNote}</p>}
-                <p className="archive-section__text">{s.text}</p>
+                <p className="archive-section__text">{fillText(s.text, save.profile.name)}</p>
               </>
             ) : (
               <>

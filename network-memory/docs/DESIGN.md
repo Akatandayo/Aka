@@ -155,6 +155,18 @@
 - 独の能力: {Glitch}（かつての【自我】が転生を経て完成したもの・身体を削る諸刃の剣）と、{upset}【大番狂わせ】（呪いから魂を解き放った独が自分の意思で生み出した力。自分より上の存在にのみ使え、相手と対等になる）。
 - 重い話題（自死・いじめ）を扱う章・節は `contentNote` で注意書きを出す。直接的な描写（方法など）は書かない。
 
+## 9.5 WORLD 探索（PHASE 4）
+
+`core/world/exploration.ts` / `core/world/quests.ts` / `screens/World`。
+
+- **エリア**（`src/data/areas/WORLD-xxx.json`）: マップ上の位置・つながり・解放条件・背景・入口。`hidden` のエリアは解放されるまでマップに出ない（`revealedBy` の探索能力があれば位置だけ見える）。
+- **地点**: `search`（一度だけの報酬・フラグ・Memory の発見/検出）/ `talk`・`event`（イベントを再生）/ `signal`（流出反応。BATTLE の遭遇をそのままエリアに置く）。`visible`（現れる条件）・`unlock`（使える条件）・`fieldAbility`（必要な探索能力）を持てる。
+- **探索能力**: 同期済み（所持）の Memory の `fieldAbilities` が有効になる。装備は不要。
+- **イベント**（`src/data/events`）: ストーリーと同じ命令列。`StoryPlayer` のイベントモードで再生し、終わると `EVENT_COMPLETE`（フラグ・Memory の検出・初回報酬）→ 最後にいたエリアへ戻る。
+- **サブクエスト**（`src/data/quests`）: 受注 → 達成条件（`Condition`）をすべて満たす → 報告で報酬。進捗は保存せず、毎回セーブデータから判定する。
+- **戦闘からの復帰**: 最後にいたエリアと同じ WORLD の流出反応なら、結果画面に「探索に戻る」を出す。
+- 条件式に `restored`（修復対象が復元されている）と `questCompleted` を追加。
+
 ## 10. ONLINE（PvP）共通ルール（Ver.3 §9）
 
 `core/online/pvp.ts`（クライアントとサーバーで共有するルール）。通信対戦の実装は PHASE 5。
@@ -176,23 +188,27 @@
 | 章 / 登場人物 / 進行 / 選択肢 | `src/data/story` / `characters` / `story` | `story_chapters` / `story_characters` / `story_progress` / `story_choices` |
 | ARCHIVE | `src/data/archive` / `archive.readEntryIds` | `archive_entries` / `player_profiles.read_archive_ids` |
 | 敵 / 遭遇 / アイテム / 遭遇の進行 | `enemies` / `encounters` / `items.json` / `battle.encounters` | `enemies` / `encounters` / `items` / `encounter_progress` |
+| 探索エリア / イベント / サブクエスト | `src/data/areas` / `events` / `quests` | `world_areas` / `story_events` / `quests` |
+| 探索の進行 / サブクエストの状態 | `exploration` / `quests` | `player_exploration` / `player_quests` |
 | BattleRecords / Rankings / PvP | `battle.records` / — / `core/online/pvp.ts` | `battle_records` / `rankings` / `pvp_modes` |
 | Inventory / Transactions | `inventory` / `transactions[]` | `inventory` / `transactions` |
 
 ### セーブデータ
 
+- **v3 → v4**: 探索の進行（`exploration`: 訪れたエリア・調べた地点・見たイベント・最後にいたエリア）とサブクエストの状態（`quests`）を追加。
 - **v2 → v3**: ストーリー進行（`story`）・WORLD の修復状態（`worlds`）・ARCHIVE の既読（`archive.readEntryIds`）を追加。修復状態は読み込み時に所持 Memory から算出する。
 - 読み込み時に `core/save/sanitize.ts` で全項目を検証・補正し、修復状態を再計算する。
 
 ## 12. オンラインのセキュリティ設計
 
-`supabase/migrations/20261119000000_initial_schema.sql`（未適用のため Ver.3 に合わせて改訂済み）。ローカル PostgreSQL 16 にマスターデータ全件（シナリオ・登場人物・ARCHIVE・修復対象を含む）を投入し、40 項目を検証済み。
+`supabase/migrations/20261119000000_initial_schema.sql`（未適用のため Ver.3 に合わせて改訂済み）。ローカル PostgreSQL 16 にマスターデータ全件（シナリオ・登場人物・ARCHIVE・修復対象・探索エリア・イベント・サブクエストを含む）を投入し、49 項目を検証済み。
 
 - マスターデータは全員読み取り専用、プレイヤーデータは本人のみ参照（RLS）。
 - クライアントが直接更新できるのは名前・外見・紹介文・設定・お気に入り・装備・ARCHIVE の既読・ストーリーの読書位置のみ（列単位の権限）。
 - 装備はトリガーで検証（所持・重複・枠ごとの装備可否・枠の数）。サブ枠は補助スキルを持つ Memory のみ。
 - 世界修復: `refresh_world_progress()` が所持 Memory から修復状態を算出し、Memory の回収（`player_memories` への追加）時にトリガーで更新。クライアントは書き込めない。
 - 章のクリア・通貨・Memory の同期・遭遇の進行・戦闘結果・ランキングはサーバー（service_role）のみ。
+- 探索: 訪れたエリア・最後にいたエリアはクライアントが更新できる。調べた地点・見たイベント（報酬に関わる）はサーバーのみ。サブクエストの受注（active での追加）はクライアント、報告（completed への更新と報酬）はサーバーのみ。
 - 対人戦: `battle_records` はメイン Memory を含む装備スナップショットが必須で、開始後はスナップショット・シードを変更できない（トリガー）。`pvp_modes` に 5 モードと共通ルール（PHASE 5 まで無効）。
 
 ## 13. 拡張の手引き
@@ -202,6 +218,8 @@
 | Memory・スキル・記録・敵・遭遇・アイテム | JSON を追加 → `npm run validate:data`。遭遇を追加したら `npm test` でバランス検証も確認 |
 | WORLD・修復対象 | `worlds.json` に WORLD を追加（`restorations` に対象 Memory を列挙）。既存の WORLD・Memory は変更不要 |
 | ストーリーの章 | `src/data/story/*.json` に章を追加（`order` で並ぶ）。参照する人物・Memory・ラベルは読み込み時に検証される |
+| 探索エリア・地点 | `src/data/areas/` に WORLD ごとのファイルを追加。入口（`entry`）は WORLD に 1 つ。参照（流出反応・イベント・探索能力・Memory・アイテム）は読み込み時に検証される |
+| 探索イベント・サブクエスト | `src/data/events/` / `src/data/quests/` に追加 |
 | 登場人物・立ち絵 | `src/data/characters/*.json`。画像があれば `portraits` に表情ごとのパスを指定 |
 | ARCHIVE の記録 | `src/data/archive/*.json`（分類・解放条件・節） |
 | 背景・BGM・SE | `components/story/SceneBackground.tsx` / `audio/audio.ts` に ID を追加（素材ができたら画像・音声ファイルに差し替え） |

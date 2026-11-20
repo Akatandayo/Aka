@@ -7,7 +7,7 @@ import './TitleScreen.css';
 
 type Phase = 'boot' | 'title' | 'register' | 'receive';
 
-const APP_VERSION = '0.3.0';
+const APP_VERSION = '0.4.0';
 
 /**
  * 起動シーケンス → タイトル → 探索者登録 → 初期Memory受領。
@@ -138,7 +138,7 @@ export function TitleScreen({ onEnter }: { onEnter: () => void }) {
         {phase === 'receive' && save && <ReceiveStarter onDone={onEnter} />}
       </div>
       <footer className="title__footer mono">
-        v{APP_VERSION} · PHASE 3 BUILD · LOCAL SAVE
+        v{APP_VERSION} · PHASE 4 BUILD · LOCAL SAVE
       </footer>
     </div>
   );

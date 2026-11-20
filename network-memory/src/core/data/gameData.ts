@@ -3,13 +3,17 @@ import type { ItemDefinition } from '../../types/item';
 import type { MemoryDefinition } from '../../types/memory';
 import type { MemoryStory } from '../../types/record';
 import type { SkillDefinition, SkillEffect, SkillKind } from '../../types/skill';
-import type { WorldDefinition } from '../../types/world';
+import type { RestorationTarget, WorldDefinition } from '../../types/world';
+import type { AreaDefinition, EventDefinition, QuestDefinition } from '../../types/exploration';
 import type { ArchiveEntry } from '../../types/archive';
 import type { Condition } from '../../types/condition';
 import type { CharacterDefinition, StoryChapter } from '../../types/story';
 import {
   parseArchiveEntry,
+  parseArea,
   parseChapter,
+  parseEvent,
+  parseQuest,
   parseCharacter,
   parseEncounter,
   parseEnemy,
@@ -41,6 +45,16 @@ export interface RawGameDataSources {
   characters?: unknown[];
   chapters?: unknown[];
   archive?: unknown[];
+  areas?: unknown[];
+  events?: unknown[];
+  quests?: unknown[];
+}
+
+export interface FieldAbilityInfo {
+  id: string;
+  name: string;
+  description: string;
+  memoryId: string;
 }
 
 export interface GameData {
@@ -62,6 +76,17 @@ export interface GameData {
   /** ARCHIVE（MEMORY RECORD 以外） */
   archive: ArchiveEntry[];
   archiveById: ReadonlyMap<string, ArchiveEntry>;
+  /** WORLD の修復対象（ID → 対象） */
+  restorationById: ReadonlyMap<string, RestorationTarget & { worldId: string }>;
+  /** 探索（PHASE 4） */
+  areas: AreaDefinition[];
+  areaById: ReadonlyMap<string, AreaDefinition>;
+  events: EventDefinition[];
+  eventById: ReadonlyMap<string, EventDefinition>;
+  quests: QuestDefinition[];
+  questById: ReadonlyMap<string, QuestDefinition>;
+  /** 探索能力 ID → 能力と、その能力を持つ Memory */
+  fieldAbilityById: ReadonlyMap<string, FieldAbilityInfo>;
   issues: DataIssue[];
 }
 
@@ -97,6 +122,9 @@ export function buildGameData(src: RawGameDataSources): GameData {
   const characterMap = parseAll(src.characters, parseCharacter, 'character', issues);
   const chapterMap = parseAll(src.chapters, parseChapter, 'story', issues);
   const archiveMap = parseAll(src.archive, parseArchiveEntry, 'archive', issues);
+  const areaMap = parseAll(src.areas, parseArea, 'area', issues);
+  const eventMap = parseAll(src.events, parseEvent, 'event', issues);
+  const questMap = parseAll(src.quests, parseQuest, 'quest', issues);
 
   const err = (source: string, message: string) => issues.push({ level: 'error', source, message });
   const warn = (source: string, message: string) => issues.push({ level: 'warning', source, message });
@@ -207,6 +235,8 @@ export function buildGameData(src: RawGameDataSources): GameData {
     encounters.push({ ...enc, enemies: enemies.slice(0, 3) });
   }
 
+  const restorationIds = new Set([...worlds.values()].flatMap((w) => w.restorations.map((t) => t.id)));
+
   // ---- 共通条件式の参照チェック
   const checkConds = (source: string, conds: Condition[] | undefined) => {
     for (const c of conds ?? []) {
@@ -214,6 +244,8 @@ export function buildGameData(src: RawGameDataSources): GameData {
       if (c.type === 'encounterCleared' && !encounterMap.has(c.encounterId)) err(source, `条件の流出反応 ${c.encounterId} が存在しません`);
       if (c.type === 'storyCleared' && !chapterMap.has(c.chapterId)) err(source, `条件の章 ${c.chapterId} が存在しません`);
       if (c.type === 'worldRestoration' && !worlds.has(c.worldId)) err(source, `条件の WORLD ${c.worldId} が存在しません`);
+      if (c.type === 'restored' && !restorationIds.has(c.targetId)) err(source, `条件の修復対象 ${c.targetId} が存在しません`);
+      if (c.type === 'questCompleted' && !questMap.has(c.questId)) err(source, `条件のサブクエスト ${c.questId} が存在しません`);
     }
   };
   for (const m of memories) checkConds(`memory:${m.id}`, m.unlockConditions);
@@ -228,17 +260,76 @@ export function buildGameData(src: RawGameDataSources): GameData {
     }
   }
 
-  // ---- ストーリー
-  const chapters = [...chapterMap.values()].sort((a, b) => a.order - b.order);
-  for (const ch of chapters) {
-    const source = `story:${ch.id}`;
-    checkConds(source, ch.unlock);
-    for (const cmd of ch.script) {
+  // ---- ストーリー・イベント（シナリオ）
+  const checkScript = (source: string, script: StoryChapter['script']) => {
+    for (const cmd of script) {
       if ((cmd.t === 'show' || cmd.t === 'hide' || cmd.t === 'say') && !characterMap.has(cmd.char) && cmd.char !== 'PLAYER') err(source, `登場人物 ${cmd.char} が存在しません`);
       if (cmd.t === 'detect' && !memoryById.has(cmd.memoryId)) err(source, `Memory ${cmd.memoryId} が存在しません`);
       if (cmd.t === 'if') checkConds(source, cmd.cond);
     }
+  };
+  const chapters = [...chapterMap.values()].sort((a, b) => a.order - b.order);
+  for (const ch of chapters) {
+    const source = `story:${ch.id}`;
+    checkConds(source, ch.unlock);
+    checkScript(source, ch.script);
     for (const id of Object.keys(ch.rewards?.items ?? {})) if (!items.has(id)) err(source, `報酬のアイテム ${id} が存在しません`);
+  }
+  for (const ev of eventMap.values()) {
+    checkScript(`event:${ev.id}`, ev.script);
+    checkItems(`event:${ev.id}`, ev.rewards?.items);
+  }
+
+  // ---- 探索能力（Memory の fieldAbilities）
+  const fieldAbilityById = new Map<string, FieldAbilityInfo>();
+  for (const m of memories) {
+    for (const f of m.fieldAbilities ?? []) {
+      if (fieldAbilityById.has(f.id)) err(`memory:${m.id}`, `探索能力 ${f.id} が重複しています`);
+      else fieldAbilityById.set(f.id, { ...f, memoryId: m.id });
+    }
+  }
+
+  // ---- 探索エリア
+  const areas = [...areaMap.values()];
+  const pointIds = new Set<string>();
+  for (const a of areas) {
+    const source = `area:${a.id}`;
+    if (!worlds.has(a.worldId)) err(source, `WORLD ${a.worldId} が存在しません`);
+    checkConds(source, a.unlock);
+    for (const l of a.links) {
+      const to = areaMap.get(l);
+      if (!to) err(source, `つながっているエリア ${l} が存在しません`);
+      else if (to.worldId !== a.worldId) err(source, `エリア ${l} は別の WORLD です`);
+      else if (!to.links.includes(a.id)) warn(source, `エリア ${l} からこのエリアへの道がありません（片道）`);
+    }
+    if (a.revealedBy && !fieldAbilityById.has(a.revealedBy)) err(source, `探索能力 ${a.revealedBy} が存在しません`);
+    for (const p of a.points) {
+      if (pointIds.has(p.id)) err(source, `地点 ID ${p.id} が重複しています`);
+      pointIds.add(p.id);
+      checkConds(source, p.visible);
+      checkConds(source, p.unlock);
+      if (p.fieldAbility && !fieldAbilityById.has(p.fieldAbility)) err(source, `${p.id}: 探索能力 ${p.fieldAbility} が存在しません`);
+      if (p.encounterId && !encounterMap.has(p.encounterId)) err(source, `${p.id}: 流出反応 ${p.encounterId} が存在しません`);
+      if (p.eventId && !eventMap.has(p.eventId)) err(source, `${p.id}: イベント ${p.eventId} が存在しません`);
+      if (p.npc && !characterMap.has(p.npc)) err(source, `${p.id}: 登場人物 ${p.npc} が存在しません`);
+      for (const id of [...(p.discover ?? []), ...(p.detect ?? [])]) if (!memoryById.has(id)) err(source, `${p.id}: Memory ${id} が存在しません`);
+      checkItems(source, p.rewards?.items);
+    }
+  }
+  for (const w of worlds.values()) {
+    const own = areas.filter((a) => a.worldId === w.id);
+    if (own.length && own.filter((a) => a.entry).length !== 1) err(`world:${w.id}`, '探索エリアの入口（entry）は 1 つにしてください');
+  }
+
+  // ---- サブクエスト
+  const quests = [...questMap.values()];
+  for (const q of quests) {
+    const source = `quest:${q.id}`;
+    if (!worlds.has(q.worldId)) err(source, `WORLD ${q.worldId} が存在しません`);
+    if (!characterMap.has(q.giver)) err(source, `依頼人 ${q.giver} が存在しません`);
+    checkConds(source, q.unlock);
+    checkConds(source, q.objectives.map((o) => o.cond));
+    checkItems(source, q.rewards.items);
   }
 
   // ---- ARCHIVE
@@ -258,6 +349,14 @@ export function buildGameData(src: RawGameDataSources): GameData {
     chapterById: new Map(chapters.map((c) => [c.id, c])),
     archive: [...archiveMap.values()],
     archiveById: archiveMap,
+    restorationById: new Map([...worlds.values()].flatMap((w) => w.restorations.map((t) => [t.id, { ...t, worldId: w.id }] as const))),
+    areas,
+    areaById: areaMap,
+    events: [...eventMap.values()],
+    eventById: eventMap,
+    quests,
+    questById: questMap,
+    fieldAbilityById,
     memories,
     memoryById,
     skillById: skills,
@@ -294,6 +393,9 @@ export function loadBundledSources(): RawGameDataSources {
     characters: flattenModules(import.meta.glob('../../data/characters/*.json', { eager: true, import: 'default' })),
     chapters: flattenModules(import.meta.glob('../../data/story/*.json', { eager: true, import: 'default' })),
     archive: flattenModules(import.meta.glob('../../data/archive/*.json', { eager: true, import: 'default' })),
+    areas: flattenModules(import.meta.glob('../../data/areas/*.json', { eager: true, import: 'default' })),
+    events: flattenModules(import.meta.glob('../../data/events/*.json', { eager: true, import: 'default' })),
+    quests: flattenModules(import.meta.glob('../../data/quests/*.json', { eager: true, import: 'default' })),
   };
 }
 

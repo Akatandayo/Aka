@@ -1,0 +1,58 @@
+[
+  {
+    "id": "A004-RIM",
+    "worldId": "WORLD-004",
+    "name": "破損領域の外縁部",
+    "description": "ERROR ZONE の外縁。破損データが寄り集まり、群れを成している。",
+    "bg": "error-zone",
+    "pos": { "x": 26, "y": 68 },
+    "links": ["A004-DEEP"],
+    "unlock": [],
+    "entry": true,
+    "points": [
+      {
+        "id": "P004-SIG-RIM",
+        "type": "signal",
+        "name": "破損体の群れ",
+        "description": "破損データが寄り集まり、群れを成している。",
+        "encounterId": "ENC-007"
+      },
+      {
+        "id": "P004-HEAP",
+        "type": "search",
+        "name": "破損データの山",
+        "description": "壊れた記録が積み上がっている。まだ使える部分もありそうだ。",
+        "resultText": "崩れかけた山の中から、使える DATA を拾い集めた。破損した記録の断面には、どれも同じ時刻のタイムスタンプが残っている。——大流出の日の。",
+        "rewards": { "currencies": { "DATA": 300 } }
+      }
+    ]
+  },
+  {
+    "id": "A004-DEEP",
+    "worldId": "WORLD-004",
+    "name": "破損領域の深部",
+    "description": "王冠の命令に従う猟犬たちの巣。空間そのものがひび割れている。",
+    "bg": "error-zone",
+    "pos": { "x": 72, "y": 30 },
+    "links": ["A004-RIM"],
+    "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-007" }],
+    "points": [
+      {
+        "id": "P004-SIG-DEEP",
+        "type": "signal",
+        "name": "ハウンド・アルファ",
+        "description": "王冠の命令に従う猟犬の長が待ち構えている。",
+        "encounterId": "ENC-008"
+      },
+      {
+        "id": "P004-SIGNAL",
+        "type": "event",
+        "name": "未知のシグナル",
+        "description": "深部のさらに奥から、聞いたことのない信号が届いている。",
+        "eventId": "EV-UNKNOWN-SIGNAL",
+        "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-008" }],
+        "fieldAbility": "FA-0004"
+      }
+    ]
+  }
+]

@@ -26,6 +26,8 @@ const REASON_LABEL: Record<TransactionReason, string> = {
   QUEST_REWARD: 'クエスト報酬',
   BATTLE_REWARD: 'バトル報酬',
   STORY_REWARD: 'ストーリー報酬',
+  EXPLORE_REWARD: '探索',
+  EVENT_REWARD: 'イベント',
   DUPLICATE_MEMORY: '重複Memoryの断片化',
   ADJUSTMENT: '調整',
 };

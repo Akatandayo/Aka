@@ -65,6 +65,16 @@ export const MIGRATIONS: Record<number, Migration> = {
       worlds: {},
     };
   },
+  /**
+   * v3 → v4（PHASE 4: WORLD 探索）
+   * - 探索の進行（訪れたエリア・調べた地点・見たイベント）とサブクエストの状態を追加
+   */
+  3: (raw) => ({
+    ...raw,
+    version: 4,
+    exploration: { visitedAreas: [], points: {}, events: {}, lastArea: null },
+    quests: {},
+  }),
 };
 
 export type MigrateResult = { ok: true; data: Raw; from: number } | { ok: false; error: string };

@@ -1,0 +1,184 @@
+[
+  {
+    "id": "A001-AKARUA",
+    "worldId": "WORLD-001",
+    "name": "何でも屋「アカルア」",
+    "description": "雨の街で、古い看板の灯りだけがいつも温かい。ハルカ・独・紅葉の店で、{player}の帰る場所。",
+    "bg": "akarua-office",
+    "pos": { "x": 50, "y": 16 },
+    "links": ["A001-STREET"],
+    "unlock": [],
+    "entry": true,
+    "points": [
+      {
+        "id": "P001-HARUKA",
+        "type": "talk",
+        "name": "白石ハルカ",
+        "description": "カウンターの奥で、帳簿をつけている。",
+        "npc": "CHR-HARUKA",
+        "eventId": "EV-HARUKA"
+      },
+      {
+        "id": "P001-HITORI",
+        "type": "talk",
+        "name": "電子 独",
+        "description": "端末の前で、流出反応の観測を続けている。",
+        "npc": "CHR-HITORI",
+        "eventId": "EV-HITORI"
+      },
+      {
+        "id": "P001-MOMIJI",
+        "type": "talk",
+        "name": "電子 紅葉",
+        "description": "救急箱の中身を確かめている。",
+        "npc": "CHR-MOMIJI",
+        "eventId": "EV-MOMIJI"
+      },
+      {
+        "id": "P001-TERMINAL",
+        "type": "search",
+        "name": "店の端末",
+        "description": "独が組んだ観測端末。流出反応の記録が流れていく。",
+        "resultText": "画面の隅に、NULL CITY の地図が表示されている。灯りの消えた区画ほど、地図の線が薄い。……誰かが、使い終わった DATA を端末の横に置いていった。",
+        "rewards": { "currencies": { "DATA": 100 } }
+      }
+    ]
+  },
+  {
+    "id": "A001-STREET",
+    "worldId": "WORLD-001",
+    "name": "消えかけの街灯通り",
+    "description": "灯りが一本、また一本と消えていく大通り。水たまりに映る街並みが、ときどき現実と食い違う。",
+    "bg": "null-city-rain",
+    "pos": { "x": 50, "y": 46 },
+    "links": ["A001-AKARUA", "A001-ALLEY", "A001-CROSS", "A001-RAINALLEY"],
+    "unlock": [],
+    "points": [
+      {
+        "id": "P001-SIG-STREET",
+        "type": "signal",
+        "name": "消えかけの街灯",
+        "description": "闇の中心に、灯りを喰う強い反応がひとつ。",
+        "encounterId": "ENC-002"
+      },
+      {
+        "id": "P001-LUX",
+        "type": "talk",
+        "name": "点灯夫ルクス",
+        "description": "灯竿を担いだ男が、消えかけた街灯を見上げている。",
+        "npc": "CHR-LUX",
+        "eventId": "EV-LUX",
+        "visible": [{ "type": "restored", "targetId": "R001-LUX" }]
+      },
+      {
+        "id": "P001-PUDDLE",
+        "type": "search",
+        "name": "水たまりに映る路地",
+        "description": "水たまりの中にだけ、見覚えのない細い路地が映っている。",
+        "fieldAbility": "FA-0002",
+        "resultText": "雨音に耳を澄ますと、地図に無い道の形が浮かび上がった。水たまりの路地は、確かに現実のどこかにつながっている。——雨音の路地が見つかった。",
+        "setFlags": ["explore.rainalley.found"],
+        "rewards": { "currencies": { "FRAGMENT": 15 } }
+      }
+    ]
+  },
+  {
+    "id": "A001-ALLEY",
+    "worldId": "WORLD-001",
+    "name": "第七区画・路地裏",
+    "description": "{player}が目を覚ました路地。値を失ったデータの残骸が、雨に流されずに溜まっている。",
+    "bg": "null-city-rain",
+    "pos": { "x": 22, "y": 74 },
+    "links": ["A001-STREET"],
+    "unlock": [],
+    "points": [
+      {
+        "id": "P001-SIG-ALLEY",
+        "type": "signal",
+        "name": "第七区画の流出反応",
+        "description": "弱い流出反応。値を失ったデータの残骸が集まっている。",
+        "encounterId": "ENC-001"
+      },
+      {
+        "id": "P001-BOX",
+        "type": "search",
+        "name": "濡れた段ボール箱",
+        "description": "誰かが雨宿りに使っていたらしい箱。",
+        "resultText": "箱の底に、使いかけの修復パッチと、少しの DATA が残っていた。……誰かの忘れ物だろうか。",
+        "rewards": { "currencies": { "DATA": 150 }, "items": { "ITEM-0001": 1 } }
+      },
+      {
+        "id": "P001-CATS",
+        "type": "talk",
+        "name": "路地裏の猫たち",
+        "description": "0と1でできた猫たちが、段ボールの陰からこちらを見ている。",
+        "eventId": "EV-ALLEY-CATS",
+        "visible": [{ "type": "restored", "targetId": "R001-CAT" }]
+      }
+    ]
+  },
+  {
+    "id": "A001-CROSS",
+    "worldId": "WORLD-001",
+    "name": "第七区画・雨の交差点",
+    "description": "信号が永遠に赤のまま止まった交差点。ここでは、雨が一度も止んだことがない。",
+    "bg": "null-city-rain",
+    "pos": { "x": 80, "y": 72 },
+    "links": ["A001-STREET"],
+    "unlock": [{ "type": "restored", "targetId": "R001-CROSS" }],
+    "points": [
+      {
+        "id": "P001-GATE",
+        "type": "search",
+        "name": "認証ゲート",
+        "description": "探索者認証を求める古いゲート。巡回ドローンの航路の起点らしい。",
+        "fieldAbility": "FA-0003",
+        "resultText": "探索者 ID を照合すると、ゲートが低い音を立てて開いた。中には、巡回ドローンの整備記録と、封をされた CORE が保管されていた。",
+        "setFlags": ["explore.gate.checked"],
+        "rewards": { "currencies": { "CORE": 2 } }
+      },
+      {
+        "id": "P001-OTHERSIDE",
+        "type": "search",
+        "name": "交差点の向こう側",
+        "description": "赤信号の向こう。雨の幕の奥に、白い何かが立っている気がする。",
+        "unlock": [{ "type": "storyCleared", "chapterId": "CH-001" }],
+        "resultText": "目を凝らすと、白い傘を差した少女の輪郭が見えた。顔のところだけが、白く抜け落ちている。瞬きをした次の瞬間には、もう誰もいなかった。——記録されていない誰かの存在を、確かに観測した。",
+        "setFlags": ["explore.cross.glimpse"],
+        "discover": ["MEM-0012"]
+      }
+    ]
+  },
+  {
+    "id": "A001-RAINALLEY",
+    "worldId": "WORLD-001",
+    "name": "雨音の路地",
+    "description": "雨の日にだけ現れる、地図に無い路地。足音が、少し遅れて聞こえる。",
+    "bg": "null-city-rain",
+    "pos": { "x": 18, "y": 36 },
+    "links": ["A001-STREET"],
+    "unlock": [{ "type": "flag", "flag": "explore.rainalley.found", "label": "雨の日だけ現れる路地を見つける" }],
+    "hidden": true,
+    "revealedBy": "FA-0005",
+    "points": [
+      {
+        "id": "P001-UMBRELLA",
+        "type": "search",
+        "name": "落とし物の白い傘",
+        "description": "壁に立てかけられた、白い傘。雨粒ひとつ付いていない。",
+        "resultText": "傘の柄に、小さく名前が刻まれていた。けれど、その文字だけが読めない。紅葉の依頼にあった落とし物は、これに違いない。",
+        "setFlags": ["explore.rainalley.umbrella"],
+        "rewards": { "currencies": { "DATA": 200 }, "items": { "ITEM-0003": 1 } }
+      },
+      {
+        "id": "P001-TRACE",
+        "type": "search",
+        "name": "流出の痕跡",
+        "description": "路地の奥で、記録が流れ出した跡が細く続いている。",
+        "fieldAbility": "FA-0004",
+        "resultText": "流出経路を辿ると、痕跡は NULL CITY の外へ——ARCHIVE の方角へと伸びていた。大流出の日、記録はここを通って流れていったのだ。",
+        "rewards": { "currencies": { "FRAGMENT": 40 } }
+      }
+    ]
+  }
+]

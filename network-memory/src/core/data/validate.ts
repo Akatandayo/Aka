@@ -28,6 +28,7 @@ import {
 import { RESTORATION_KINDS, type RestorationTarget, type WorldDefinition, type WorldUnlock } from '../../types/world';
 import { ARCHIVE_CATEGORIES, type ArchiveEntry, type ArchiveSection } from '../../types/archive';
 import type { CharacterDefinition, StoryChapter, StoryCommand } from '../../types/story';
+import { POINT_TYPES, type AreaDefinition, type AreaPoint, type EventDefinition, type QuestDefinition, type Rewards } from '../../types/exploration';
 
 /**
  * マスターデータの検証。
@@ -102,6 +103,12 @@ export function parseCondition(x: unknown, c: Collector): Condition | null {
       break;
     case 'worldRestoration':
       if (isStr(x.worldId) && isNum(x.value)) return { type: 'worldRestoration', worldId: x.worldId, value: x.value };
+      break;
+    case 'restored':
+      if (isStr(x.targetId)) return { type: 'restored', targetId: x.targetId };
+      break;
+    case 'questCompleted':
+      if (isStr(x.questId)) return { type: 'questCompleted', questId: x.questId };
       break;
     case 'unknown':
       return { type: 'unknown' };
@@ -532,6 +539,7 @@ export function parseCharacter(raw: unknown, issues: DataIssue[]): CharacterDefi
     name: raw.name,
     reading: optStr(raw.reading),
     ...(isStr(raw.formerName) ? { formerName: raw.formerName } : {}),
+    ...(raw.cast === false ? { cast: false } : {}),
     role: raw.role,
     age: isNum(raw.age) ? raw.age : undefined,
     origin: optStr(raw.origin),
@@ -613,6 +621,27 @@ function parseCommand(x: unknown, c: Collector, at: number): StoryCommand | null
   }
 }
 
+/** シナリオ（命令列）の解析: ラベルの存在と end の有無も検証する */
+function parseScript(raw: unknown[], c: Collector): StoryCommand[] {
+  const script = raw.map((x, i) => parseCommand(x, c, i)).filter((x): x is StoryCommand => x !== null);
+  const labels = new Set(script.flatMap((x) => (x.t === 'label' ? [x.id] : [])));
+  for (const cmd of script) {
+    const targets = cmd.t === 'goto' ? [cmd.label] : cmd.t === 'if' ? [cmd.goto, cmd.else] : cmd.t === 'choice' ? cmd.options.map((o) => o.goto) : [];
+    for (const l of targets) if (l && !labels.has(l)) c.error(`ラベル ${l} が存在しません`);
+  }
+  if (!script.some((x) => x.t === 'end')) c.error('script に end がありません');
+  return script;
+}
+
+function parseRewards(raw: unknown): Rewards | undefined {
+  if (!isObj(raw)) return undefined;
+  const currencies: Partial<Record<(typeof CURRENCIES)[number], number>> = {};
+  if (isObj(raw.currencies)) for (const [k, v] of Object.entries(raw.currencies)) if (isOneOf(CURRENCIES, k) && isNum(v) && v > 0) currencies[k] = v;
+  const items: Record<string, number> = {};
+  if (isObj(raw.items)) for (const [k, v] of Object.entries(raw.items)) if (isNum(v) && v > 0) items[k] = v;
+  return { currencies, items };
+}
+
 export function parseChapter(raw: unknown, issues: DataIssue[]): StoryChapter | null {
   const id = isObj(raw) && isStr(raw.id) ? raw.id : '(id不明)';
   const c = new Collector(`story:${id}`);
@@ -624,21 +653,8 @@ export function parseChapter(raw: unknown, issues: DataIssue[]): StoryChapter | 
     c.error('id / label / title / order / script が必要です');
     return finish(null);
   }
-  const script = raw.script.map((x, i) => parseCommand(x, c, i)).filter((x): x is StoryCommand => x !== null);
-  const labels = new Set(script.flatMap((x) => (x.t === 'label' ? [x.id] : [])));
-  for (const cmd of script) {
-    const targets = cmd.t === 'goto' ? [cmd.label] : cmd.t === 'if' ? [cmd.goto, cmd.else] : cmd.t === 'choice' ? cmd.options.map((o) => o.goto) : [];
-    for (const l of targets) if (l && !labels.has(l)) c.error(`ラベル ${l} が存在しません`);
-  }
-  if (!script.some((x) => x.t === 'end')) c.error('script に end がありません');
-  let rewards: StoryChapter['rewards'];
-  if (isObj(raw.rewards)) {
-    const currencies: Partial<Record<(typeof CURRENCIES)[number], number>> = {};
-    if (isObj(raw.rewards.currencies)) for (const [k, v] of Object.entries(raw.rewards.currencies)) if (isOneOf(CURRENCIES, k) && isNum(v) && v > 0) currencies[k] = v;
-    const items: Record<string, number> = {};
-    if (isObj(raw.rewards.items)) for (const [k, v] of Object.entries(raw.rewards.items)) if (isNum(v) && v > 0) items[k] = v;
-    rewards = { currencies, items };
-  }
+  const script = parseScript(raw.script, c);
+  const rewards = parseRewards(raw.rewards);
   if (c.issues.some((i) => i.level === 'error')) return finish(null);
   return finish({
     id: raw.id,
@@ -877,5 +893,111 @@ export function parseEncounter(raw: unknown, issues: DataIssue[]): EncounterDefi
     unlock,
     rewards,
     firstClear,
+  });
+}
+
+// ---------------------------------------------------------------- Exploration（PHASE 4）
+
+function parsePoint(x: unknown, c: Collector): AreaPoint | null {
+  if (!isObj(x) || !isStr(x.id) || !isOneOf(POINT_TYPES, x.type) || !isStr(x.name) || !isStr(x.description)) {
+    c.error(`points の要素が不正です: ${JSON.stringify(x)?.slice(0, 80)}`);
+    return null;
+  }
+  const p: AreaPoint = { id: x.id, type: x.type, name: x.name, description: x.description };
+  if (x.visible !== undefined) p.visible = parseConditions(x.visible, c, `${x.id}.visible`);
+  if (x.unlock !== undefined) p.unlock = parseConditions(x.unlock, c, `${x.id}.unlock`);
+  if (isStr(x.fieldAbility)) p.fieldAbility = x.fieldAbility;
+  if (isStr(x.encounterId)) p.encounterId = x.encounterId;
+  if (isStr(x.eventId)) p.eventId = x.eventId;
+  if (isStr(x.npc)) p.npc = x.npc;
+  if (isStr(x.resultText)) p.resultText = x.resultText;
+  const rewards = parseRewards(x.rewards);
+  if (rewards) p.rewards = rewards;
+  if (strArray(x.setFlags)) p.setFlags = strArray(x.setFlags)!;
+  if (strArray(x.discover)) p.discover = strArray(x.discover)!;
+  if (strArray(x.detect)) p.detect = strArray(x.detect)!;
+  if (p.type === 'signal' && !p.encounterId) c.error(`${p.id}: signal には encounterId が必要です`);
+  if ((p.type === 'talk' || p.type === 'event') && !p.eventId) c.error(`${p.id}: ${p.type} には eventId が必要です`);
+  if (p.type === 'search' && !p.resultText) c.error(`${p.id}: search には resultText が必要です`);
+  return p;
+}
+
+export function parseArea(raw: unknown, issues: DataIssue[]): AreaDefinition | null {
+  const id = isObj(raw) && isStr(raw.id) ? raw.id : '(id不明)';
+  const c = new Collector(`area:${id}`);
+  const finish = <T>(v: T) => {
+    issues.push(...c.issues);
+    return v;
+  };
+  if (!isObj(raw) || !isStr(raw.id) || !isStr(raw.worldId) || !isStr(raw.name) || !isStr(raw.bg) || !isObj(raw.pos) || !isNum(raw.pos.x) || !isNum(raw.pos.y) || !Array.isArray(raw.points)) {
+    c.error('id / worldId / name / bg / pos / points が必要です');
+    return finish(null);
+  }
+  const points = raw.points.map((x) => parsePoint(x, c)).filter((x): x is AreaPoint => x !== null);
+  if (c.issues.some((i) => i.level === 'error')) return finish(null);
+  return finish({
+    id: raw.id,
+    worldId: raw.worldId,
+    name: raw.name,
+    description: isStr(raw.description) ? raw.description : '',
+    bg: raw.bg,
+    pos: { x: Math.min(100, Math.max(0, raw.pos.x)), y: Math.min(100, Math.max(0, raw.pos.y)) },
+    links: strArray(raw.links) ?? [],
+    unlock: parseConditions(raw.unlock, c, 'unlock'),
+    ...(raw.hidden === true ? { hidden: true } : {}),
+    ...(isStr(raw.revealedBy) ? { revealedBy: raw.revealedBy } : {}),
+    ...(raw.entry === true ? { entry: true } : {}),
+    points,
+  });
+}
+
+export function parseEvent(raw: unknown, issues: DataIssue[]): EventDefinition | null {
+  const id = isObj(raw) && isStr(raw.id) ? raw.id : '(id不明)';
+  const c = new Collector(`event:${id}`);
+  const finish = <T>(v: T) => {
+    issues.push(...c.issues);
+    return v;
+  };
+  if (!isObj(raw) || !isStr(raw.id) || !isStr(raw.title) || !Array.isArray(raw.script)) {
+    c.error('id / title / script が必要です');
+    return finish(null);
+  }
+  const script = parseScript(raw.script, c);
+  const rewards = parseRewards(raw.rewards);
+  if (c.issues.some((i) => i.level === 'error')) return finish(null);
+  return finish({ id: raw.id, title: raw.title, ...(rewards ? { rewards } : {}), script });
+}
+
+export function parseQuest(raw: unknown, issues: DataIssue[]): QuestDefinition | null {
+  const id = isObj(raw) && isStr(raw.id) ? raw.id : '(id不明)';
+  const c = new Collector(`quest:${id}`);
+  const finish = <T>(v: T) => {
+    issues.push(...c.issues);
+    return v;
+  };
+  if (!isObj(raw) || !isStr(raw.id) || !isStr(raw.worldId) || !isStr(raw.title) || !isStr(raw.giver) || !Array.isArray(raw.objectives) || raw.objectives.length === 0) {
+    c.error('id / worldId / title / giver / objectives が必要です');
+    return finish(null);
+  }
+  const objectives: QuestDefinition['objectives'] = [];
+  for (const o of raw.objectives) {
+    const cond = isObj(o) ? parseCondition(o.cond, c) : null;
+    if (!isObj(o) || !isStr(o.label) || !cond) {
+      c.error(`objectives の要素が不正です: ${JSON.stringify(o)?.slice(0, 80)}`);
+      continue;
+    }
+    objectives.push({ label: o.label, cond });
+  }
+  if (c.issues.some((i) => i.level === 'error')) return finish(null);
+  return finish({
+    id: raw.id,
+    worldId: raw.worldId,
+    title: raw.title,
+    giver: raw.giver,
+    description: isStr(raw.description) ? raw.description : '',
+    unlock: parseConditions(raw.unlock, c, 'unlock'),
+    objectives,
+    rewards: parseRewards(raw.rewards) ?? {},
+    ...(isStr(raw.completeText) ? { completeText: raw.completeText } : {}),
   });
 }

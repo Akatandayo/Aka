@@ -167,17 +167,6 @@ create table public.encounters (
   sort_order        int not null default 0
 );
 
-create table public.quests (
-  id          text primary key,
-  world_id    text not null references public.worlds(id),
-  kind        text not null check (kind in ('main','sub','event')),
-  name        text not null,
-  description text not null default '',
-  requirements jsonb not null default '{}',
-  rewards     jsonb not null default '[]',
-  sort_order  int not null default 0
-);
-
 -- STORY ENGINE（Ver.3 §8）: 一本道のメインストーリー。シナリオは命令列（会話・背景・立ち絵・表情・BGM・SE・演出・分岐）
 create table public.story_chapters (
   id          text primary key,                  -- 'CH-000' / 'INT-001'
@@ -218,6 +207,43 @@ create table public.archive_entries (
   unlock     jsonb not null default '[]',          -- Condition[]（満たすまで内容を伏せる）
   sections   jsonb not null default '[]',          -- [{id,title,text,contentNote?,unlock?}]
   related    jsonb not null default '{}'
+);
+
+-- WORLD 探索（PHASE 4）: エリア（地点を含む）・探索イベント・サブクエスト
+create table public.world_areas (
+  id          text primary key,                   -- 'A001-ALLEY'
+  world_id    text not null references public.worlds(id) on delete cascade,
+  name        text not null,
+  description text not null default '',
+  bg          text not null,
+  pos         jsonb not null,                     -- {x, y}（0〜100）
+  links       text[] not null default '{}',       -- 同じ WORLD のエリア
+  unlock      jsonb not null default '[]',        -- Condition[]
+  hidden      boolean not null default false,
+  revealed_by text,                               -- 探索能力 ID
+  entry       boolean not null default false,
+  points      jsonb not null default '[]'         -- [{id,type,name,description,visible?,unlock?,fieldAbility?,encounterId?,eventId?,npc?,resultText?,rewards?,setFlags?,discover?,detect?}]
+);
+create unique index world_areas_one_entry on public.world_areas (world_id) where entry;
+
+create table public.story_events (
+  id      text primary key,                       -- 'EV-LUX'
+  title   text not null,
+  rewards jsonb,                                  -- 初回のみ
+  script  jsonb not null default '[]'
+);
+
+create table public.quests (
+  id            text primary key,                 -- 'Q-001'
+  world_id      text not null references public.worlds(id),
+  title         text not null,
+  giver         text not null references public.story_characters(id),
+  description   text not null default '',
+  unlock        jsonb not null default '[]',      -- Condition[]
+  objectives    jsonb not null default '[]',      -- [{label, cond}]
+  rewards       jsonb not null default '{}',
+  complete_text text,
+  sort_order    int not null default 0
 );
 
 -- ONLINE（Ver.3 §9）: 対戦モードと共通ルール。PHASE 5 で enabled にする
@@ -338,6 +364,28 @@ create table public.story_choices (
   value      text not null,
   chosen_at  timestamptz not null default now(),
   unique (user_id, chapter_id, choice_key)
+);
+
+-- 探索の進行（PHASE 4）。調べた地点・見たイベントは報酬に関わるためサーバーのみ書き込める。
+-- 訪れたエリアと最後にいたエリアはクライアントが更新できる
+create table public.player_exploration (
+  user_id        uuid primary key references auth.users(id) on delete cascade,
+  visited_areas  text[] not null default '{}',
+  points         jsonb not null default '{}',     -- 地点 ID → 調べた日時
+  events         jsonb not null default '{}',     -- イベント ID → 回数
+  last_area      text references public.world_areas(id),
+  updated_at     timestamptz not null default now()
+);
+
+-- サブクエスト: 受注（active での追加）はクライアント、報告（completed への更新・報酬）はサーバー
+create table public.player_quests (
+  user_id      uuid not null references auth.users(id) on delete cascade,
+  quest_id     text not null references public.quests(id),
+  status       text not null check (status in ('active','completed')),
+  accepted_at  timestamptz not null default now(),
+  completed_at timestamptz,
+  primary key (user_id, quest_id),
+  check ((status = 'completed') = (completed_at is not null))
 );
 
 create table public.inventory (
@@ -569,6 +617,10 @@ alter table public.story_characters         enable row level security;
 alter table public.archive_entries          enable row level security;
 alter table public.pvp_modes                enable row level security;
 alter table public.story_progress           enable row level security;
+alter table public.world_areas              enable row level security;
+alter table public.story_events             enable row level security;
+alter table public.player_exploration       enable row level security;
+alter table public.player_quests            enable row level security;
 alter table public.player_profiles          enable row level security;
 alter table public.player_memories          enable row level security;
 alter table public.player_loadouts          enable row level security;
@@ -595,6 +647,8 @@ create policy "master read" on public.world_restorations       for select using 
 create policy "master read" on public.story_characters         for select using (true);
 create policy "master read" on public.archive_entries          for select using (true);
 create policy "master read" on public.pvp_modes                for select using (true);
+create policy "master read" on public.world_areas              for select using (true);
+create policy "master read" on public.story_events             for select using (true);
 
 -- プレイヤーデータ: 本人のみ参照
 create policy "own read" on public.player_profiles for select using (auth.uid() = user_id);
@@ -604,6 +658,8 @@ create policy "own read" on public.encounter_progress for select using (auth.uid
 create policy "own read" on public.world_progress  for select using (auth.uid() = user_id);
 create policy "own read" on public.story_choices   for select using (auth.uid() = user_id);
 create policy "own read" on public.story_progress  for select using (auth.uid() = user_id);
+create policy "own read" on public.player_exploration for select using (auth.uid() = user_id);
+create policy "own read" on public.player_quests   for select using (auth.uid() = user_id);
 create policy "own read" on public.inventory       for select using (auth.uid() = user_id);
 create policy "own read" on public.transactions    for select using (auth.uid() = user_id);
 create policy "own read" on public.battle_records  for select using (auth.uid() = player_id or auth.uid() = opponent_id);
@@ -615,6 +671,8 @@ create policy "own update" on public.player_memories for update using (auth.uid(
 create policy "own write"  on public.player_loadouts for all    using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own insert" on public.story_choices   for insert with check (auth.uid() = user_id);
 create policy "own update" on public.story_progress  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "own update" on public.player_exploration for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+create policy "own accept" on public.player_quests   for insert with check (auth.uid() = user_id and status = 'active' and completed_at is null);
 
 -- 列単位の権限: 通貨・レベル等は更新させない
 revoke insert, update, delete on all tables in schema public from anon, authenticated;
@@ -624,3 +682,5 @@ grant update (favorite) on public.player_memories to authenticated;
 grant insert, update, delete on public.player_loadouts to authenticated;
 grant insert on public.story_choices to authenticated;
 grant update (current_chapter_id, current_index, updated_at) on public.story_progress to authenticated;
+grant update (visited_areas, last_area, updated_at) on public.player_exploration to authenticated;
+grant insert (user_id, quest_id, status, accepted_at) on public.player_quests to authenticated;

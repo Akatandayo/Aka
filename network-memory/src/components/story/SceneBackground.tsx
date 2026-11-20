@@ -8,6 +8,8 @@ import './SceneBackground.css';
  * - akarua-office: 何でも屋「アカルア」の店内
  * - akarua-night: 閉店後のアカルア（照明を落とした夜）
  * - archive-stacks: WORLD-002 ARCHIVE の回廊と封印書架の扉
+ * - lost-garden: WORLD-003 LOST GARDEN（lit が大きいほど花に色が戻る）
+ * - error-zone: WORLD-004 ERROR ZONE
  */
 export function SceneBackground({ id, lit = 0.3 }: { id: string | null; lit?: number }) {
   return (
@@ -17,6 +19,8 @@ export function SceneBackground({ id, lit = 0.3 }: { id: string | null; lit?: nu
       {id === 'akarua-office' && <OfficeScene />}
       {id === 'akarua-night' && <OfficeScene night />}
       {id === 'archive-stacks' && <ArchiveScene />}
+      {id === 'lost-garden' && <GardenScene lit={lit} />}
+      {id === 'error-zone' && <ErrorScene />}
       <div className="scene__vignette" />
     </div>
   );
@@ -97,6 +101,94 @@ function CityScene({ lit }: { lit: number }) {
       {rain.map((d, i) => (
         <line key={i} className="scene__rain" style={{ animationDelay: `${-d.d}s` }} x1={d.x} y1={d.y} x2={d.x - 10} y2={d.y + 40} stroke="#9fc3ff" strokeOpacity="0.35" />
       ))}
+    </svg>
+  );
+}
+
+function GardenScene({ lit }: { lit: number }) {
+  const { flowers, petals } = useMemo(() => {
+    const r = rand(31);
+    const flowers = Array.from({ length: 46 }, () => ({ x: r() * 1600, y: 600 + r() * 280, s: 10 + r() * 16, hue: [210, 280, 330, 45, 160][Math.floor(r() * 5)], on: r() }));
+    const petals = Array.from({ length: 18 }, () => ({ x: r() * 1600, y: r() * 700, d: r() * 6 }));
+    return { flowers, petals };
+  }, []);
+  const bloom = Math.min(1, lit * 1.6);
+  return (
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <linearGradient id="garden-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#0b0d1c" />
+          <stop offset="70%" stopColor="#1a2230" />
+          <stop offset="100%" stopColor="#13201a" />
+        </linearGradient>
+        <radialGradient id="garden-moon" cx="75%" cy="18%" r="30%">
+          <stop offset="0%" stopColor="#dfe8ff" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#dfe8ff" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#garden-sky)" />
+      <rect width="1600" height="900" fill="url(#garden-moon)" />
+      {/* arches of vines */}
+      {[180, 620, 1060, 1440].map((x, i) => (
+        <path key={i} d={`M${x - 140} 900 C${x - 140} 520 ${x + 140} 520 ${x + 140} 900`} fill="none" stroke="#1f3a2a" strokeWidth="18" opacity="0.8" />
+      ))}
+      <path d="M0 640 C300 600 500 680 800 640 C1100 600 1300 660 1600 630 L1600 900 L0 900 Z" fill="#0d1a13" />
+      {flowers.map((f, i) => {
+        const colored = f.on < bloom;
+        return (
+          <g key={i} transform={`translate(${f.x} ${f.y})`}>
+            <line x1="0" y1="0" x2="0" y2={f.s * 2} stroke="#24402e" strokeWidth="2" />
+            {[0, 72, 144, 216, 288].map((a) => (
+              <ellipse key={a} cx="0" cy={-f.s * 0.5} rx={f.s * 0.35} ry={f.s * 0.6} transform={`rotate(${a})`} fill={colored ? `hsl(${f.hue} 70% 65%)` : '#4a4f58'} opacity={colored ? 0.9 : 0.5} />
+            ))}
+            <circle r={f.s * 0.22} fill={colored ? '#ffe9a0' : '#5a5e66'} />
+          </g>
+        );
+      })}
+      {petals.map((p, i) => (
+        <ellipse key={i} className="scene__float" style={{ animationDelay: `${-p.d}s` }} cx={p.x} cy={p.y} rx="6" ry="3" fill={i % 3 ? '#b8c4d8' : '#ff9ac1'} opacity="0.5" />
+      ))}
+    </svg>
+  );
+}
+
+function ErrorScene() {
+  const { blocks, cracks } = useMemo(() => {
+    const r = rand(77);
+    const blocks = Array.from({ length: 34 }, () => ({ x: r() * 1600, y: r() * 900, w: 20 + r() * 140, h: 4 + r() * 30, c: r() < 0.6 ? '#ff3b5c' : '#3ee8ff', d: r() * 3 }));
+    const cracks = Array.from({ length: 7 }, () => {
+      let x = r() * 1600;
+      let y = r() * 300;
+      const pts = [`${x.toFixed(0)} ${y.toFixed(0)}`];
+      for (let k = 0; k < 8; k++) {
+        x += (r() - 0.5) * 160;
+        y += 60 + r() * 80;
+        pts.push(`${x.toFixed(0)} ${y.toFixed(0)}`);
+      }
+      return `M${pts.join(' L')}`;
+    });
+    return { blocks, cracks };
+  }, []);
+  return (
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <radialGradient id="err-bg" cx="50%" cy="60%" r="80%">
+          <stop offset="0%" stopColor="#2a0a14" />
+          <stop offset="100%" stopColor="#05030a" />
+        </radialGradient>
+        <pattern id="err-grid" width="80" height="80" patternUnits="userSpaceOnUse">
+          <path d="M80 0 L0 0 0 80" fill="none" stroke="#ff3b5c" strokeOpacity="0.07" />
+        </pattern>
+      </defs>
+      <rect width="1600" height="900" fill="url(#err-bg)" />
+      <rect width="1600" height="900" fill="url(#err-grid)" transform="skewY(-4)" />
+      {cracks.map((d, i) => (
+        <path key={i} d={d} fill="none" stroke="#ff6b85" strokeWidth="2" opacity="0.35" />
+      ))}
+      {blocks.map((b, i) => (
+        <rect key={i} className="scene__flicker" style={{ animationDelay: `${-b.d}s` }} x={b.x} y={b.y} width={b.w} height={b.h} fill={b.c} opacity="0.35" />
+      ))}
+      <path d="M0 760 L240 720 L420 790 L700 700 L980 780 L1260 710 L1600 770 L1600 900 L0 900 Z" fill="#0a0408" />
     </svg>
   );
 }

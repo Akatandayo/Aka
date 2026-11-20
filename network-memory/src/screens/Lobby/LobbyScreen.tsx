@@ -15,6 +15,7 @@ import { getActiveLoadout } from '../../core/player/loadout';
 import { fillText } from '../../core/story/engine';
 import { chapterStatus, nextChapter } from '../../core/story/progress';
 import { computeWorldState, overallRestoration, worldConnection } from '../../core/world/restoration';
+import { questCounts } from '../../core/world/quests';
 import { usePlayer } from '../../state/GameProvider';
 import { CURRENCIES, LOADOUT_SLOT_TYPES } from '../../types/player';
 import './LobbyScreen.css';
@@ -30,6 +31,7 @@ export function LobbyScreen() {
   const nextSignal = data.encounters.find((e) => encounterStatus(save, e) === 'available');
   const pendingSync = save.archive.pendingSyncIds.length;
   const rate = summary.total ? Math.round((summary.owned / summary.total) * 100) : 0;
+  const quests = questCounts(save, data);
   const story = nextChapter(save, data);
   const storyStatus = story ? chapterStatus(save, data, story) : null;
   const lockedStory = !story ? data.chapters.find((c) => !save.story.completedChapters.includes(c.id)) : undefined;
@@ -37,6 +39,7 @@ export function LobbyScreen() {
   const logs = [
     { tone: 'alert', text: 'Memoryの流出を継続して観測中。流出規模は測定不能。' },
     { tone: 'info', text: `同期済みの記録 ${summary.owned} / ${summary.total}（${rate}%）` },
+    ...(quests.ready > 0 ? [{ tone: 'discover', text: `報告できるサブクエストが ${quests.ready} 件あります（WORLD）。` }] : []),
     ...(story ? [{ tone: 'discover', text: `STORY: ${story.label}「${story.title}」${storyStatus === 'in_progress' ? 'の続きが読めます。' : 'が読めます。'}` }] : []),
     ...(pendingSync > 0 ? [{ tone: 'discover', text: `検出済み・未同期のMemoryが ${pendingSync} 件あります（MEMORY › PENDING SYNC）。` }] : []),
     ...(nextSignal ? [{ tone: 'info', text: `新たな流出反応: ${data.worldById.get(nextSignal.worldId)?.name} 「${nextSignal.name}」` }] : []),
@@ -130,7 +133,7 @@ export function LobbyScreen() {
 
         <nav className="lobby__menu" aria-label="メインメニュー">
           {MENU.map((m, i) => (
-            <MenuTile key={m.id} entry={m} index={i} badge={m.id === 'MEMORY' && pendingSync > 0 ? `SYNC ${pendingSync}` : undefined} onClick={() => nav(m.route)} />
+            <MenuTile key={m.id} entry={m} index={i} badge={m.id === 'MEMORY' && pendingSync > 0 ? `SYNC ${pendingSync}` : m.id === 'WORLD' && quests.ready > 0 ? `QUEST ${quests.ready}` : undefined} onClick={() => nav(m.route)} />
           ))}
         </nav>
       </main>

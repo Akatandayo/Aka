@@ -110,7 +110,7 @@ export function StoryScreen() {
             <small>何でも屋「アカルア」</small>
           </div>
           <div className="story-cast__grid">
-            {data.characters.map((c) => (
+            {data.characters.filter((c) => c.cast !== false).map((c) => (
               <article key={c.id} className="story-cast__card" style={{ ['--spk-c' as string]: c.color } as CSSProperties}>
                 <div className="story-cast__art">
                   <CharacterPortrait character={c} expr={c.expressions.includes('smile') ? 'smile' : 'normal'} speaking className="is-bust" />

@@ -296,7 +296,7 @@ describe('battle results, growth and MEMORY SYNC', () => {
   }, 60000);
 });
 
-describe('save migration v1 → v3', () => {
+describe('save migration v1 → v4', () => {
   it('converts PHASE 1 teams into loadouts and grants starter items', () => {
     const v2 = newSave();
     const id = (mid: string) => v2.memories.find((m) => m.memoryId === mid)!.instanceId;
@@ -317,7 +317,9 @@ describe('save migration v1 → v3', () => {
     const r = parseSaveText(JSON.stringify(v1), gameData);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.save.version).toBe(3);
+    expect(r.save.version).toBe(4);
+    expect(r.save.exploration).toEqual({ visitedAreas: [], points: {}, events: {}, lastArea: null });
+    expect(r.save.quests).toEqual({});
     expect(r.save.story).toEqual({ completedChapters: [], current: null, choices: {} });
     expect(r.save.worlds['WORLD-001'].recoveredMemories.length).toBeGreaterThan(0);
     expect(r.save.loadouts[0].slots.main).toEqual([id('MEM-0007')]);

@@ -13,6 +13,8 @@ export interface CharacterDefinition {
   reading?: string;
   /** 以前の名前（例: 現世での名前） */
   formerName?: string;
+  /** false: STORY の CAST 欄に出さない（探索で会う NPC など） */
+  cast?: boolean;
   /** 肩書き・所属 */
   role: string;
   age?: number;

@@ -330,7 +330,7 @@
       { "t": "say", "char": "CHR-MOMIJI", "expr": "worried", "text": "そんなの、どうやって……？　同期の力でも、記録の階位が違いすぎるよ。" },
       { "t": "if", "cond": [{ "type": "ownedMemory", "memoryId": "MEM-0007" }], "goto": "libra-warn", "else": "plan" },
       { "t": "label", "id": "libra-warn" },
-      { "t": "narr", "text": "{player} の中で、同期した司書の記録がざわめいた。" },
+      { "t": "narr", "text": "{player}の中で、同期した司書の記録がざわめいた。" },
       { "t": "narr", "text": "——上位記録への干渉は、閲覧者には許可されていません。（記録司書リブラ）" },
       { "t": "say", "char": "CHR-HITORI", "expr": "smirk", "text": "司書さまのお墨付きか。……ご丁寧にどうも。" },
       { "t": "label", "id": "plan" },

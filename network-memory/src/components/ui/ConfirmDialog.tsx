@@ -9,12 +9,16 @@ interface Props {
   cancelLabel?: string;
   danger?: boolean;
   confirmDisabled?: boolean;
+  /** 見出し上の小さなラベル（既定: CONFIRM） */
+  kicker?: string;
+  /** キャンセルボタンを出さない（結果の表示など） */
+  hideCancel?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 /** 確認ダイアログ（ネイティブ <dialog> を使用し、フォーカス管理・Esc を任せる） */
-export function ConfirmDialog({ open, title, children, confirmLabel = 'OK', cancelLabel = 'キャンセル', danger, confirmDisabled, onConfirm, onCancel }: Props) {
+export function ConfirmDialog({ open, title, children, confirmLabel = 'OK', cancelLabel = 'キャンセル', danger, confirmDisabled, kicker, hideCancel, onConfirm, onCancel }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -37,13 +41,15 @@ export function ConfirmDialog({ open, title, children, confirmLabel = 'OK', canc
       }}
     >
       <div className="dialog__body">
-        <p className="dialog__kicker mono">{danger ? '!! CONFIRM' : '> CONFIRM'}</p>
+        <p className="dialog__kicker mono">{kicker ?? (danger ? '!! CONFIRM' : '> CONFIRM')}</p>
         <h2 className="dialog__title">{title}</h2>
         {children && <div className="dialog__content">{children}</div>}
         <div className="dialog__actions">
-          <button type="button" className="btn btn--ghost" onClick={onCancel}>
-            {cancelLabel}
-          </button>
+          {!hideCancel && (
+            <button type="button" className="btn btn--ghost" onClick={onCancel}>
+              {cancelLabel}
+            </button>
+          )}
           <button type="button" className={`btn btn--primary ${danger ? 'btn--danger' : ''}`} onClick={onConfirm} disabled={confirmDisabled}>
             {confirmLabel}
           </button>

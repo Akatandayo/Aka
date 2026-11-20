@@ -41,6 +41,8 @@ export function createNewSave(rawName: string, data: GameData, at: string = new 
     battle: { encounters: {}, wins: 0, losses: 0, retreats: 0, records: [] },
     story: { completedChapters: [], current: null, choices: {} },
     worlds: {},
+    exploration: { visitedAreas: [], points: {}, events: {}, lastArea: null },
+    quests: {},
     inventory: { ...STARTING_ITEMS },
     progress: { flags: {} },
     settings: { ...DEFAULT_SETTINGS },

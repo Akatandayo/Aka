@@ -1,0 +1,98 @@
+[
+  {
+    "id": "A002-HALL",
+    "worldId": "WORLD-002",
+    "name": "閲覧室",
+    "description": "無数の閲覧机が並ぶ大広間。頁が勝手に書き換わる異常が続いている。",
+    "bg": "archive-stacks",
+    "pos": { "x": 50, "y": 76 },
+    "links": ["A002-CORRIDOR"],
+    "unlock": [],
+    "entry": true,
+    "points": [
+      {
+        "id": "P002-SIG-HALL",
+        "type": "signal",
+        "name": "誤植の閲覧室",
+        "description": "頁が勝手に書き換わる異常。誤植の頁が群れている。",
+        "encounterId": "ENC-003"
+      },
+      {
+        "id": "P002-BOX",
+        "type": "search",
+        "name": "鍵のかかった記録箱",
+        "description": "閲覧机の下に押し込まれた、古い記録箱。錠が錆びついている。",
+        "fieldAbility": "FA-0001",
+        "resultText": "合鍵を差し込むと、錆びた錠がカチリと応えた。中には、閲覧室の貸出記録と、記録結晶がしまわれていた。",
+        "setFlags": ["explore.archive.box"],
+        "rewards": { "currencies": { "CORE": 3 }, "items": { "ITEM-0002": 1 } }
+      },
+      {
+        "id": "P002-PAGES",
+        "type": "search",
+        "name": "書き換わる頁",
+        "description": "机の上の頁が、読むたびに違う文章になる。",
+        "resultText": "【探索者】たんさく-しゃ：失くしたものを、失くしたことも知らずに探す者。——頁はそれきり、書き換わるのをやめた。",
+        "rewards": { "currencies": { "FRAGMENT": 20 } }
+      }
+    ]
+  },
+  {
+    "id": "A002-CORRIDOR",
+    "worldId": "WORLD-002",
+    "name": "封印書架の回廊",
+    "description": "封印書架へ続く長い回廊。宙を漂う頁が、侵入者を見張っている。",
+    "bg": "archive-stacks",
+    "pos": { "x": 50, "y": 46 },
+    "links": ["A002-HALL", "A002-STACK3"],
+    "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-003" }],
+    "points": [
+      {
+        "id": "P002-SIG-GUARD",
+        "type": "signal",
+        "name": "封印書架の番人",
+        "description": "封印書架を守る自律防衛記録。主を失った今も扉を守っている。",
+        "encounterId": "ENC-004"
+      },
+      {
+        "id": "P002-DOOR",
+        "type": "search",
+        "name": "開かれた封印の扉",
+        "description": "独の {upset} で開いた扉。表面の紋様が、まだかすかに光っている。",
+        "visible": [{ "type": "storyCleared", "chapterId": "CH-002" }],
+        "resultText": "扉の紋様には「階位」を示す数字が刻まれていた。上位、上位、上位——そして最後の一行だけが「対等」に書き換わっている。",
+        "rewards": { "currencies": { "DATA": 300 } }
+      }
+    ]
+  },
+  {
+    "id": "A002-STACK3",
+    "worldId": "WORLD-002",
+    "name": "第三書架",
+    "description": "大流出の日、すべての記録が流れ出した書架。空の棚がどこまでも続いている。",
+    "bg": "archive-stacks",
+    "pos": { "x": 50, "y": 16 },
+    "links": ["A002-CORRIDOR"],
+    "unlock": [{ "type": "storyCleared", "chapterId": "CH-002" }],
+    "points": [
+      {
+        "id": "P002-LIBRA",
+        "type": "talk",
+        "name": "記録司書リブラ",
+        "description": "空の書架の前で、目録カードを手にしている。",
+        "npc": "CHR-LIBRA",
+        "eventId": "EV-LIBRA",
+        "visible": [{ "type": "restored", "targetId": "R002-LIBRA" }]
+      },
+      {
+        "id": "P002-CATALOG",
+        "type": "search",
+        "name": "空の書架の目録カード",
+        "description": "空の棚の一段ごとに、白紙の目録カードが差し込まれている。",
+        "resultText": "白紙のカードの一枚にだけ、かすれた文字が残っていた。「最初に流出した記録：■■■■」——書き手の名前は、リブラの筆跡によく似ていた。",
+        "setFlags": ["explore.stack3.catalog"],
+        "rewards": { "currencies": { "FRAGMENT": 30 } }
+      }
+    ]
+  }
+]

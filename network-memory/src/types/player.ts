@@ -21,6 +21,8 @@ export const TRANSACTION_REASONS = [
   'QUEST_REWARD',
   'BATTLE_REWARD',
   'STORY_REWARD',
+  'EXPLORE_REWARD',
+  'EVENT_REWARD',
   'DUPLICATE_MEMORY',
   'ADJUSTMENT',
 ] as const;
@@ -159,6 +161,24 @@ export interface WorldProgress {
   updatedAt: string;
 }
 
+/** WORLD 探索の進行（PHASE 4） */
+export interface ExplorationState {
+  /** 訪れたエリア */
+  visitedAreas: string[];
+  /** 調べ終えた地点（地点 ID → 日時） */
+  points: Record<string, string>;
+  /** 見たイベント（イベント ID → 回数） */
+  events: Record<string, number>;
+  /** 最後にいたエリア（戦闘・イベントのあとに戻る先） */
+  lastArea: string | null;
+}
+
+export interface QuestState {
+  status: 'active' | 'completed';
+  acceptedAt: string;
+  completedAt?: string;
+}
+
 export interface ProgressState {
   /** ストーリー/イベント条件判定用の汎用フラグ */
   flags: Record<string, boolean | number | string>;
@@ -182,6 +202,9 @@ export interface PlayerSave {
   story: StoryProgress;
   /** WORLD ID → 修復状態 */
   worlds: Record<string, WorldProgress>;
+  exploration: ExplorationState;
+  /** サブクエスト ID → 状態 */
+  quests: Record<string, QuestState>;
   /** アイテム ID → 所持数 */
   inventory: Record<string, number>;
   progress: ProgressState;

@@ -11,10 +11,11 @@ import { MemoryScreen } from '../screens/Memory/MemoryScreen';
 import { PlannedScreen } from '../screens/Planned/PlannedScreen';
 import { ProfileScreen } from '../screens/Profile/ProfileScreen';
 import { SettingsScreen } from '../screens/Settings/SettingsScreen';
-import { StoryPlayer } from '../screens/Story/StoryPlayer';
+import { EventPlayer, StoryPlayer } from '../screens/Story/StoryPlayer';
 import { StoryScreen } from '../screens/Story/StoryScreen';
 import { SyncScreen } from '../screens/Sync/SyncScreen';
 import { TitleScreen } from '../screens/Title/TitleScreen';
+import { AreaScreen } from '../screens/World/AreaScreen';
 import { WorldScreen } from '../screens/World/WorldScreen';
 import { useGame } from '../state/GameProvider';
 import { NavContext } from './nav';
@@ -42,6 +43,10 @@ function renderRoute(route: Route) {
       return <WorldScreen />;
     case 'worldDetail':
       return <WorldScreen key={route.worldId} worldId={route.worldId} />;
+    case 'worldArea':
+      return <AreaScreen key={`${route.worldId}/${route.areaId}`} worldId={route.worldId} areaId={route.areaId} />;
+    case 'eventPlay':
+      return <EventPlayer key={route.eventId} eventId={route.eventId} />;
     case 'archive':
       return <ArchiveScreen category={route.category} />;
     case 'archiveEntry':

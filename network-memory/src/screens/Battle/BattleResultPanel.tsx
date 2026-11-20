@@ -14,12 +14,15 @@ export function BattleResultPanel({
   encounterName,
   onRetry,
   onExit,
+  onReturnToArea,
   onSync,
 }: {
   summary: BattleSummary;
   encounterName: string;
   onRetry: () => void;
   onExit: () => void;
+  /** 探索のエリアから接続した場合の戻り先 */
+  onReturnToArea?: { label: string; go: () => void };
   onSync: (memoryId: string) => void;
 }) {
   const { save, data } = usePlayer();
@@ -118,7 +121,12 @@ export function BattleResultPanel({
           <button type="button" className="btn" onClick={onRetry}>
             もう一度接続
           </button>
-          <button type="button" className="btn btn--primary" onClick={onExit}>
+          {onReturnToArea && (
+            <button type="button" className="btn btn--primary" onClick={onReturnToArea.go}>
+              {onReturnToArea.label}
+            </button>
+          )}
+          <button type="button" className={`btn ${onReturnToArea ? '' : 'btn--primary'}`} onClick={onExit}>
             流出反応一覧へ
           </button>
         </div>

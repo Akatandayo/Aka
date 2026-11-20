@@ -7,6 +7,9 @@ import { SceneBackground } from '../../components/story/SceneBackground';
 import { describeCondition, evaluateCondition, type ConditionContext } from '../../core/conditions';
 import { advance, fillText, resumeChapter, startChapter, type StoryLine, type StoryRun, type StoryView } from '../../core/story/engine';
 import { chapterChoices, chapterStatus, completeChapter, type ChapterResult } from '../../core/story/progress';
+import { completeEvent, type EventOutcome } from '../../core/world/exploration';
+import { RewardList } from '../../components/ui/RewardList';
+import type { EventDefinition } from '../../types/exploration';
 import { worldRestorationRate } from '../../core/world/restoration';
 import { usePlayer } from '../../state/GameProvider';
 import { CURRENCIES } from '../../types/player';
@@ -94,7 +97,43 @@ function ContentNoteGate({ chapter }: { chapter: StoryChapter }) {
   );
 }
 
-function StoryStage({ chapter }: { chapter: StoryChapter }) {
+/** 探索イベントの再生（#/event/:eventId）。ストーリーと同じ演出エンジンで再生し、終わったら探索に戻る */
+export function EventPlayer({ eventId }: { eventId: string }) {
+  const nav = useNav();
+  const { data } = usePlayer();
+  const ev = data.eventById.get(eventId);
+  if (!ev) {
+    return (
+      <div className="story-gate">
+        <div className="panel">
+          <p className="mono story-gate__code">!! EVENT NOT FOUND</p>
+          <p>指定されたイベント（{eventId}）は存在しません。</p>
+          <button type="button" className="btn btn--primary" onClick={() => nav({ name: 'world' })}>
+            WORLD に戻る
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return <StoryStage key={ev.id} chapter={eventAsChapter(ev)} event={ev} />;
+}
+
+function eventAsChapter(ev: EventDefinition): StoryChapter {
+  return { id: ev.id, order: 0, label: 'EVENT', title: ev.title, summary: '', unlock: [], script: ev.script };
+}
+
+/** イベントのあとに戻る先（最後にいたエリア） */
+function useReturnToArea() {
+  const nav = useNav();
+  const { save, data } = usePlayer();
+  return () => {
+    const a = save.exploration.lastArea ? data.areaById.get(save.exploration.lastArea) : undefined;
+    if (a) nav({ name: 'worldArea', worldId: a.worldId, areaId: a.id });
+    else nav({ name: 'world' });
+  };
+}
+
+function StoryStage({ chapter, event }: { chapter: StoryChapter; event?: EventDefinition }) {
   const nav = useNav();
   const { save, data, dispatch } = usePlayer();
   const saveRef = useRef(save);
@@ -107,7 +146,7 @@ function StoryStage({ chapter }: { chapter: StoryChapter }) {
   const [run, setRun] = useState<StoryRun>(() => {
     const c = { save, data };
     const cur = save.story.current;
-    if (cur?.chapterId === chapter.id && cur.index > 0) return resumeChapter(chapter, c, cur.index, chapterChoices(save, chapter.id));
+    if (!event && cur?.chapterId === chapter.id && cur.index > 0) return resumeChapter(chapter, c, cur.index, chapterChoices(save, chapter.id));
     return startChapter(chapter, c);
   });
   const runRef = useRef(run);
@@ -128,6 +167,8 @@ function StoryStage({ chapter }: { chapter: StoryChapter }) {
   const [log, setLog] = useState<LogEntry[]>([]);
   const lastLogged = useRef<StoryLine | null>(null);
   const [result, setResult] = useState<ChapterResult | null>(null);
+  const [eventResult, setEventResult] = useState<EventOutcome | null>(null);
+  const returnToArea = useReturnToArea();
   const completed = useRef(false);
 
   const entryOf = useCallback(
@@ -196,15 +237,21 @@ function StoryStage({ chapter }: { chapter: StoryChapter }) {
       if (e) setLog((cur) => [...cur.slice(-199), e]);
     }
     if (!run.ended) {
-      dispatch({ type: 'STORY_PROGRESS', chapterId: run.chapterId, index: run.pc, flags: run.flags, choices: run.choices });
+      // 探索イベントは短いので中断位置を保存しない
+      if (!event) dispatch({ type: 'STORY_PROGRESS', chapterId: run.chapterId, index: run.pc, flags: run.flags, choices: run.choices });
       return;
     }
     if (completed.current) return;
     completed.current = true;
     const at = new Date().toISOString();
+    if (event) {
+      setEventResult(completeEvent(saveRef.current, data, event.id, run.flags, run.detected, at));
+      dispatch({ type: 'EVENT_COMPLETE', eventId: event.id, flags: run.flags, detected: run.detected, at });
+      return;
+    }
     setResult(completeChapter(saveRef.current, data, run.chapterId, run.flags, run.detected, at));
     dispatch({ type: 'STORY_COMPLETE', chapterId: run.chapterId, flags: run.flags, detected: run.detected, at });
-  }, [run, data, dispatch, entryOf]);
+  }, [run, data, dispatch, entryOf, event]);
 
   // ---- BGM
   useEffect(() => {
@@ -245,7 +292,7 @@ function StoryStage({ chapter }: { chapter: StoryChapter }) {
     [chapter, ctx],
   );
 
-  const canInput = !busy && !result && !logOpen && !shown.choice && shown.wait === null && !run.ended;
+  const canInput = !busy && !result && !eventResult && !logOpen && !shown.choice && shown.wait === null && !run.ended;
 
   const proceed = useCallback(() => {
     if (!canInput) return;
@@ -356,7 +403,7 @@ function StoryStage({ chapter }: { chapter: StoryChapter }) {
         <button type="button" className="story__tool" onClick={() => setLogOpen(true)}>
           LOG
         </button>
-        <button type="button" className="story__tool" onClick={() => nav({ name: 'story' })} title="現在の位置は自動保存されます">
+        <button type="button" className="story__tool" onClick={() => (event ? returnToArea() : nav({ name: 'story' }))} title={event ? '探索に戻る' : '現在の位置は自動保存されます'}>
           中断
         </button>
       </div>
@@ -421,6 +468,44 @@ function StoryStage({ chapter }: { chapter: StoryChapter }) {
       )}
 
       {result && <ChapterClear chapter={chapter} result={result} />}
+      {eventResult && event && <EventClear event={event} result={eventResult} onReturn={returnToArea} />}
+    </div>
+  );
+}
+
+function EventClear({ event, result, onReturn }: { event: EventDefinition; result: EventOutcome; onReturn: () => void }) {
+  const nav = useNav();
+  const { data } = usePlayer();
+  return (
+    <div className="story__clear" onClick={(e) => e.stopPropagation()} role="dialog" aria-label="EVENT">
+      <div className="panel story__clear-card">
+        <p className="story__clear-code mono">EVENT</p>
+        <h2>{event.title}</h2>
+        {result.rewards && (
+          <div className="story__clear-block">
+            <p className="section-label">REWARD</p>
+            <RewardList rewards={result.rewards} />
+          </div>
+        )}
+        {result.detected.length > 0 && (
+          <div className="story__clear-block">
+            <p className="section-label">MEMORY DETECTED</p>
+            {result.detected.map((id) => (
+              <div key={id} className="story__detected">
+                <strong>{data.memoryById.get(id)?.name}</strong>
+                <button type="button" className="btn btn--sm btn--purple" onClick={() => nav({ name: 'sync', memoryId: id })}>
+                  MEMORY SYNC へ
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="story__clear-actions">
+          <button type="button" className="btn btn--primary" onClick={onReturn}>
+            探索に戻る
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

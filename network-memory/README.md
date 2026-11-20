@@ -7,7 +7,7 @@
 その力で戦い、流出した記録を回収して世界を修復していく。物語は何でも屋「アカルア」の三人
 （白石ハルカ・電子 独・電子 紅葉）とともに進む。
 
-> 現在 **PHASE 3（ストーリー・ARCHIVE・世界修復）** まで実装済み。正式な設計は GDD Ver.2 + SYSTEM SPECIFICATION Ver.3。
+> 現在 **PHASE 4（WORLD 探索・サブクエスト）** まで実装済み。正式な設計は GDD Ver.2 + SYSTEM SPECIFICATION Ver.3。
 > 各フェーズの状況は [docs/ROADMAP.md](docs/ROADMAP.md)、設計は [docs/DESIGN.md](docs/DESIGN.md) を参照。
 
 ## すぐに遊ぶ（HTML ファイル 1 つ）
@@ -46,7 +46,9 @@ npm run dev          # http://localhost:5173 で起動（同一LANのスマホ�
 2. **MEMORY › LOADOUT** で Memory を装備する（メイン 1 = 完全同期 / サブ 3 = 補助スキル / パッシブ 2）
 3. **BATTLE** で流出反応に接続し、ATTACK / SKILL / DEFEND / ITEM / REWRITE で戦う（スキルは SYNC ENERGY を消費、REWRITE は行動で溜まる REWRITE GAUGE が最大のとき）
 4. 初回クリアで Memory の反応を検出 → **MEMORY SYNC** で同期すると能力が使えるようになり、**WORLD** が修復される
-5. 条件を満たすと次の章が読めるようになる。発見した記録は **ARCHIVE** で読める
+5. **WORLD** でエリアを探索する。調べる・話す・流出反応に接続する。同期した Memory の探索能力で新しい場所が開く
+6. 依頼（サブクエスト）を受けて達成し、依頼人に報告する
+7. 条件を満たすと次の章が読めるようになる。発見した記録は **ARCHIVE** で読める
 
 ## 技術構成
 
@@ -96,6 +98,9 @@ network-memory/
 | アイテム | `src/data/items.json` |
 | WORLD・修復対象 | `src/data/worlds.json`（`restorations`） |
 | ストーリーの章（シナリオ） | `src/data/story/*.json` |
+| 探索エリア・地点 | `src/data/areas/*.json`（WORLD ごとに 1 ファイル） |
+| 探索イベント（会話・出来事） | `src/data/events/*.json` |
+| サブクエスト | `src/data/quests/*.json` |
 | 登場人物（NPC） | `src/data/characters/*.json`（`formerName` で旧名も持てる） |
 | 立ち絵画像 | `src/assets/portraits/` に置き、キャラクターの `portraits` に `{ "normal": "portraits/ファイル名.png", "smile": ... }` と書く |
 | ARCHIVE の記録（人物・出来事・用語・断片ログ） | `src/data/archive/*.json` |

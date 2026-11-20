@@ -1,0 +1,59 @@
+[
+  {
+    "id": "A003-PATH",
+    "worldId": "WORLD-003",
+    "name": "枯れ蔓の小径",
+    "description": "LOST GARDEN の北側。枯れかけた蔓が、生きた記録を探して蠢いている。",
+    "bg": "lost-garden",
+    "pos": { "x": 28, "y": 66 },
+    "links": ["A003-HEART"],
+    "unlock": [],
+    "entry": true,
+    "points": [
+      {
+        "id": "P003-SIG-PATH",
+        "type": "signal",
+        "name": "枯れ蔓の小径",
+        "description": "枯れかけた蔓が、生きた記録に絡みつこうとしている。",
+        "encounterId": "ENC-005"
+      },
+      {
+        "id": "P003-BED",
+        "type": "search",
+        "name": "枯れかけの花壇",
+        "description": "色を失った花が、首を垂れている。",
+        "fieldAbility": "FA-0006",
+        "resultText": "花に耳を寄せると、小さな声が聞こえた。——ここは、忘れられた記録が咲く庭。色を喰われた花は、誰にも思い出されなくなった記録なのだと。",
+        "setFlags": ["explore.garden.voice"],
+        "rewards": { "currencies": { "FRAGMENT": 30 } }
+      }
+    ]
+  },
+  {
+    "id": "A003-HEART",
+    "worldId": "WORLD-003",
+    "name": "庭の最深部",
+    "description": "花の色を喰らう空洞の向こうに、静かな気配がある。",
+    "bg": "lost-garden",
+    "pos": { "x": 72, "y": 32 },
+    "links": ["A003-PATH"],
+    "unlock": [{ "type": "encounterCleared", "encounterId": "ENC-005" }],
+    "points": [
+      {
+        "id": "P003-SIG-HEART",
+        "type": "signal",
+        "name": "色喰い",
+        "description": "花の色を喰らう空洞。その奥に静かな気配。",
+        "encounterId": "ENC-006"
+      },
+      {
+        "id": "P003-BLOOM",
+        "type": "event",
+        "name": "色の戻った花畑",
+        "description": "庭の記録がすべて戻ったとき、何かが起きる気がする。",
+        "eventId": "EV-GARDEN-BLOOM",
+        "unlock": [{ "type": "worldRestoration", "worldId": "WORLD-003", "value": 1 }]
+      }
+    ]
+  }
+]

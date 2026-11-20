@@ -9,6 +9,8 @@ import { syncMemory } from '../core/player/sync';
 import { PLAYER_BIO_MAX, normalizePlayerName } from '../core/save/schema';
 import type { FlagValue } from '../core/story/engine';
 import { completeChapter, saveStoryProgress } from '../core/story/progress';
+import { completeEvent, searchPoint, visitArea } from '../core/world/exploration';
+import { acceptQuest, claimQuest } from '../core/world/quests';
 import { syncWorldProgress } from '../core/world/restoration';
 import type { LoadoutSlotType, PlayerAvatar, PlayerSave, PlayerSettings } from '../types/player';
 
@@ -37,6 +39,11 @@ export type GameAction =
   | { type: 'STORY_COMPLETE'; chapterId: string; flags: Record<string, FlagValue>; detected: string[]; at: string }
   | { type: 'STORY_RESET_CURRENT' }
   | { type: 'ARCHIVE_READ'; entryIds: string[] }
+  | { type: 'EXPLORE_VISIT'; areaId: string }
+  | { type: 'EXPLORE_SEARCH'; pointId: string; at: string }
+  | { type: 'EVENT_COMPLETE'; eventId: string; flags: Record<string, FlagValue>; detected: string[]; at: string }
+  | { type: 'QUEST_ACCEPT'; questId: string; at: string }
+  | { type: 'QUEST_CLAIM'; questId: string; at: string }
   | { type: 'UPDATE_SETTINGS'; patch: Partial<PlayerSettings> }
   | { type: 'DEV_GRANT_ALL'; at: string }
   | { type: 'DEV_ADD_CURRENCY'; at: string }
@@ -111,6 +118,22 @@ export function gameReducer(save: PlayerSave | null, action: GameAction, data: G
       const read = new Set(save.archive.readEntryIds);
       const add = action.entryIds.filter((id) => !read.has(id));
       return add.length ? { ...save, archive: { ...save.archive, readEntryIds: [...save.archive.readEntryIds, ...add] } } : save;
+    }
+    case 'EXPLORE_VISIT':
+      return visitArea(save, data, action.areaId);
+    case 'EXPLORE_SEARCH': {
+      const r = searchPoint(save, data, action.pointId, action.at);
+      return r.ok ? r.save : save;
+    }
+    case 'EVENT_COMPLETE':
+      return completeEvent(save, data, action.eventId, action.flags, action.detected, action.at).save;
+    case 'QUEST_ACCEPT': {
+      const r = acceptQuest(save, data, action.questId, action.at);
+      return r.ok ? r.save : save;
+    }
+    case 'QUEST_CLAIM': {
+      const r = claimQuest(save, data, action.questId, action.at);
+      return r.ok ? r.save : save;
     }
     case 'UPDATE_SETTINGS':
       return { ...save, settings: { ...save.settings, ...action.patch } };

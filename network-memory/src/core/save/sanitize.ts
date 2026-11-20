@@ -279,6 +279,31 @@ export function sanitizeSave(raw: unknown, data: GameData, now: string = new Dat
     }
   }
 
+  // ---- exploration / quests（PHASE 4）
+  const rex = isObj(raw.exploration) ? raw.exploration : {};
+  const allPoints = new Set(data.areas.flatMap((a) => a.points.map((p) => p.id)));
+  const exPoints: Record<string, string> = {};
+  if (isObj(rex.points)) for (const [k, v] of Object.entries(rex.points)) if (allPoints.has(k) && isIsoDate(v)) exPoints[k] = v;
+  const exEvents: Record<string, number> = {};
+  if (isObj(rex.events)) for (const [k, v] of Object.entries(rex.events)) if (data.eventById.has(k)) exEvents[k] = Math.max(1, nonNegInt(v, 1, 9999));
+  const exploration: PlayerSave['exploration'] = {
+    visitedAreas: strings(rex.visitedAreas).filter((id) => data.areaById.has(id)),
+    points: exPoints,
+    events: exEvents,
+    lastArea: typeof rex.lastArea === 'string' && data.areaById.has(rex.lastArea) ? rex.lastArea : null,
+  };
+  const quests: PlayerSave['quests'] = {};
+  if (isObj(raw.quests)) {
+    for (const [id, v] of Object.entries(raw.quests)) {
+      if (!isObj(v) || !data.questById.has(id) || (v.status !== 'active' && v.status !== 'completed')) continue;
+      quests[id] = {
+        status: v.status,
+        acceptedAt: isIsoDate(v.acceptedAt) ? v.acceptedAt : now,
+        ...(v.status === 'completed' ? { completedAt: isIsoDate(v.completedAt) ? v.completedAt : now } : {}),
+      };
+    }
+  }
+
   const save: PlayerSave = {
     version: SAVE_VERSION,
     saveId: str(raw.saveId, createId('save')),
@@ -295,6 +320,8 @@ export function sanitizeSave(raw: unknown, data: GameData, now: string = new Dat
     battle,
     story,
     worlds,
+    exploration,
+    quests,
     inventory,
     progress: { flags },
     settings,
