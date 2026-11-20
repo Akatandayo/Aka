@@ -149,6 +149,49 @@ describe('STORY ENGINE', () => {
   });
 });
 
+describe('INTERLUDE「目印」', () => {
+  const inter = gameData.chapterById.get('INT-001')!;
+  const playWith = (s: PlayerSave, picks: Record<string, string>) => {
+    let run = startChapter(inter, { save: s, data: gameData });
+    const speakers = new Set<string>();
+    for (let i = 0; i < 500 && !run.ended; i++) {
+      if (run.view.line?.kind === 'say') speakers.add(run.view.line.char);
+      run = run.view.choice ? advance(inter, run, { save: s, data: gameData }, picks[run.view.choice.id]) : advance(inter, run, { save: s, data: gameData });
+    }
+    return { run, speakers };
+  };
+
+  it('unlocks after CHAPTER 1 and warns about its content', () => {
+    let s = fresh();
+    expect(chapterStatus(s, gameData, inter)).toBe('locked');
+    s = { ...s, story: { ...s.story, completedChapters: ['CH-000', 'CH-001'] } };
+    expect(chapterStatus(s, gameData, inter)).toBe('available');
+    expect(inter.contentNote).toBeTruthy();
+  });
+
+  it('every combination of choices reaches the end with all three members speaking', () => {
+    for (const wait of ['stay', 'search'])
+      for (const answer of ['thanks', 'now'])
+        for (const promise of ['me', 'them']) {
+          const { run, speakers } = playWith(fresh(), { wait, answer, promise });
+          expect(run.ended, `${wait}/${answer}/${promise}`).toBe(true);
+          expect(run.flags['story.interlude.mark.clear']).toBe(true);
+          expect([...speakers].sort()).toEqual(['CHR-HARUKA', 'CHR-HITORI', 'CHR-MOMIJI']);
+        }
+  });
+
+  it("clearing it reveals the trio's past in the ARCHIVE", () => {
+    let s = { ...fresh(), story: { ...fresh().story, completedChapters: ['CH-000', 'CH-001'] } };
+    const past = (save: PlayerSave) => buildArchive(save, gameData).find((i) => i.id === 'CHR-REC-HITORI')!.sections.filter((x) => x.id === '4' || x.id === '5');
+    expect(past(s).every((x) => !x.unlocked)).toBe(true);
+    s = completeChapter(s, gameData, 'INT-001', { 'story.interlude.mark.clear': true }, [], AT).save;
+    expect(past(s).every((x) => x.unlocked && x.contentNote)).toBe(true);
+    const momiji = buildArchive(s, gameData).find((i) => i.id === 'CHR-REC-MOMIJI')!;
+    expect(momiji.sections.find((x) => x.id === '4')?.unlocked).toBe(true);
+    expect(gameData.characterById.get('CHR-MOMIJI')?.formerName).toBe('孤月 紅葉');
+  });
+});
+
 describe('MEMORY ARCHIVE', () => {
   it('hides undiscovered records and reveals them with progress', () => {
     let s = fresh();

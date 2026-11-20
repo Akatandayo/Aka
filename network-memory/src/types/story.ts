@@ -11,6 +11,8 @@ export interface CharacterDefinition {
   id: string;
   name: string;
   reading?: string;
+  /** 以前の名前（例: 現世での名前） */
+  formerName?: string;
   /** 肩書き・所属 */
   role: string;
   age?: number;
@@ -74,6 +76,8 @@ export interface StoryChapter {
   label: string;
   title: string;
   summary: string;
+  /** 内容に関する注意書き（重い話題を扱う章で、読む前に表示する） */
+  contentNote?: string;
   unlock: Condition[];
   /** クリア時の報酬 */
   rewards?: { currencies?: Partial<Record<Currency, number>>; items?: Record<string, number> };

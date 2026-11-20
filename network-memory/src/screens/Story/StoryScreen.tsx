@@ -64,6 +64,7 @@ export function StoryScreen() {
                 </div>
                 <h3 className="story-chapter__title">{ch.title}</h3>
                 {status !== 'locked' && <p className="story-chapter__summary dim">{fillText(ch.summary, save.profile.name)}</p>}
+                {ch.contentNote && <p className="story-chapter__note">{ch.contentNote}</p>}
                 {status === 'locked' && (
                   <>
                     <p className="section-label">UNLOCK 解放条件</p>

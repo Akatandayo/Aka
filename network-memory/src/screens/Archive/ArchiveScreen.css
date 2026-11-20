@@ -207,6 +207,15 @@ button.archive-row:hover {
   font-size: 14px;
 }
 
+.archive-section__note {
+  margin: 0 0 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--c-text-dim);
+  border-left: 2px solid var(--c-warn);
+  background: rgba(255, 201, 77, 0.06);
+}
+
 .archive-section.is-locked h3 {
   color: var(--c-text-mute);
 }

@@ -6,7 +6,7 @@
  * ブラウザの自動再生制限により、最初の再生はユーザー操作（タップ・クリック）の後に行う。
  */
 
-type BgmId = 'void' | 'rain' | 'akarua' | 'tension';
+type BgmId = 'void' | 'rain' | 'akarua' | 'tension' | 'night';
 type SeId = 'glitch' | 'sync' | 'door' | 'click' | 'rewrite' | 'hit';
 
 interface Playing {
@@ -166,6 +166,27 @@ const BGM: Record<BgmId, (ctx: AudioContext, out: AudioNode, noise: AudioBuffer)
     const l1 = lfo(ctx, filter.frequency, 0.1, 400);
     const l2 = lfo(ctx, vs[3].g.gain, 0.25, 0.03);
     return padStop(ctx, master, [...vs.map((v) => v.o), l1, l2]);
+  },
+  night: (ctx, out, noise) => {
+    // 静かな夜: 遠い雨音 + Dm9 のゆっくりした和音
+    const { master, filter } = bgmBus(ctx, out, 1100);
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    src.loop = true;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 900;
+    bp.Q.value = 0.5;
+    const ng = ctx.createGain();
+    ng.gain.value = 0.08;
+    src.connect(bp).connect(ng).connect(master);
+    src.start();
+    const notes = [146.8, 174.6, 220, 329.6];
+    const vs = notes.map((f, i) => voice(ctx, master, f, 'sine', 0.06, i % 2 ? 4 : -4));
+    const l1 = lfo(ctx, vs[2].g.gain, 0.08, 0.035);
+    const l2 = lfo(ctx, vs[3].g.gain, 0.05, 0.03);
+    const l3 = lfo(ctx, filter.frequency, 0.04, 250);
+    return padStop(ctx, master, [src, ...vs.map((v) => v.o), l1, l2, l3]);
   },
   tension: (ctx, out) => {
     const { master, filter } = bgmBus(ctx, out, 500);

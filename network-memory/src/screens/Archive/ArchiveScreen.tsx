@@ -138,6 +138,12 @@ export function ArchiveEntryScreen({ entryId }: { entryId: string }) {
                     <dd>{character.reading}</dd>
                   </>
                 )}
+                {character.formerName && (
+                  <>
+                    <dt>旧名</dt>
+                    <dd>{character.formerName}</dd>
+                  </>
+                )}
                 <dt>所属</dt>
                 <dd>{character.role}</dd>
                 {character.age !== undefined && (
@@ -161,7 +167,10 @@ export function ArchiveEntryScreen({ entryId }: { entryId: string }) {
           <section key={s.id} className={`panel archive-section ${s.unlocked ? '' : 'is-locked'}`}>
             <h3>{s.unlocked ? s.title : '？？？'}</h3>
             {s.unlocked ? (
-              <p className="archive-section__text">{s.text}</p>
+              <>
+                {s.contentNote && <p className="archive-section__note">{s.contentNote}</p>}
+                <p className="archive-section__text">{s.text}</p>
+              </>
             ) : (
               <>
                 <p className="archive-section__redacted" aria-label="伏せられた記録">

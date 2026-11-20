@@ -572,3 +572,12 @@
     transform: translate(-3px, -2px);
   }
 }
+
+.story-note h2 {
+  margin: 4px 0 10px;
+  font-size: 19px;
+}
+
+.story-note p {
+  line-height: 1.8;
+}

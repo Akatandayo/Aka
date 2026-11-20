@@ -63,7 +63,7 @@ describe('bundled master data', () => {
   it('every world has restoration targets and story/archive data loads', () => {
     for (const w of gameData.worlds) expect(w.restorations.length, w.id).toBeGreaterThan(0);
     expect(gameData.characters.map((c) => c.id).sort()).toEqual(['CHR-HARUKA', 'CHR-HITORI', 'CHR-MOMIJI']);
-    expect(gameData.chapters.map((c) => c.id)).toEqual(['CH-000', 'CH-001']);
+    expect(gameData.chapters.map((c) => c.id)).toEqual(['CH-000', 'CH-001', 'INT-001']);
     const cats = new Set(gameData.archive.map((a) => a.category));
     for (const c of ['character', 'event', 'term', 'fragment']) expect(cats.has(c as never), c).toBe(true);
   });

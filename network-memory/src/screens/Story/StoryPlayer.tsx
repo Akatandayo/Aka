@@ -63,7 +63,35 @@ export function StoryPlayer({ chapterId }: { chapterId: string }) {
       </div>
     );
   }
-  return <StoryStage key={chapter.id} chapter={chapter} />;
+  return <ContentNoteGate chapter={chapter} />;
+}
+
+/** 重い話題を扱う章は、最初から読むときに注意書きを表示する（中断からの再開では表示しない） */
+function ContentNoteGate({ chapter }: { chapter: StoryChapter }) {
+  const nav = useNav();
+  const { save } = usePlayer();
+  const [accepted, setAccepted] = useState(() => !chapter.contentNote || save.story.current?.chapterId === chapter.id);
+  if (accepted) return <StoryStage key={chapter.id} chapter={chapter} />;
+  return (
+    <div className="story-gate">
+      <div className="panel story-note" role="dialog" aria-label="内容についての注意">
+        <p className="mono story-gate__code">CONTENT NOTE</p>
+        <h2>
+          {chapter.label}「{chapter.title}」
+        </h2>
+        <p>{chapter.contentNote}</p>
+        <p className="dim">読むのがつらくなったら、いつでも「中断」で閉じられます。続きはあとから読めます。</p>
+        <div className="story__clear-actions">
+          <button type="button" className="btn btn--primary" onClick={() => setAccepted(true)}>
+            読む
+          </button>
+          <button type="button" className="btn" onClick={() => nav({ name: 'story' })}>
+            STORY に戻る
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function StoryStage({ chapter }: { chapter: StoryChapter }) {

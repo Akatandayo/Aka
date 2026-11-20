@@ -6,6 +6,7 @@ import './SceneBackground.css';
  * - network-void: 接続の狭間
  * - null-city-rain: 雨の NULL CITY（lit = 0〜1 で灯っている窓の割合。世界修復で明るくなる）
  * - akarua-office: 何でも屋「アカルア」の店内
+ * - akarua-night: 閉店後のアカルア（照明を落とした夜）
  */
 export function SceneBackground({ id, lit = 0.3 }: { id: string | null; lit?: number }) {
   return (
@@ -13,6 +14,7 @@ export function SceneBackground({ id, lit = 0.3 }: { id: string | null; lit?: nu
       {id === 'network-void' && <VoidScene />}
       {id === 'null-city-rain' && <CityScene lit={lit} />}
       {id === 'akarua-office' && <OfficeScene />}
+      {id === 'akarua-night' && <OfficeScene night />}
       <div className="scene__vignette" />
     </div>
   );
@@ -97,22 +99,33 @@ function CityScene({ lit }: { lit: number }) {
   );
 }
 
-function OfficeScene() {
+function OfficeScene({ night = false }: { night?: boolean }) {
   return (
     <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
       <defs>
-        <radialGradient id="office-lamp" cx="70%" cy="40%" r="60%">
-          <stop offset="0%" stopColor="#ffcf8a" stopOpacity="0.45" />
+        <radialGradient id="office-lamp" cx="70%" cy="40%" r={night ? '28%' : '60%'}>
+          <stop offset="0%" stopColor="#ffcf8a" stopOpacity={night ? 0.3 : 0.45} />
           <stop offset="100%" stopColor="#ffcf8a" stopOpacity="0" />
         </radialGradient>
         <linearGradient id="office-wall" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#241a2a" />
-          <stop offset="100%" stopColor="#120c16" />
+          <stop offset="0%" stopColor={night ? '#0e0c1a' : '#241a2a'} />
+          <stop offset="100%" stopColor={night ? '#06050c' : '#120c16'} />
         </linearGradient>
       </defs>
       <rect width="1600" height="900" fill="url(#office-wall)" />
       {/* window with rain */}
-      <rect x="180" y="140" width="420" height="380" fill="#0a1226" stroke="#6b4f3a" strokeWidth="14" />
+      <rect x="180" y="140" width="420" height="380" fill={night ? '#0b1630' : '#0a1226'} stroke="#6b4f3a" strokeWidth="14" />
+      {night && (
+        <g>
+          <circle cx="520" cy="210" r="26" fill="#dfe8ff" opacity="0.5" />
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <rect key={i} x={194 + i * 66} y={430 - (i % 3) * 40} width="44" height={83 + (i % 3) * 40} fill="#050a18" />
+          ))}
+          {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+            <rect key={`w${i}`} x={210 + i * 47} y={455 - (i % 3) * 30} width="6" height="8" fill="#ffd27a" opacity="0.7" />
+          ))}
+        </g>
+      )}
       <line x1="390" y1="140" x2="390" y2="520" stroke="#6b4f3a" strokeWidth="10" />
       <line x1="180" y1="330" x2="600" y2="330" stroke="#6b4f3a" strokeWidth="10" />
       {Array.from({ length: 24 }, (_, i) => (
@@ -131,7 +144,7 @@ function OfficeScene() {
       {/* sign */}
       <g>
         <rect x="660" y="90" width="300" height="80" rx="6" fill="#0d0a10" stroke="#ffcf8a" strokeOpacity="0.6" />
-        <text x="810" y="143" textAnchor="middle" fill="#ffcf8a" fontSize="40" fontFamily="var(--f-display)" letterSpacing="8" className="scene__sign">
+        <text x="810" y="143" textAnchor="middle" fill="#ffcf8a" fillOpacity={night ? 0.35 : 1} fontSize="40" fontFamily="var(--f-display)" letterSpacing="8" className={night ? '' : 'scene__sign'}>
           AKARUA
         </text>
       </g>
@@ -139,8 +152,9 @@ function OfficeScene() {
       <rect x="0" y="700" width="1600" height="200" fill="#1d1418" />
       <rect x="760" y="640" width="640" height="40" fill="#5a3f2e" />
       <path d="M1180 640 L1200 520 L1240 520 L1260 640 Z" fill="#2a2024" />
-      <circle className="scene__lamp" cx="1220" cy="520" r="30" fill="#ffd9a0" opacity="0.9" />
+      <circle className="scene__lamp" cx="1220" cy="520" r={night ? 18 : 30} fill="#ffd9a0" opacity={night ? 0.6 : 0.9} />
       <rect width="1600" height="900" fill="url(#office-lamp)" />
+      {night && <rect width="1600" height="900" fill="#05040e" opacity="0.35" />}
     </svg>
   );
 }

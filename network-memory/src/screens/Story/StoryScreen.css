@@ -77,6 +77,16 @@
   line-height: 1.7;
 }
 
+.story-chapter__note {
+  margin: 8px 0 0;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--c-text-dim);
+  border-left: 2px solid var(--c-warn);
+  background: rgba(255, 201, 77, 0.06);
+}
+
 .story-chapter__actions {
   display: flex;
   gap: 8px;

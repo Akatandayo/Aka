@@ -180,11 +180,12 @@ create table public.quests (
 
 -- STORY ENGINE（Ver.3 §8）: 一本道のメインストーリー。シナリオは命令列（会話・背景・立ち絵・表情・BGM・SE・演出・分岐）
 create table public.story_chapters (
-  id          text primary key,                  -- 'CH-000'
-  sort_order  int not null default 0,
+  id          text primary key,                  -- 'CH-000' / 'INT-001'
+  sort_order  numeric not null default 0,          -- 幕間は 1.5 のように章の間に置ける
   label       text not null,                     -- 'PROLOGUE' / 'CHAPTER 1'
   title       text not null,
   summary     text not null default '',
+  content_note text,                               -- 重い話題を扱う章の注意書き（読む前に表示）
   unlock      jsonb not null default '[]',         -- Condition[]
   rewards     jsonb,                               -- 初回クリア報酬
   script      jsonb not null default '[]'
@@ -195,6 +196,7 @@ create table public.story_characters (
   id          text primary key,                  -- 'CHR-HARUKA'
   name        text not null,
   reading     text,
+  former_name text,                              -- 以前の名前（例: 現世での名前）
   role        text not null,
   age         int,
   origin      text,
@@ -214,7 +216,7 @@ create table public.archive_entries (
   title      text not null,
   subtitle   text,
   unlock     jsonb not null default '[]',          -- Condition[]（満たすまで内容を伏せる）
-  sections   jsonb not null default '[]',          -- [{id,title,text,unlock?}]
+  sections   jsonb not null default '[]',          -- [{id,title,text,contentNote?,unlock?}]
   related    jsonb not null default '{}'
 );
 

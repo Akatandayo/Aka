@@ -12,6 +12,8 @@ export interface ArchiveSection {
   id: string;
   title: string;
   text: string;
+  /** 内容に関する注意書き（本文の前に表示する） */
+  contentNote?: string;
   /** 省略時はエントリが解放されていれば読める */
   unlock?: Condition[];
 }

@@ -531,6 +531,7 @@ export function parseCharacter(raw: unknown, issues: DataIssue[]): CharacterDefi
     id: raw.id,
     name: raw.name,
     reading: optStr(raw.reading),
+    ...(isStr(raw.formerName) ? { formerName: raw.formerName } : {}),
     role: raw.role,
     age: isNum(raw.age) ? raw.age : undefined,
     origin: optStr(raw.origin),
@@ -645,6 +646,7 @@ export function parseChapter(raw: unknown, issues: DataIssue[]): StoryChapter | 
     label: raw.label,
     title: raw.title,
     summary: isStr(raw.summary) ? raw.summary : '',
+    ...(isStr(raw.contentNote) ? { contentNote: raw.contentNote } : {}),
     unlock: parseConditions(raw.unlock, c, 'unlock'),
     ...(rewards ? { rewards } : {}),
     script,
@@ -670,7 +672,13 @@ export function parseArchiveEntry(raw: unknown, issues: DataIssue[]): ArchiveEnt
       c.error(`sections の要素が不正です: ${JSON.stringify(sec)?.slice(0, 60)}`);
       continue;
     }
-    sections.push({ id: sec.id, title: sec.title, text: sec.text, ...(sec.unlock !== undefined ? { unlock: parseConditions(sec.unlock, c, `sections.${sec.id}.unlock`) } : {}) });
+    sections.push({
+      id: sec.id,
+      title: sec.title,
+      text: sec.text,
+      ...(isStr(sec.contentNote) ? { contentNote: sec.contentNote } : {}),
+      ...(sec.unlock !== undefined ? { unlock: parseConditions(sec.unlock, c, `sections.${sec.id}.unlock`) } : {}),
+    });
   }
   const rel = isObj(raw.related) ? raw.related : undefined;
   if (c.issues.some((i) => i.level === 'error')) return finish(null);

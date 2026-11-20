@@ -123,16 +123,18 @@ function Eyes({ expr, color }: { expr: string; color: string }) {
       </g>
     );
   }
-  const ry = expr === 'surprised' ? 15 : expr === 'annoyed' || expr === 'serious' ? 9 : 13;
-  const lid = expr === 'annoyed' ? 7 : 0;
+  const ry = expr === 'surprised' ? 15 : expr === 'annoyed' || expr === 'serious' ? 9 : expr === 'sad' ? 11 : 13;
+  const lid = expr === 'annoyed' ? 7 : expr === 'sad' ? 6 : 0;
+  // 伏し目（sad）は瞳を下に寄せる
+  const look = expr === 'sad' ? 3 : 0;
   return (
     <g>
       {[126, 174].map((cx) => (
         <g key={cx}>
           <ellipse cx={cx} cy={y} rx="12" ry={ry} fill="#fff" />
-          <ellipse cx={cx} cy={y + 1} rx="8.5" ry={ry - 2} fill={color} />
-          <ellipse cx={cx} cy={y + 2} rx="4" ry={Math.max(3, ry - 6)} fill="#121624" />
-          <circle cx={cx - 3} cy={y - 4} r="2.6" fill="#fff" />
+          <ellipse cx={cx} cy={y + 1 + look} rx="8.5" ry={ry - 2} fill={color} />
+          <ellipse cx={cx} cy={y + 2 + look} rx="4" ry={Math.max(3, ry - 6)} fill="#121624" />
+          <circle cx={cx - 3} cy={y - 4 + look} r="2.6" fill="#fff" />
           <path d={`M${cx - 13} ${y - ry + 1 + lid} Q${cx} ${y - ry - 5 + lid} ${cx + 13} ${y - ry + 1 + lid}`} stroke="#2a2030" strokeWidth="3" fill="none" strokeLinecap="round" />
         </g>
       ))}
@@ -141,7 +143,7 @@ function Eyes({ expr, color }: { expr: string; color: string }) {
 }
 
 function Brows({ expr, color }: { expr: string; color: string }) {
-  const tilt: Record<string, [number, number]> = { serious: [6, -2], annoyed: [7, -1], worried: [-6, 2], surprised: [-2, -6], pout: [3, 0] };
+  const tilt: Record<string, [number, number]> = { serious: [6, -2], annoyed: [7, -1], worried: [-6, 2], surprised: [-2, -6], pout: [3, 0], sad: [-7, 4] };
   const [inner, outer] = tilt[expr] ?? [0, 0];
   return (
     <g stroke={color} strokeWidth="4" strokeLinecap="round" fill="none">
@@ -166,6 +168,8 @@ function Mouth({ expr }: { expr: string }) {
       return <path d="M142 272 Q150 266 158 272 Q150 276 142 272" stroke={c} strokeWidth="2.5" fill="#c96a6a" fillOpacity="0.4" />;
     case 'annoyed':
       return <path d="M140 274 L162 270" stroke={c} strokeWidth="3" strokeLinecap="round" />;
+    case 'sad':
+      return <path d="M142 276 Q150 271 158 276" stroke={c} strokeWidth="2.5" fill="none" strokeLinecap="round" />;
     default:
       return <path d="M140 272 Q150 275 160 272" stroke={c} strokeWidth="3" fill="none" strokeLinecap="round" />;
   }

@@ -29,6 +29,7 @@ export interface ArchiveSectionView {
   id: string;
   title: string;
   text: string;
+  contentNote?: string;
   unlocked: boolean;
   /** 未解放時のヒント */
   hint: string | null;
@@ -98,7 +99,7 @@ export function buildArchive(save: PlayerSave, data: GameData): ArchiveItem[] {
       hint: unlocked ? null : hintOf(e.unlock, ctx),
       sections: e.sections.map((s) => {
         const ok = unlocked && evaluateAll(s.unlock, ctx);
-        return { id: s.id, title: s.title, text: s.text, unlocked: ok, hint: ok ? null : hintOf(s.unlock, ctx) };
+        return { id: s.id, title: s.title, text: s.text, contentNote: s.contentNote, unlocked: ok, hint: ok ? null : hintOf(s.unlock, ctx) };
       }),
       characterId: e.related?.characterId,
       worldId: e.related?.worldId,

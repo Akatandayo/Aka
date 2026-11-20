@@ -96,7 +96,7 @@ network-memory/
 | アイテム | `src/data/items.json` |
 | WORLD・修復対象 | `src/data/worlds.json`（`restorations`） |
 | ストーリーの章（シナリオ） | `src/data/story/*.json` |
-| 登場人物（NPC） | `src/data/characters/*.json` |
+| 登場人物（NPC） | `src/data/characters/*.json`（`formerName` で旧名も持てる） |
 | ARCHIVE の記録（人物・出来事・用語・断片ログ） | `src/data/archive/*.json` |
 
 ```jsonc
