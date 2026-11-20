@@ -6,7 +6,7 @@
  * ブラウザの自動再生制限により、最初の再生はユーザー操作（タップ・クリック）の後に行う。
  */
 
-type BgmId = 'void' | 'rain' | 'akarua' | 'tension' | 'night';
+type BgmId = 'void' | 'rain' | 'akarua' | 'tension' | 'night' | 'archive';
 type SeId = 'glitch' | 'sync' | 'door' | 'click' | 'rewrite' | 'hit';
 
 interface Playing {
@@ -187,6 +187,16 @@ const BGM: Record<BgmId, (ctx: AudioContext, out: AudioNode, noise: AudioBuffer)
     const l2 = lfo(ctx, vs[3].g.gain, 0.05, 0.03);
     const l3 = lfo(ctx, filter.frequency, 0.04, 250);
     return padStop(ctx, master, [src, ...vs.map((v) => v.o), l1, l2, l3]);
+  },
+  archive: (ctx, out) => {
+    // 書庫: 高いところで鳴り続ける Cmaj7 と、ゆっくり揺れる低音
+    const { master, filter } = bgmBus(ctx, out, 1800);
+    const notes = [130.8, 261.6, 329.6, 392, 493.9];
+    const vs = notes.map((f, i) => voice(ctx, master, f, i === 0 ? 'sine' : 'triangle', i === 0 ? 0.12 : 0.04, i % 2 ? 6 : -6));
+    const l1 = lfo(ctx, vs[4].g.gain, 0.09, 0.03);
+    const l2 = lfo(ctx, vs[0].g.gain, 0.05, 0.05);
+    const l3 = lfo(ctx, filter.frequency, 0.06, 500);
+    return padStop(ctx, master, [...vs.map((v) => v.o), l1, l2, l3]);
   },
   tension: (ctx, out) => {
     const { master, filter } = bgmBus(ctx, out, 500);

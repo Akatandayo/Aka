@@ -192,6 +192,55 @@ describe('INTERLUDE「目印」', () => {
   });
 });
 
+describe('CHAPTER 2「大番狂わせ」', () => {
+  const ch2 = gameData.chapterById.get('CH-002')!;
+  const lines = (s: PlayerSave, picks: Record<string, string>) => {
+    let run = startChapter(ch2, { save: s, data: gameData });
+    const texts: string[] = [];
+    for (let i = 0; i < 500 && !run.ended; i++) {
+      if (run.view.line && run.view.line.kind !== 'title') texts.push(run.view.line.text);
+      if (run.view.line?.kind === 'title') texts.push(run.view.line.text);
+      run = run.view.choice ? advance(ch2, run, { save: s, data: gameData }, picks[run.view.choice.id]) : advance(ch2, run, { save: s, data: gameData });
+    }
+    return { run, text: texts.join('\n') };
+  };
+
+  it('unlocks after the INTERLUDE and the sealed-stacks guardian', () => {
+    let s = { ...fresh(), story: { ...fresh().story, completedChapters: ['CH-000', 'CH-001', 'INT-001'] } };
+    expect(chapterStatus(s, gameData, ch2)).toBe('locked');
+    s = { ...s, battle: { ...s.battle, encounters: { ...s.battle.encounters, 'ENC-004': { clears: 1, bestRounds: 6, firstClearedAt: AT } } } };
+    expect(chapterStatus(s, gameData, ch2)).toBe('available');
+  });
+
+  it('Hitori uses {upset}; every path ends, and Libra reacts only when synced', () => {
+    const withLibra = fresh();
+    expect(withLibra.memories.some((m) => m.memoryId === 'MEM-0007')).toBe(true);
+    const withoutLibra = { ...withLibra, memories: withLibra.memories.filter((m) => m.memoryId !== 'MEM-0007') };
+    for (const trust of ['trust', 'ask'])
+      for (const finish of ['sync', 'momiji']) {
+        const a = lines(withLibra, { trust, finish });
+        const b = lines(withoutLibra, { trust, finish });
+        expect(a.run.ended && b.run.ended).toBe(true);
+        expect(a.run.flags['story.chapter2.clear']).toBe(true);
+        expect(a.text).toMatch(/\{upset\}/);
+        expect(a.text).toMatch(/記録司書リブラ/);
+        expect(b.text).not.toMatch(/記録司書リブラ/);
+      }
+  });
+
+  it('clearing it adds the {upset} record, a term and an event to the ARCHIVE', () => {
+    let s = { ...fresh(), story: { ...fresh().story, completedChapters: ['CH-000', 'CH-001', 'INT-001'] } };
+    const find = (save: PlayerSave, id: string) => buildArchive(save, gameData).find((i) => i.id === id)!;
+    expect(find(s, 'CHR-REC-HITORI').sections.find((x) => x.id === '7')?.unlocked).toBe(false);
+    expect(find(s, 'TERM-RANK').unlocked).toBe(false);
+    s = completeChapter(s, gameData, 'CH-002', { 'story.chapter2.clear': true }, [], AT).save;
+    expect(find(s, 'CHR-REC-HITORI').sections.find((x) => x.id === '7')?.unlocked).toBe(true);
+    expect(find(s, 'TERM-RANK').unlocked).toBe(true);
+    expect(find(s, 'EVT-SEALSTACK').unlocked).toBe(true);
+    expect(gameData.characterById.get('CHR-HITORI')!.abilities!.find((a) => a.name.startsWith('{upset}'))!.description).toMatch(/自分の意思/);
+  });
+});
+
 describe('MEMORY ARCHIVE', () => {
   it('hides undiscovered records and reveals them with progress', () => {
     let s = fresh();

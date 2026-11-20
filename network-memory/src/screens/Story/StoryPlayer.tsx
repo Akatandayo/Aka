@@ -119,6 +119,9 @@ function StoryStage({ chapter }: { chapter: StoryChapter }) {
   const [busy, setBusy] = useState(false);
   const [fx, setFx] = useState<{ key: number; type: StoryFx; ms: number }[]>([]);
   const fxKey = useRef(0);
+  // 演出の終了タイマーは次の命令に進んでも取り消さない（取り消すと揺れ等が止まらなくなる）。アンマウント時にだけ片付ける
+  const fxTimers = useRef<number[]>([]);
+  useEffect(() => () => fxTimers.current.forEach((t) => window.clearTimeout(t)), []);
   const [typed, setTyped] = useState(0);
   const [autoMode, setAutoMode] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
@@ -149,7 +152,7 @@ function StoryStage({ chapter }: { chapter: StoryChapter }) {
       if (!others.length) return;
       const added = others.map((f) => ({ key: ++fxKey.current, type: f.type, ms: f.ms }));
       setFx((cur) => [...cur, ...added]);
-      for (const a of added) later(() => setFx((cur) => cur.filter((x) => x.key !== a.key)), a.ms);
+      for (const a of added) fxTimers.current.push(window.setTimeout(() => setFx((cur) => cur.filter((x) => x.key !== a.key)), a.ms));
     };
     const fade = (ms: number) => (reduced ? Math.min(ms, 250) : ms);
     if (fadeOut) {
@@ -327,7 +330,7 @@ function StoryStage({ chapter }: { chapter: StoryChapter }) {
           const ch = data.characterById.get(s.char);
           if (!ch) return null;
           return (
-            <div key={s.char} className={`story__actor story__actor--${s.pos}`}>
+            <div key={s.char} className={`story__actor story__actor--${s.pos} ${line?.kind === 'say' && line.char === s.char ? 'is-front' : ''}`}>
               <CharacterPortrait character={ch} expr={s.expr} speaking={line?.kind !== 'say' || line.char === s.char} />
             </div>
           );

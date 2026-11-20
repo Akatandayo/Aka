@@ -7,6 +7,7 @@ import './SceneBackground.css';
  * - null-city-rain: 雨の NULL CITY（lit = 0〜1 で灯っている窓の割合。世界修復で明るくなる）
  * - akarua-office: 何でも屋「アカルア」の店内
  * - akarua-night: 閉店後のアカルア（照明を落とした夜）
+ * - archive-stacks: WORLD-002 ARCHIVE の回廊と封印書架の扉
  */
 export function SceneBackground({ id, lit = 0.3 }: { id: string | null; lit?: number }) {
   return (
@@ -15,6 +16,7 @@ export function SceneBackground({ id, lit = 0.3 }: { id: string | null; lit?: nu
       {id === 'null-city-rain' && <CityScene lit={lit} />}
       {id === 'akarua-office' && <OfficeScene />}
       {id === 'akarua-night' && <OfficeScene night />}
+      {id === 'archive-stacks' && <ArchiveScene />}
       <div className="scene__vignette" />
     </div>
   );
@@ -95,6 +97,76 @@ function CityScene({ lit }: { lit: number }) {
       {rain.map((d, i) => (
         <line key={i} className="scene__rain" style={{ animationDelay: `${-d.d}s` }} x1={d.x} y1={d.y} x2={d.x - 10} y2={d.y + 40} stroke="#9fc3ff" strokeOpacity="0.35" />
       ))}
+    </svg>
+  );
+}
+
+function ArchiveScene() {
+  const pages = useMemo(() => {
+    const r = rand(23);
+    return Array.from({ length: 26 }, () => ({ x: 120 + r() * 1360, y: 80 + r() * 640, a: r() * 60 - 30, d: r() * 6 }));
+  }, []);
+  const shelf = (x: number, w: number, top: number, key: string, flip = false) => (
+    <g key={key}>
+      <rect x={x} y={top} width={w} height={900 - top} fill="#120f22" stroke="#c9a85a" strokeOpacity="0.25" strokeWidth="3" />
+      {Array.from({ length: Math.floor((900 - top) / 70) }, (_, row) => (
+        <g key={row}>
+          <rect x={x} y={top + 62 + row * 70} width={w} height="6" fill="#c9a85a" opacity="0.3" />
+          {Array.from({ length: Math.floor(w / 22) }, (_, i) => (
+            <rect
+              key={i}
+              x={x + 6 + i * 22}
+              y={top + 14 + row * 70 + ((i + row) % 3) * 4}
+              width={14 + ((i * 7 + row) % 4)}
+              height={48 - ((i + row) % 3) * 4}
+              fill={['#2a3a6a', '#5a2a3a', '#2a5a4a', '#6a5a2a', '#3a2a5a'][(i * 3 + row + (flip ? 2 : 0)) % 5]}
+              opacity={(i + row) % 7 === 0 ? 0.15 : 0.75}
+            />
+          ))}
+        </g>
+      ))}
+    </g>
+  );
+  return (
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="arc-sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#090b1a" />
+          <stop offset="100%" stopColor="#1b1630" />
+        </linearGradient>
+        <radialGradient id="arc-door" cx="50%" cy="45%" r="50%">
+          <stop offset="0%" stopColor="#ffe3a0" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#ffe3a0" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#arc-sky)" />
+      {/* light from above */}
+      <path d="M700 0 L900 0 L1060 900 L540 900 Z" fill="#ffe3a0" opacity="0.05" />
+      {shelf(0, 330, 120, 'l1')}
+      {shelf(1270, 330, 120, 'r1', true)}
+      {shelf(360, 180, 260, 'l2')}
+      {shelf(1060, 180, 260, 'r2', true)}
+      {/* sealed door */}
+      <ellipse cx="800" cy="420" rx="260" ry="260" fill="url(#arc-door)" />
+      <path d="M660 860 L660 380 Q660 250 800 250 Q940 250 940 380 L940 860 Z" fill="#0c0a18" stroke="#c9a85a" strokeWidth="5" />
+      <path d="M800 252 L800 860" stroke="#c9a85a" strokeWidth="3" opacity="0.6" />
+      <circle className="scene__pulse" cx="800" cy="520" r="70" fill="none" stroke="#ffd36b" strokeWidth="3" opacity="0.7" />
+      <path d="M800 456 L840 520 L800 584 L760 520 Z" fill="none" stroke="#ffd36b" strokeWidth="2" opacity="0.8" />
+      {pages.map((p, i) => (
+        <rect
+          key={i}
+          className="scene__float"
+          style={{ animationDelay: `${-p.d}s` }}
+          x={p.x}
+          y={p.y}
+          width="22"
+          height="28"
+          transform={`rotate(${p.a} ${p.x + 11} ${p.y + 14})`}
+          fill="#f4ead2"
+          opacity="0.55"
+        />
+      ))}
+      <rect y="860" width="1600" height="40" fill="#06050c" />
     </svg>
   );
 }

@@ -49,6 +49,10 @@
   margin: 0 auto;
 }
 
+.story__actor.is-front {
+  z-index: 1;
+}
+
 .story__actor--left {
   left: 24%;
 }
@@ -454,15 +458,15 @@
 @media (max-width: 640px) {
   .story__actor {
     height: 62dvh;
-    max-width: 52vw;
+    max-width: 46vw;
   }
 
   .story__actor--left {
-    left: 26%;
+    left: 23%;
   }
 
   .story__actor--right {
-    left: 74%;
+    left: 77%;
   }
 
   .story__box {

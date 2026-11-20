@@ -136,7 +136,8 @@
 
 - 再生画面: 文字送り（SETTINGS のテキスト速度）、AUTO、SKIP（次の選択肢まで）、LOG、中断（位置は自動保存）。フェード中は旧画面を保持して切り替える。
 - 進行の保存: `save.story`（クリア済みの章・中断位置・選択肢）。再開は保存した選択肢で先頭から決定的に早送りして復元する。
-- 立ち絵・背景: 画像素材が無いため手続き生成（`components/story`）。キャラクターデータの `portraits` に画像パスを入れると画像に切り替わる。
+- 立ち絵・背景: 画像素材が無いため手続き生成（`components/story`）。人物ごとに髪型・目・服装・仕草を描き分ける（独と紅葉は作者の立ち絵が参考）。キャラクターデータの `portraits` に画像パスを入れると画像に切り替わる。
+- 背景: network-void / null-city-rain（修復率で窓が灯る）/ akarua-office / akarua-night / archive-stacks。BGM: void / rain / akarua / tension / night / archive。
 - BGM / SE: 音声素材が無いため Web Audio で合成（`audio/audio.ts`）。呼び出しは ID のみなので、素材が揃えばファイル再生に差し替えられる。
 
 ### 登場人物（何でも屋「アカルア」）
@@ -149,7 +150,8 @@
 | CHR-HITORI | 電子 独 | 現世から来た少年。【自我】が転生を経て完成した {Glitch} の使い手。一人称は「僕」 |
 | CHR-MOMIJI | 電子 紅葉 | 現世では独の後輩（旧名・孤月紅葉）。独のそばにいる少女 |
 
-- 人物の過去は ARCHIVE の CHARACTER RECORD に節ごとに収録し、ストーリーの進行（INTERLUDE「目印」のクリア）で解放する。
+- 人物の過去は ARCHIVE の CHARACTER RECORD に節ごとに収録し、ストーリーの進行（INTERLUDE「目印」・CHAPTER 2 のクリア）で解放する。
+- 独の能力: {Glitch}（かつての【自我】が転生を経て完成したもの・身体を削る諸刃の剣）と、{upset}【大番狂わせ】（呪いから魂を解き放った独が自分の意思で生み出した力。自分より上の存在にのみ使え、相手と対等になる）。
 - 重い話題（自死・いじめ）を扱う章・節は `contentNote` で注意書きを出す。直接的な描写（方法など）は書かない。
 
 ## 10. ONLINE（PvP）共通ルール（Ver.3 §9）
